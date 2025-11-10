@@ -1,0 +1,7 @@
+{
+  "name": "tipster-tracker",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "firebase emulators:start --import=./emulator-data --export-on-exit"
+  }
+}
