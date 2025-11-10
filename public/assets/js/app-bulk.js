@@ -1,6 +1,3 @@
-
-import firebaseConfig from './firebase.config.js';
-
 let auth, db;
 let currentUser = null;
 let unsubscribeTipsters = null;
