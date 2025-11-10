@@ -141,6 +141,77 @@ function getAuthErrorMessage(code) {
   return errors[code] || 'Error de autenticación: ' + code;
 }
 
+function togglePasswordVisibility(inputId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(inputId + 'Icon');
+  
+  if (!input || !icon) return;
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.setAttribute('data-lucide', 'eye-off');
+  } else {
+    input.type = 'password';
+    icon.setAttribute('data-lucide', 'eye');
+  }
+  lucide.createIcons();
+}
+
+function showForgotPasswordModal() {
+  const modal = document.getElementById('forgotPasswordModal');
+  const emailInput = document.getElementById('forgotEmail');
+  const errorEl = document.getElementById('forgotError');
+  const successEl = document.getElementById('forgotSuccess');
+  
+  console.log(modal)
+  modal.classList.add('active');
+  emailInput.value = '';
+  errorEl.classList.remove('visible');
+  successEl.classList.remove('visible');
+  emailInput.focus();
+}
+
+function handleForgotPassword(event) {
+  event.preventDefault();
+  
+  const email = document.getElementById('forgotEmail').value;
+  const errorEl = document.getElementById('forgotError');
+  const successEl = document.getElementById('forgotSuccess');
+  
+  errorEl.classList.remove('visible');
+  successEl.classList.remove('visible');
+  
+  showLoading(true);
+  
+  auth.sendPasswordResetEmail(email)
+    .then(() => {
+      showLoading(false);
+      successEl.classList.add('visible');
+      errorEl.classList.remove('visible');
+      
+      setTimeout(() => {
+        closeModal('forgotPasswordModal');
+      }, 3000);
+    })
+    .catch((error) => {
+      showLoading(false);
+      errorEl.textContent = getPasswordResetErrorMessage(error.code);
+      errorEl.classList.add('visible');
+      successEl.classList.remove('visible');
+    });
+}
+
+function getPasswordResetErrorMessage(code) {
+  const errors = {
+    'auth/user-not-found': 'No existe ninguna cuenta con este email',
+    'auth/invalid-email': 'Email inválido',
+    'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde',
+    'auth/network-request-failed': 'Error de red. Verifica tu conexión'
+  };
+  return errors[code] || `Error al enviar email: ${code}`;
+}
+
+
 function showLoading(show) {
   const overlay = document.getElementById('loadingOverlay');
   if (show) {
@@ -2385,4 +2456,5 @@ async function updateTipsterInFirestore(tipsterId, data) {
 
 window.addEventListener('DOMContentLoaded', () => {
   console.log('App loaded, waiting for authentication...');
+  lucide.createIcons();
 });
