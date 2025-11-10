@@ -1,5 +1,5 @@
 const firebaseConfig = {
-    apiKey: "AIzaSyAyab7F6Y82stOiNXwlDwWxljWi4MXD6o",
+    apiKey: "AIzaSyAyab7F6Y82stOiNX_wlDwWxljWi4MXD6o",
     authDomain: "tipstertracker-b5e3c.firebaseapp.com",
     projectId: "tipstertracker-b5e3c",
     storageBucket: "tipstertracker-b5e3c.firebasestorage.app",
