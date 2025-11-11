@@ -29,9 +29,34 @@ Aplicación web con Firebase para seguibilidad de tipsters
 │ │ └── logo-filled.svg
 │ ├── js/
 │ │ ├── config/
-│ │ │ ├── firebase.config.example.js # Template de configuración
-│ │ │ └── firebase.config.js # Config real (en .gitignore)
-│ │ └── app-bulk.js # Lógica principal de la aplicación
+│ │ │ ├── firebase.config.js # Config real (en .gitignore)
+│ │ │ └── firebase.config.example.js # Template de configuración
+│ │ ├── core/
+│ │ │ ├── init.js # Inicialización Firebase y variables globales
+│ │ │ ├── auth.js # Auth listeners y funciones de autenticación
+│ │ │ └── state.js # Estado global de la app
+│ │ ├── data/
+│ │ │ ├── constants.js # Arrays: allSports, allBookmakers, sportIcons, chartColors
+│ │ │ └── listeners.js # onSnapshot listeners (tipsters, picks, follows)
+│ │ ├── services/
+│ │ │ ├── tipster.service.js # CRUD Firestore de tipsters
+│ │ │ ├── pick.service.js # CRUD Firestore de picks
+│ │ │ └── follow.service.js # CRUD Firestore de follows
+│ │ ├── utils/
+│ │ │ ├── calculations.js # Yield, winrate, profit, seguibilidad
+│ │ │ ├── filters.js # Lógica de filtrado (dashboard, picks)
+│ │ │ ├── ui-helpers.js # showLoading, confirm, closeModal
+│ │ │ └── date-utils.js # Formateo de fechas ISO
+│ │ ├── views/
+│ │ │ ├── dashboard.js # renderDashboard + filtros dashboard
+│ │ │ ├── all-picks.js # renderAllPicks + filtros all picks
+│ │ │ ├── mis-picks.js # renderMisPicks + filtros mis picks
+│ │ │ └── tipster-detail.js # renderTipsterDetail + tabs + charts
+│ │ ├── modals/
+│ │ │ ├── tipster-modal.js # showAddTipsterModal, handleAddTipster
+│ │ │ ├── pick-modal.js # showAddPickModal, handleAddPick, showEditPickModal
+│ │ │ └── follow-modal.js # showFollowPickModal, handleFollow
+│ │ └── app.js # Punto de entrada (imports + init)
 │ ├── index.html # Punto de entrada principal
 │ ├── .firebaserc # Alias de proyectos Firebase
 │ └── firebase.json # Configuración de hosting
@@ -53,10 +78,10 @@ Aplicación web con Firebase para seguibilidad de tipsters
   - Usa Lucide Icons (CDN) + Chart.js + Firebase SDK 10.7.1
   - Sistema de tabs y dropdowns personalizados
   
-- **public/js/app-bulk.js**: 
-  - Lógica completa de la aplicación
-  - Firebase listeners, CRUD operations, renders, filtros
-  - Inicialización de auth, routing de vistas, cálculos de stats
+- **public/js/app.js**: 
+  - **Punto de entrada modular** que importa todos los módulos
+  - Coordina la inicialización de la aplicación
+  - Importa y ejecuta funciones de inicialización de cada módulo
   
 - **public/assets/css/style.css**: 
   - Design system completo con CSS variables
@@ -78,7 +103,143 @@ Aplicación web con Firebase para seguibilidad de tipsters
 
 
 
+### Módulos core/
+
+- **core/init.js**:
+  - Inicialización de Firebase (app, auth, db)
+  - Configuración de emuladores para localhost
+  - Exporta instancias de Firebase para uso global
+
+- **core/auth.js**:
+  - Auth listeners con `onAuthStateChanged`
+  - Funciones de login, signup, logout, reset password
+  - Control de visibilidad de pantallas auth/main
+
+- **core/state.js**:
+  - Variables de estado global: `currentUser`, `currentView`, `currentTipsterId`
+  - Arrays de datos: `tipsters[]`, `picks[]`, `userFollows[]`
+  - Objetos de estado: `dashboardFilters`, `charts`
+
+### Módulos data/
+
+- **data/constants.js**:
+  - Arrays constantes: `allSports`, `allBookmakers`, `allChannels`
+  - Mapeo de iconos: `sportIcons` (objeto con emojis/símbolos)
+  - Paleta de colores: `chartColors` (array hex)
+
+- **data/listeners.js**:
+  - Listeners de Firestore con `onSnapshot`
+  - Funciones: `setupTipstersListener()`, `setupPicksListener()`, `setupFollowsListener()`
+  - Sincronización en tiempo real con Firebase
+  - Variables de unsubscribe: `unsubscribeTipsters`, `unsubscribePicks`, `unsubscribeFollows`
+
+### Módulos services/
+
+- **services/tipster.service.js**:
+  - CRUD de tipsters en Firestore
+  - Funciones: `addTipsterToFirestore()`, `updateTipsterInFirestore()`, `deleteTipsterFromFirestore()`
+  - Queries filtradas por `uid` del usuario
+
+- **services/pick.service.js**:
+  - CRUD de picks en Firestore
+  - Funciones: `addPickToFirestore()`, `updatePickInFirestore()`, `deletePickFromFirestore()`
+  - Manejo de timestamps y formato ISO
+
+- **services/follow.service.js**:
+  - CRUD de follows en Firestore
+  - Funciones: `addFollowToFirestore()`, `updateFollowInFirestore()`, `deleteFollowFromFirestore()`
+  - Relación entre picks y follows del usuario
+
+### Módulos utils/
+
+- **utils/calculations.js**:
+  - Cálculos de estadísticas: `calculateYield()`, `calculateWinrate()`, `calculateProfit()`
+  - Lógica de seguibilidad: `calculateSeguibilidad()`
+  - Fórmulas: 
+    - Yield: `(profit / totalStaked) * 100`
+    - Winrate: `(wonPicks / totalPicks) * 100`
+    - Profit: `(odds - 1) * stake` (ganada) o `-stake` (perdida)
+
+- **utils/filters.js**:
+  - Lógica de filtrado para dashboard y picks
+  - Funciones: `applyDashboardFilters()`, `applyPicksFilters()`, `applyMisPicksFilters()`
+  - Búsqueda, ordenación y filtrado multi-criterio
+
+- **utils/ui-helpers.js**:
+  - Helpers de UI: `showLoading()`, `closeModal()`, `confirm()`
+  - Manejo de estados visuales y overlays
+  - Inicialización de Lucide icons
+
+- **utils/date-utils.js**:
+  - Formateo de fechas ISO
+  - Funciones: `formatDate()`, `formatTime()`, `formatDateTime()`
+  - Parsing y validación de fechas
+
+### Módulos views/
+
+- **views/dashboard.js**:
+  - Función `renderDashboard()`: grid de tipsters con estadísticas
+  - Funciones de filtros: `applyDashboardFilters()`, `searchTipsters()`
+  - Renderizado de personal stats y tipster cards
+
+- **views/all-picks.js**:
+  - Función `renderAllPicks()`: tabla completa de picks
+  - Filtros avanzados por tipster, sport, status, channel, bookmaker
+  - Acciones: editar, eliminar, seguir
+
+- **views/mis-picks.js**:
+  - Función `renderMisPicks()`: tabla de picks seguidas
+  - Estadísticas de seguibilidad
+  - Comparación tipster vs usuario (match/diverge)
+
+- **views/tipster-detail.js**:
+  - Función `renderTipsterDetail()`: vista detallada de tipster
+  - Sistema de tabs: Stats, My Stats, Follows
+  - Renderizado de charts con Chart.js (4 gráficos)
+  - Historial de picks del tipster
+
+### Módulos modals/
+
+- **modals/tipster-modal.js**:
+  - `showAddTipsterModal()`: abre modal de añadir tipster
+  - `handleAddTipster()`: guarda nuevo tipster en Firestore
+  - Validación de campos
+
+- **modals/pick-modal.js**:
+  - `showAddPickModal()`: modal de añadir pick (con sección follow opcional)
+  - `showEditPickModal()`: modal de editar pick existente
+  - `handleAddPick()`, `handleEditPick()`: CRUD operations
+  - Gestión de formulario complejo con follow integrado
+
+- **modals/follow-modal.js**:
+  - `showFollowPickModal()`: modal para seguir pick existente
+  - `handleFollow()`: guarda follow en Firestore
+  - Validación de stake y odds del usuario
+
+- **public/assets/css/style.css**: 
+  - Design system completo con CSS variables
+  - Dark theme único con palette azul/slate
+  - Componentes: buttons, forms, cards, modals, tables, badges
+  - Custom dropdowns multi-select
+  - Sistema responsive con breakpoint 768px
+  - Custom font: FKGroteskNeue (cargada desde CDN Perplexity)
+
+- **public/js/config/firebase.config.js**: 
+  - Configuración de Firebase (credentials) - en .gitignore
+  
+- **firestore.rules**: 
+  - Reglas de seguridad - solo el usuario propietario puede modificar sus datos
+  
+- **.github/workflows/firebase-hosting-main.yml**: 
+  - Deploy automático al hacer push a main
+
 ## Convenciones de código
+
+**Arquitectura modular:**
+- Separación de responsabilidades por carpetas
+- **Exports/Imports**: todos los módulos exportan funciones y variables necesarias
+- **app.js** como orquestador central que importa e inicializa todo
+- Cada módulo es independiente y reutilizable
 
 **Naming:**
 - Variables globales: camelCase (ej: `currentUser`, `tipsters`, `picks`)
@@ -89,14 +250,24 @@ Aplicación web con Firebase para seguibilidad de tipsters
 - Clases CSS: kebab-case (ej: `.tipster-card`, `.stat-item`)
 - Archivos: kebab-case (ej: `app-bulk.js`, `style.css`)
 
-**Estructura del código:**
+**Estructura del código modular:**
 - SVG logos personalizados + Lucide Icons (CDN)
-- Inicialización Firebase al inicio del archivo con manejo de emuladores para localhost
-- Variables globales en la parte superior (auth, db, currentUser, arrays de datos)
-- Listeners de Firebase con `onSnapshot` para sincronización en tiempo real
-- Modal pattern: funciones `show*Modal()` y `closeModal(modalId)`
-- Renderizado: funciones `render*()` para cada vista
-- CRUD: funciones async con prefijos `add*ToFirestore`, `update*InFirestore`, `delete*FromFirestore`
+- Inicialización Firebase en `core/init.js` con manejo de emuladores para localhost
+- Estado global exportado desde `core/state.js`
+- Listeners exportados desde `data/listeners.js`
+- Servicios Firestore en `services/*.service.js`
+- Utils reutilizables en `utils/*.js`
+- Renders de vistas en `views/*.js`
+- Modals en `modals/*.js`
+
+**Patrones de importación:**
+// En app.js
+import { auth, db } from './core/init.js';
+import { setupAuthListeners } from './core/auth.js';
+import { tipsters, picks } from './core/state.js';
+import { allSports, sportIcons } from './data/constants.js';
+import { calculateYield } from './utils/calculations.js';
+import { renderDashboard } from './views/dashboard.js';
 
 **Patrones de datos:**
 - Firestore: 3 colecciones principales: `tipsters`, `picks`, `userFollows`
@@ -151,6 +322,7 @@ Aplicación web con Firebase para seguibilidad de tipsters
 - `currentView`: vista activa ('dashboard', 'allPicks', 'misPicks', 'tipsterDetail')
 - `currentTipsterId`: ID del tipster en vista detalle
 - `dashboardFilters`: objeto con filtros activos
+- `charts`: objeto con instancias de Chart.js
 
 ## Estructura HTML (index.html)
 
@@ -398,22 +570,26 @@ git push origin main
 
 ## Problemas conocidos
 
-- [Bugs pendientes]
-  - ajustar tamaños y colores de charts
-- [Mejoras planificadas]
-  - Unificar historial follows y estadisticas follow
-  - Falta  especificidad en los stakes de follow, estan en ranges
-  - Subida de imagenes y OCR
-  - Añadir Bookie
-  - Remove tipster y pick
-  - Import y export de excel 
-- [Limitaciones técnicas]
+**Bugs pendientes:**
+- Ajustar tamaños y colores de charts
+
+**Mejoras planificadas:**
+- Unificar historial follows y estadísticas follow
+- Falta especificidad en los stakes de follow, están en ranges
+- Subida de imágenes y OCR
+- Añadir Bookie
+- Remove tipster y pick
+- Import y export de Excel
 
 ## Notas para el agente
 
 - **Prioridad**: mantener seguridad de Firebase, optimización y UX
 - **Evitar**: exponer credenciales, romper reglas de Firestore
 - **Al modificar CSS**: mantener consistencia visual
-- **Al modificar JS**: respetar la estructura de configuración modular
+- **Al modificar JS**: respetar la estructura modular y las dependencias entre módulos
+- **Imports/Exports**: asegurarse de que cada módulo exporte correctamente sus funciones y variables
+- **app.js**: es el orquestador, debe importar e inicializar todos los módulos necesarios
 - **Deploy**: está automatizado vía GitHub Actions, los cambios en main se despliegan automáticamente
 - **Iconos**: usar Lucide Icons cuando sea posible, los logos son SVG personalizados
+- **Modularización**: cada archivo tiene una responsabilidad única y clara
+- **Estado compartido**: usar `core/state.js` para variables globales compartidas entre módulos
