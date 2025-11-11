@@ -1,72 +1,10 @@
-let auth, db;
-let currentUser = null;
-let unsubscribeTipsters = null;
-let unsubscribePicks = null;
-let unsubscribeFollows = null;
-
-try {
-  firebase.initializeApp(firebaseConfig);
-  auth = firebase.auth();
-  db = firebase.firestore();
-  console.log('Firebase initialized successfully');
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    console.log('🔧 Usando Firebase Emulators');
-    auth.useEmulator('http://localhost:9099');
-    db.useEmulator('localhost', 8080);
-  }
-} catch (error) {
-  console.error('Firebase initialization error:', error);
-  alert('Error: Firebase no está configurado correctamente. Revisa la configuración en app.js');
-}
-
-let tipsters = [];
-let picks = [];
-let userFollows = [];
-let currentView = 'dashboard';
-let currentTipsterId = null;
-let nextTipsterId = 1;
-let nextPickId = 1;
-let nextFollowId = 1;
-let charts = {};
-let dashboardFilters = {
-  sports: [],
-  channels: [],
-  yieldMin: -1000,
-  lastPickDays: 'all',
-  sortBy: 'yield',
-  searchQuery: ''
-};
-let yieldDebounceTimer = null;
-
-
-const sportIcons = {
-  'Fútbol': '⚽',
-  'Baloncesto': '🏀',
-  'Tenis': '🎾',
-  'Fútbol Americano': '🏈',
-  'Hockey': '🏒',
-  'Béisbol': '⚾',
-  'Dardos': '🎯',
-  'Caballos': '🐴',
-  'Motor': '🏎️',
-  'Esports': '🎮',
-  'Fórmula 1': '🏁',
-  'Golf': '⛳',
-  'Rugby': '🏉',
-  'Cricket': '🏏',
-  'Tenis de mesa': '🏓',
-  'Otro': '🎲'
-};
-
-const allSports = ['Fútbol', 'Baloncesto', 'Tenis', 'Fútbol Americano', 'Hockey', 'Béisbol', 'Dardos', 'Caballos', 'Motor', 'Esports', 'Fórmula 1', 'Golf', 'Rugby', 'Cricket', 'Tenis de mesa', 'Otro'];
-const allChannels = ['BlogaBet', 'Telegram', 'TipsterLand', 'Twitter/X', 'Discord', 'Otro'];
-const allBookmakers = ['1xBet', 'Betfair', 'Bet365', 'William Hill', 'Marathonbet', '888', 'Bwin','Codere', 'Luckia', 'Sportium', 'Betsson', 'Betway', 'Interwetten','Kirolbet', 'Casumo', 'LeoVegas', 'Winamax', 'Paf', 'Pastón', 'Olybet','TonyBet', 'Marca Apuestas', 'Suertia', 'Yaas', 'Versus', 'Retabet','Opabets', 'Otro'];
+import { auth, db, state, sportIcons, allSports, allChannels, allBookmakers } from './core/init.js';
 
 
 function showAuthTab(tab) {
   const tabs = document.querySelectorAll('.auth-tab');
   tabs.forEach(t => t.classList.remove('active'));
-  
+  t
   if (tab === 'login') {
     tabs[0].classList.add('active');
     document.getElementById('loginForm').style.display = 'block';
@@ -224,29 +162,29 @@ function showLoading(show) {
 
 auth.onAuthStateChanged(user => {
   if (user) {
-    currentUser = user;
+    state.currentUser = user;
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     document.getElementById('userEmailDisplay').textContent = user.email;
     initApp();
   } else {
-    currentUser = null;
+    state.currentUser = null;
     document.getElementById('authScreen').style.display = 'flex';
     document.getElementById('mainApp').style.display = 'none';
     showLoading(false);
-    
-    if (unsubscribeTipsters) unsubscribeTipsters();
-    if (unsubscribePicks) unsubscribePicks();
-    if (unsubscribeFollows) unsubscribeFollows();
-    
-    tipsters = [];
-    picks = [];
-    userFollows = [];
+
+    if (state.unsubscribeTipsters) state.unsubscribeTipsters();
+    if (state.unsubscribePicks) state.unsubscribePicks();
+    if (state.unsubscribeFollows) state.unsubscribeFollows();
+
+    state.tipsters = [];
+    state.picks = [];
+    state.userFollows = [];
   }
 });
 
 function initApp() {
-  if (!currentUser) return;
+  if (!state.currentUser) return;
   
   showLoading(true);
   
@@ -262,14 +200,14 @@ function initApp() {
 }
 
 function setupTipstersListener() {
-  if (!currentUser) return;
-  
-  unsubscribeTipsters = db.collection('tipsters')
-    .where('uid', '==', currentUser.uid)
+  if (!state.currentUser) return;
+
+  state.unsubscribeTipsters = db.collection('tipsters')
+    .where('uid', '==', state.currentUser.uid)
     .onSnapshot(snapshot => {
-      tipsters = [];
+      state.tipsters = [];
       snapshot.forEach(doc => {
-        tipsters.push({ id: doc.id, ...doc.data() });
+        state.tipsters.push({ id: doc.id, ...doc.data() });
       });
       renderDashboard();
       updatePickTipsterSelect();
@@ -283,18 +221,18 @@ function setupTipstersListener() {
 }
 
 function setupPicksListener() {
-  if (!currentUser) return;
+  if (!state.currentUser) return;
   
-  unsubscribePicks = db.collection('picks')
-    .where('uid', '==', currentUser.uid)
+  state.unsubscribePicks = db.collection('picks')
+    .where('uid', '==', state.currentUser.uid)
     .onSnapshot(snapshot => {
-      picks = [];
+      state.picks = [];
       snapshot.forEach(doc => {
-        picks.push({ id: doc.id, ...doc.data() });
+        state.picks.push({ id: doc.id, ...doc.data() });
       });
       
-      tipsters.forEach(tipster => {
-        const tipsterPicks = picks.filter(p => p.tipsterId === tipster.id);
+      state.tipsters.forEach(tipster => {
+        const tipsterPicks = state.picks.filter(p => p.tipsterId === tipster.id);
         if (tipsterPicks.length > 0) {
           const dates = tipsterPicks.map(p => new Date(p.date));
           const lastDate = new Date(Math.max(...dates));
@@ -302,9 +240,9 @@ function setupPicksListener() {
         }
       });
       
-      if (currentView === 'allPicks') renderAllPicks();
-      if (currentView === 'tipsterDetail') renderTipsterDetail(currentTipsterId);
-      if (currentView === 'dashboard') renderDashboard();
+      if (state.currentView === 'allPicks') renderAllPicks();
+      if (state.currentView === 'tipsterDetail') renderTipsterDetail(state.currentTipsterId);
+      if (state.currentView === 'dashboard') renderDashboard();
     }, error => {
       console.error('Error loading picks:', error);
       alert('Error al cargar picks: ' + error.message);
@@ -312,18 +250,18 @@ function setupPicksListener() {
 }
 
 function setupFollowsListener() {
-  if (!currentUser) return;
+  if (!state.currentUser) return;
   
-  unsubscribeFollows = db.collection('userFollows')
-    .where('uid', '==', currentUser.uid)
+  state.unsubscribeFollows = db.collection('userFollows')
+    .where('uid', '==', state.currentUser.uid)
     .onSnapshot(snapshot => {
-      userFollows = [];
+      state.userFollows = [];
       snapshot.forEach(doc => {
-        userFollows.push({ id: doc.id, ...doc.data() });
+        state.userFollows.push({ id: doc.id, ...doc.data() });
       });
       
-      if (currentView === 'misPicks') renderMisPicks();
-      if (currentView === 'tipsterDetail') renderTipsterDetail(currentTipsterId);
+      if (state.currentView === 'misPicks') renderMisPicks();
+      if (state.currentView === 'tipsterDetail') renderTipsterDetail(state.currentTipsterId);
       renderDashboardPersonalStats();
     }, error => {
       console.error('Error loading follows:', error);
@@ -337,15 +275,15 @@ function initializeFilters() {
   
   const sportDropdown = document.getElementById('sportDropdown');
   sportDropdown.innerHTML = sports.map(sport => `
-    <div class="dropdown-item" onclick="toggleFilterOption(event, 'sport', '${sport}')">
+    <div class="dropdown-item">
       <input type="checkbox" value="${sport}" id="sport_${sport.replace(/\s+/g, '_')}">
       <label for="sport_${sport.replace(/\s+/g, '_')}">${sport}</label>
     </div>
   `).join('');
-  
+
   const channelDropdown = document.getElementById('channelDropdown');
   channelDropdown.innerHTML = channels.map(channel => `
-    <div class="dropdown-item" onclick="toggleFilterOption(event, 'channel', '${channel}')">
+    <div class="dropdown-item">
       <input type="checkbox" value="${channel}" id="channel_${channel.replace(/\s+/g, '_').replace('/', '_')}">
       <label for="channel_${channel.replace(/\s+/g, '_').replace('/', '_')}">${channel}</label>
     </div>
@@ -354,8 +292,8 @@ function initializeFilters() {
   const yieldInput = document.getElementById('yieldMinInput');
   yieldInput.value = -1000;
   yieldInput.addEventListener('input', function() {
-    clearTimeout(yieldDebounceTimer);
-    yieldDebounceTimer = setTimeout(() => {
+    clearTimeout(state.yieldDebounceTimer);
+    state.yieldDebounceTimer = setTimeout(() => {
       applyFilters();
     }, 500);
   });
@@ -420,24 +358,24 @@ document.addEventListener('click', function(event) {
 
 function updateDashboardFilters() {
   const sportCheckboxes = document.querySelectorAll('#sportDropdown input:checked');
-  dashboardFilters.sports = Array.from(sportCheckboxes).map(cb => cb.value);
+  state.dashboardFilters.sports = Array.from(sportCheckboxes).map(cb => cb.value);
   
   const channelCheckboxes = document.querySelectorAll('#channelDropdown input:checked');
-  dashboardFilters.channels = Array.from(channelCheckboxes).map(cb => cb.value);
+  state.dashboardFilters.channels = Array.from(channelCheckboxes).map(cb => cb.value);
   
   const yieldInput = document.getElementById('yieldMinInput');
-  dashboardFilters.yieldMin = parseFloat(yieldInput.value) || -1000;
-  
-  dashboardFilters.lastPickDays = document.getElementById('lastPickFilter').value;
-  
-  dashboardFilters.sortBy = document.getElementById('sortBy').value;
-  
+  state.dashboardFilters.yieldMin = parseFloat(yieldInput.value) || -1000;
+
+  state.dashboardFilters.lastPickDays = document.getElementById('lastPickFilter').value;
+
+  state.dashboardFilters.sortBy = document.getElementById('sortBy').value;
+
   const searchInput = document.getElementById('tipsterSearch');
-  dashboardFilters.searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+  state.dashboardFilters.searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
   
   const clearBtn = document.querySelector('.clear-search');
   if (clearBtn) {
-    clearBtn.style.display = dashboardFilters.searchQuery ? 'inline-flex' : 'none';
+    clearBtn.style.display = state.dashboardFilters.searchQuery ? 'inline-flex' : 'none';
   }
 }
 
@@ -462,7 +400,7 @@ function resetFilters() {
   document.getElementById('sortBy').value = 'yield';
   document.getElementById('tipsterSearch').value = '';
   
-  dashboardFilters = {
+  state.dashboardFilters = {
     sports: [],
     channels: [],
     yieldMin: -1000,
@@ -475,7 +413,7 @@ function resetFilters() {
 }
 
 function getLastPickDate(tipsterId) {
-  const tipsterPicks = picks.filter(p => p.tipsterId === tipsterId);
+  const tipsterPicks = state.picks.filter(p => p.tipsterId === tipsterId);
   if (tipsterPicks.length === 0) return null;
   
   const dates = tipsterPicks.map(p => new Date(p.date));
@@ -483,34 +421,34 @@ function getLastPickDate(tipsterId) {
 }
 
 function filterTipstersByFilters() {
-  let filtered = [...tipsters];
+  let filtered = [...state.tipsters];
   
-  if (dashboardFilters.searchQuery) {
-    filtered = filtered.filter(t => t.name.toLowerCase().includes(dashboardFilters.searchQuery));
+  if (state.dashboardFilters.searchQuery) {
+    filtered = filtered.filter(t => t.name.toLowerCase().includes(state.dashboardFilters.searchQuery));
   }
   
-  if (dashboardFilters.sports.length > 0) {
+  if (state.dashboardFilters.sports.length > 0) {
     filtered = filtered.filter(t => {
-      const tipsterPicks = picks.filter(p => p.tipsterId === t.id);
+      const tipsterPicks = state.picks.filter(p => p.tipsterId === t.id);
       const tipsterSports = [...new Set(tipsterPicks.map(p => p.sport))];
-      return dashboardFilters.sports.some(sport => tipsterSports.includes(sport));
+      return state.dashboardFilters.sports.some(sport => tipsterSports.includes(sport));
     });
   }
   
-  if (dashboardFilters.channels.length > 0) {
-    filtered = filtered.filter(t => dashboardFilters.channels.includes(t.channel));
+  if (state.dashboardFilters.channels.length > 0) {
+    filtered = filtered.filter(t => state.dashboardFilters.channels.includes(t.channel));
   }
-  
-  if (dashboardFilters.yieldMin !== null) {
+
+  if (state.dashboardFilters.yieldMin !== null) {
     filtered = filtered.filter(t => {
       const stats = calculateStats(t.id);
       const yield_ = parseFloat(stats.yield);
-      return yield_ >= dashboardFilters.yieldMin;
+      return yield_ >= state.dashboardFilters.yieldMin;
     });
   }
-  
-  if (dashboardFilters.lastPickDays !== 'all') {
-    const days = parseInt(dashboardFilters.lastPickDays);
+
+  if (state.dashboardFilters.lastPickDays !== 'all') {
+    const days = parseInt(state.dashboardFilters.lastPickDays);
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
     
@@ -521,15 +459,15 @@ function filterTipstersByFilters() {
   }
   
   filtered.sort((a, b) => {
-    if (dashboardFilters.sortBy === 'yield') {
+    if (state.dashboardFilters.sortBy === 'yield') {
       const yieldA = parseFloat(calculateStats(a.id).yield);
       const yieldB = parseFloat(calculateStats(b.id).yield);
       return yieldB - yieldA;
-    } else if (dashboardFilters.sortBy === 'winrate') {
+    } else if (state.dashboardFilters.sortBy === 'winrate') {
       const wrA = parseFloat(calculateStats(a.id).winrate);
       const wrB = parseFloat(calculateStats(b.id).winrate);
       return wrB - wrA;
-    } else if (dashboardFilters.sortBy === 'lastPick') {
+    } else if (state.dashboardFilters.sortBy === 'lastPick') {
       const dateA = getLastPickDate(a.id) || new Date(0);
       const dateB = getLastPickDate(b.id) || new Date(0);
       return dateB - dateA;
@@ -544,7 +482,7 @@ function filterTipstersByFilters() {
 async function addTipsterToFirestore(tipsterData) {
   try {
     const docRef = await db.collection('tipsters').add({
-      uid: currentUser.uid,
+      uid:  state.currentUser.uid,
       name: tipsterData.name,
       channel: tipsterData.channel,
       createdDate: tipsterData.createdDate,
@@ -560,7 +498,7 @@ async function addTipsterToFirestore(tipsterData) {
 async function addPickToFirestore(pickData) {
   try {
     const docRef = await db.collection('picks').add({
-      uid: currentUser.uid,
+      uid: state.currentUser.uid,
       tipsterId: pickData.tipsterId,
       sport: pickData.sport,
       odds: pickData.odds,
@@ -595,7 +533,7 @@ async function updatePickInFirestore(pickId, pickData) {
 async function addFollowToFirestore(followData) {
   try {
     const docRef = await db.collection('userFollows').add({
-      uid: currentUser.uid,
+      uid: state.currentUser.uid,
       tipsterId: followData.tipsterId,
       pickId: followData.pickId,
       tipsterBookmaker: followData.tipsterBookmaker || '',
@@ -638,13 +576,13 @@ async function deleteFollowFromFirestore(followId) {
 }
 
 function loadSampleData() {
-  tipsters = [
+  state.tipsters = [
     { id: 1, name: 'ProTipster', channel: 'Telegram', createdDate: '2025-01-01', lastPickDate: '2025-11-06' },
     { id: 2, name: 'SportsMaster', channel: 'BlogaBet', createdDate: '2025-01-15', lastPickDate: '2025-11-05' },
     { id: 3, name: 'CornerKing', channel: 'TipsterLand', createdDate: '2025-02-01', lastPickDate: '2025-11-03' }
   ];
-  
-  picks = [
+
+  state.picks = [
     {
       id: 1,
       tipsterId: 1,
@@ -819,7 +757,7 @@ function loadSampleData() {
     }
   ];
 
-  userFollows = [
+  state.userFollows = [
     {
       id: 1,
       tipsterId: 1,
@@ -934,12 +872,12 @@ function loadSampleData() {
     }
   ];
   
-  nextTipsterId = Math.max(...tipsters.map(t => t.id)) + 1;
-  nextPickId = Math.max(...picks.map(p => p.id)) + 1;
-  nextFollowId = userFollows.length > 0 ? Math.max(...userFollows.map(f => f.id)) + 1 : 1;
-  
-  tipsters.forEach(tipster => {
-    const tipsterPicks = picks.filter(p => p.tipsterId === tipster.id);
+  state.nextTipsterId = Math.max(...state.tipsters.map(t => t.id)) + 1;
+  state.nextPickId = Math.max(...state.picks.map(p => p.id)) + 1;
+  state.nextFollowId = state.userFollows.length > 0 ? Math.max(...state.userFollows.map(f => f.id)) + 1 : 1;
+
+  state.tipsters.forEach(tipster => {
+    const tipsterPicks = state.picks.filter(p => p.tipsterId === tipster.id);
     if (tipsterPicks.length > 0) {
       const dates = tipsterPicks.map(p => new Date(p.date));
       const lastDate = new Date(Math.max(...dates));
@@ -949,11 +887,6 @@ function loadSampleData() {
   
   renderDashboardPersonalStats();
 }
-
-document.getElementById('navbarLogo').addEventListener('click', function() {
-  console.log('Navbar logo clicked, showing dashboard view');
-  showView('dashboard');
-});
 
 function showView(viewName) {
   const views = document.querySelectorAll('.view');
@@ -981,10 +914,10 @@ function showView(viewName) {
     renderMisPicks();
   } else if (viewName === 'tipsterDetail') {
     document.getElementById('tipsterDetailView').classList.add('active');
-    renderTipsterDetail(currentTipsterId);
+    renderTipsterDetail(state.currentTipsterId);
   }
   
-  currentView = viewName;
+  state.currentView = viewName;
 }
 
 function showDetailTab(tabName) {
@@ -998,25 +931,25 @@ function showDetailTab(tabName) {
   } else if (tabName === 'myStats') {
     document.querySelectorAll('.detail-tab')[1].classList.add('active');
     document.getElementById('myStatsTab').classList.add('active');
-    renderMyStats(currentTipsterId);
+    renderMyStats(state.currentTipsterId);
   } else if (tabName === 'follows') {
     document.querySelectorAll('.detail-tab')[2].classList.add('active');
     document.getElementById('followsTab').classList.add('active');
-    renderTipsterFollows(currentTipsterId);
-    renderFollowComparison(currentTipsterId);
+    renderTipsterFollows(state.currentTipsterId);
+    renderFollowComparison(state.currentTipsterId);
     document.getElementById('comparisonSection').style.display = 'block';
   }
 }
 
 function showTipsterDetail(tipsterId) {
-  currentTipsterId = tipsterId;
+  state.currentTipsterId = tipsterId;
   showView('tipsterDetail');
 }
 
 function calculateSeguibilidad(tipsterId) {
-  const tipsterPicks = picks.filter(p => p.tipsterId === tipsterId).sort((a, b) => new Date(a.date) - new Date(b.date));
-  const tipsterFollows = userFollows.filter(f => f.tipsterId === tipsterId);
-  
+  const tipsterPicks = state.picks.filter(p => p.tipsterId === tipsterId).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const tipsterFollows = state.userFollows.filter(f => f.tipsterId === tipsterId);
+
   if (tipsterFollows.length === 0) {
     return 0;
   }
@@ -1037,7 +970,7 @@ function calculateSeguibilidad(tipsterId) {
 }
 
 function calculateStats(tipsterId) {
-  const tipsterPicks = picks.filter(p => p.tipsterId === tipsterId);
+  const tipsterPicks = state.picks.filter(p => p.tipsterId === tipsterId);
   const resolvedPicks = tipsterPicks.filter(p => p.isResolved && p.result !== 'Void');
   const wonPicks = resolvedPicks.filter(p => p.result === 'Ganada');
   
@@ -1170,7 +1103,7 @@ function calculateDashboardPersonalStats() {
   const filteredTipsters = filterTipstersByFilters();
   const filteredTipsterIds = filteredTipsters.map(t => t.id);
   
-  const relevantFollows = userFollows.filter(f => filteredTipsterIds.includes(f.tipsterId));
+  const relevantFollows = state.userFollows.filter(f => filteredTipsterIds.includes(f.tipsterId));
   const resolvedFollows = relevantFollows.filter(f => f.isResolved && f.userResult !== 'Void');
   const wonFollows = resolvedFollows.filter(f => f.userResult === 'Ganada');
   
@@ -1239,8 +1172,8 @@ function renderDashboardPersonalStats() {
 function renderDashboard() {
   const container = document.getElementById('tipstersGrid');
   const emptyState = document.getElementById('emptyState');
-  
-  if (tipsters.length === 0) {
+
+  if (state.tipsters.length === 0) {
     container.style.display = 'none';
     emptyState.style.display = 'block';
     return;
@@ -1263,7 +1196,7 @@ function renderDashboard() {
     const lastPick = getLastPickDate(tipster.id);
     const lastPickStr = lastPick ? formatDate(lastPick.toISOString().split('T')[0]) : 'Sin picks';
     return `
-      <div class="tipster-card" onclick="showTipsterDetail('${tipster.id}')">
+      <div class="tipster-card" data-tipster-id="${tipster.id}">
         <div class="tipster-card-header">
           <div class="tipster-card-left">
             <div class="tipster-card-title">${tipster.name}</div>
@@ -1300,15 +1233,15 @@ function renderDashboard() {
 function renderAllPicks() {
   const tbody = document.getElementById('allPicksBody');
   
-  if (picks.length === 0) {
+  if (state.picks.length === 0) {
     tbody.innerHTML = '<tr><td colspan="12" style="text-align: center; padding: var(--space-24);">No hay picks registrados</td></tr>';
     return;
   }
-  
-  const sortedPicks = [...picks].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const sortedPicks = [...state.picks].sort((a, b) => new Date(b.date) - new Date(a.date));
   
   tbody.innerHTML = sortedPicks.map(pick => {
-    const tipster = tipsters.find(t => t.id === pick.tipsterId);
+    const tipster = state.tipsters.find(t => t.id === pick.tipsterId);
     const profit = calculatePickProfit(pick);
     const status = pick.status || 'No Seguido';
     const statusClass = status.toLowerCase().replace(/\s+/g, '-');
@@ -1316,7 +1249,7 @@ function renderAllPicks() {
     const sportIcon = sportIcons[pick.sport] || '🎯';
     const displayType = pick.pickType === 'Pre' ? 'Pre' : pick.pickType;
     return `
-      <tr>
+      <tr data-pick-id="${pick.id}">
         <td>${formatDate(pick.date)}</td>
         <td>${tipster ? tipster.name : 'N/A'}</td>
         <td>${pick.match}</td>
@@ -1326,12 +1259,12 @@ function renderAllPicks() {
         <td>${pick.odds.toFixed(2)}</td>
         <td>${pick.stake}</td>
         <td>
-          <span class="status-badge ${statusClass}" onclick="togglePickStatus('${pick.id}')">${status}</span>
+          <span class="status-badge ${statusClass} status-badge-clickable">${status}</span>
         </td>
         <td><span class="result-badge ${pick.result.toLowerCase()}">${pick.result}</span></td>
         <td><span class="profit ${profit >= 0 ? 'positive' : 'negative'}">${profit > 0 ? '+' : ''}${profit.toFixed(2)}u</span></td>
         <td>
-          <button class="action-btn" onclick="editPick('${pick.id}')">Editar</button>
+          <button class="action-btn edit-pick-btn">Editar</button>
         </td>
       </tr>
     `;
@@ -1346,7 +1279,7 @@ function filterPicks() {
   const bookmakerFilter = document.getElementById('filterBookmaker').value;
   const resultFilter = document.getElementById('filterResult').value;
   
-  let filteredPicks = [...picks];
+  let filteredPicks = [...state.picks];
   
   if (tipsterFilter !== 'all') {
     filteredPicks = filteredPicks.filter(p => p.tipsterId === parseInt(tipsterFilter));
@@ -1362,14 +1295,14 @@ function filterPicks() {
   
   if (channelFilter !== 'all') {
     filteredPicks = filteredPicks.filter(p => {
-      const tipster = tipsters.find(t => t.id === p.tipsterId);
+      const tipster = state.tipsters.find(t => t.id === p.tipsterId);
       return tipster && tipster.channel === channelFilter;
     });
   }
   
   if (bookmakerFilter !== 'all') {
     filteredPicks = filteredPicks.filter(p => {
-      const follow = userFollows.find(f => f.pickId === p.id);
+      const follow = state.userFollows.find(f => f.pickId === p.id);
       return follow && follow.userBookmaker === bookmakerFilter;
     });
   }
@@ -1387,9 +1320,9 @@ function filterPicks() {
   }
   
   tbody.innerHTML = sortedPicks.map(pick => {
-    const tipster = tipsters.find(t => t.id === pick.tipsterId);
+    const tipster = state.tipsters.find(t => t.id === pick.tipsterId);
     const profit = calculatePickProfit(pick);
-    const isFollowed = userFollows.some(f => f.pickId === pick.id);
+    const isFollowed = state.userFollows.some(f => f.pickId === pick.id);
     
     const status = pick.status || 'No Seguido';
     const statusClass = status.toLowerCase().replace(/\s+/g, '-');
@@ -1397,7 +1330,7 @@ function filterPicks() {
     const displayType = pick.pickType === 'Pre' ? 'Pre' : pick.pickType;
     
     return `
-      <tr>
+      <tr data-pick-id="${pick.id}">
         <td>${formatDate(pick.date)}</td>
         <td>${tipster ? tipster.name : 'N/A'}</td>
         <td>${pick.match}</td>
@@ -1407,12 +1340,12 @@ function filterPicks() {
         <td>${pick.odds.toFixed(2)}</td>
         <td>${pick.stake}</td>
         <td>
-          <span class="status-badge ${statusClass}" onclick="togglePickStatus('${pick.id}')">${status}</span>
+          <span class="status-badge ${statusClass} status-badge-clickable">${status}</span>
         </td>
         <td><span class="result-badge ${pick.result.toLowerCase()}">${pick.result}</span></td>
         <td><span class="profit ${profit >= 0 ? 'positive' : 'negative'}">${profit > 0 ? '+' : ''}${profit.toFixed(2)}u</span></td>
         <td>
-          <button class="action-btn" onclick="editPick('${pick.id}')">Editar</button>
+          <button class="action-btn edit-pick-btn">Editar</button>
         </td>
       </tr>
     `;
@@ -1420,12 +1353,12 @@ function filterPicks() {
 }
 
 function renderTipsterDetail(tipsterId) {
-  const tipster = tipsters.find(t => t.id === tipsterId);
+  const tipster = state.tipsters.find(t => t.id === tipsterId);
   if (!tipster) return;
   
   const stats = calculateStats(tipsterId);
-  const tipsterPicks = picks.filter(p => p.tipsterId === tipsterId).sort((a, b) => new Date(b.date) - new Date(a.date));
-  
+  const tipsterPicks = state.picks.filter(p => p.tipsterId === tipsterId).sort((a, b) => new Date(b.date) - new Date(a.date));
+
   document.getElementById('tipsterDetailName').textContent = tipster.name;
   
   document.getElementById('detailTotalPicks').textContent = stats.totalPicks;
@@ -1454,13 +1387,13 @@ function renderTipsterDetail(tipsterId) {
   } else {
     tbody.innerHTML = tipsterPicks.map(pick => {
       const profit = calculatePickProfit(pick);
-      const isFollowed = userFollows.some(f => f.pickId === pick.id);
+      const isFollowed = state.userFollows.some(f => f.pickId === pick.id);
       const status = pick.status || 'No Seguido';
       const statusClass = status.toLowerCase().replace(/\s+/g, '-');
       const sportIcon = sportIcons[pick.sport] || '🎯';
       const displayType = pick.pickType === 'Pre' ? 'Pre' : pick.pickType;
       return `
-        <tr>
+        <tr data-pick-id="${pick.id}">
           <td>${formatDate(pick.date)}</td>
           <td>${pick.match}</td>
           <td>${sportIcon} ${pick.sport}</td>
@@ -1471,11 +1404,11 @@ function renderTipsterDetail(tipsterId) {
           <td><span class="result-badge ${pick.result.toLowerCase()}">${pick.result}</span></td>
           <td><span class="profit ${profit >= 0 ? 'positive' : 'negative'}">${profit > 0 ? '+' : ''}${profit.toFixed(2)}u</span></td>
           <td>
-            <span class="status-badge ${statusClass}" onclick="togglePickStatus('${pick.id}')">${status}</span>
+            <span class="status-badge ${statusClass} status-badge-clickable">${status}</span>
           </td>
           <td>
-            <button class="action-btn" onclick="editPick('${pick.id}')">Editar</button>
-            ${!isFollowed ? `<button class="action-btn" onclick="showFollowPickModal('${pick.id}')" style="margin-left: 4px;">Seguir</button>` : ''}
+            <button class="action-btn edit-pick-btn">Editar</button>
+            ${!isFollowed ? `<button class="action-btn follow-pick-btn" style="margin-left: 4px;">Seguir</button>` : ''}
           </td>
         </tr>
       `;
@@ -1486,14 +1419,14 @@ function renderTipsterDetail(tipsterId) {
 function renderCharts(stats) {
   const chartColors = ['#1FB8CD', '#FFC185', '#B4413C', '#ECEBD5', '#5D878F', '#DB4545', '#D2BA4C', '#964325', '#944454', '#13343B'];
   
-  Object.values(charts).forEach(chart => {
+  Object.values(state.charts).forEach(chart => {
     if (chart) chart.destroy();
   });
-  charts = {};
+  state.charts = {};
   
   const oddsCtx = document.getElementById('oddsDistChart');
   if (oddsCtx) {
-    charts.odds = new Chart(oddsCtx, {
+    state.charts.odds = new Chart(oddsCtx, {
       type: 'bar',
       data: {
         labels: Object.keys(stats.oddsDistribution),
@@ -1526,7 +1459,7 @@ function renderCharts(stats) {
     const stakeData = Object.entries(stats.stakeDistribution)
       .filter(([stake, percent]) => parseFloat(percent) > 0);
     
-    charts.stake = new Chart(stakeCtx, {
+    state.charts.stake = new Chart(stakeCtx, {
       type: 'pie',
       data: {
         labels: stakeData.map(([stake]) => 'Stake ' + stake),
@@ -1550,7 +1483,7 @@ function renderCharts(stats) {
     const sportsData = Object.entries(stats.sportDistribution)
       .filter(([sport, percent]) => parseFloat(percent) > 0);
     
-    charts.sports = new Chart(sportsCtx, {
+    state.charts.sports = new Chart(sportsCtx, {
       type: 'doughnut',
       data: {
         labels: sportsData.map(([sport]) => sport),
@@ -1573,7 +1506,7 @@ function renderCharts(stats) {
   if (pickTypesCtx) {
     const typeData = Object.entries(stats.pickTypeDistribution)
       .filter(([type, percent]) => parseFloat(percent) > 0);
-    charts.pickTypes = new Chart(pickTypesCtx, {
+    state.charts.pickTypes = new Chart(pickTypesCtx, {
       type: 'bar',
       data: {
         labels: typeData.map(([type]) => type),
@@ -1609,7 +1542,7 @@ function showAddTipsterModal() {
 }
 
 function showAddPickModal() {
-  if (tipsters.length === 0) {
+  if (state.tipsters.length === 0) {
     alert('Primero debes añadir al menos un tipster');
     return;
   }
@@ -1747,7 +1680,7 @@ function addPick(event) {
 }
 
 function editPick(pickId) {
-  const pick = picks.find(p => p.id === pickId);
+  const pick = state.picks.find(p => p.id === pickId);
   if (!pick) return;
   
   document.getElementById('editPickId').value = pick.id;
@@ -1761,8 +1694,8 @@ function editPick(pickId) {
   document.getElementById('editPickTime').value = pick.time;
   document.getElementById('editPickResult').value = pick.result;
   document.getElementById('editPickComments').value = pick.comments || '';
-  
-  const follow = userFollows.find(f => f.pickId === pickId);
+
+  const follow = state.userFollows.find(f => f.pickId === pickId);
   if (follow) {
     document.getElementById('editPickFollowed').checked = true;
     document.getElementById('editFollowSection').style.display = 'block';
@@ -1790,7 +1723,7 @@ function updatePick(event) {
     event.preventDefault();
     
     const pickId = document.getElementById('editPickId').value;
-    const pick = picks.find(p => p.id === pickId);
+    const pick = state.picks.find(p => p.id === pickId);
     
     if (!pick) return;
     
@@ -1889,15 +1822,15 @@ function updatePick(event) {
 function updatePickTipsterSelect() {
   const select = document.getElementById('pickTipster');
   select.innerHTML = '<option value="">Selecciona un tipster</option>' +
-    tipsters.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    state.tipsters.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
 }
 
 function updateFilterSelects() {
   const tipsterFilter = document.getElementById('filterTipster');
   tipsterFilter.innerHTML = '<option value="all">Todos los Tipsters</option>' +
-    tipsters.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-  
-  const sports = [...new Set(picks.map(p => p.sport))];
+    state.tipsters.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+
+  const sports = [...new Set(state.picks.map(p => p.sport))];
   const sportFilter = document.getElementById('filterSport');
   sportFilter.innerHTML = '<option value="all">Todos los Deportes</option>' +
     sports.map(s => {
@@ -1905,12 +1838,12 @@ function updateFilterSelects() {
       return `<option value="${s}">${icon} ${s}</option>`;
     }).join('');
   
-  const channels = [...new Set(tipsters.map(t => t.channel))];
+  const channels = [...new Set(state.tipsters.map(t => t.channel))];
   const channelFilter = document.getElementById('filterChannel');
   channelFilter.innerHTML = '<option value="all">Todos los Canales</option>' +
     channels.map(c => `<option value="${c}">${c}</option>`).join('');
-  
-  const bookmakers = [...new Set(userFollows.map(f => f.userBookmaker).filter(b => b))];
+
+  const bookmakers = [...new Set(state.userFollows.map(f => f.userBookmaker).filter(b => b))];
   const bookmakerFilter = document.getElementById('filterBookmaker');
   bookmakerFilter.innerHTML = '<option value="all">Todas las Casas</option>' +
     bookmakers.map(b => `<option value="${b}">${b}</option>`).join('');
@@ -1919,7 +1852,7 @@ function updateFilterSelects() {
 function updateFollowFilterSelects() {
   const tipsterFilter = document.getElementById('followFilterTipster');
   tipsterFilter.innerHTML = '<option value="all">Todos los Tipsters</option>' +
-    tipsters.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    state.tipsters.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
 }
 
 function calculatePickProfit(pick) {
@@ -1938,11 +1871,11 @@ function formatDate(dateString) {
 }
 
 function showFollowPickModal(pickId) {
-  const pick = picks.find(p => p.id === pickId);
+  const pick = state.picks.find(p => p.id === pickId);
   if (!pick) return;
-  
-  const tipster = tipsters.find(t => t.id === pick.tipsterId);
-  
+
+  const tipster = state.tipsters.find(t => t.id === pick.tipsterId);
+
   document.getElementById('followPickId').value = pick.id;
   document.getElementById('followTipsterId').value = pick.tipsterId;
   document.getElementById('followOdds').value = pick.odds;
@@ -2002,8 +1935,8 @@ function addFollow(event) {
   const userResult = document.getElementById('followResult').value;
   const userDate = document.getElementById('followUserDate').value;
   const userTime = document.getElementById('followUserTime').value;
-  
-  const pick = picks.find(p => p.id === pickId);
+
+  const pick = state.picks.find(p => p.id === pickId);
   if (!pick) return;
   
   let profitFromFollow = 0;
@@ -2045,11 +1978,11 @@ function addFollow(event) {
 
 function renderMisPicks() {
   updateFollowFilterSelects();
-  
-  const resolvedFollows = userFollows.filter(f => f.isResolved && f.userResult !== 'Void');
+
+  const resolvedFollows = state.userFollows.filter(f => f.isResolved && f.userResult !== 'Void');
   const wonFollows = resolvedFollows.filter(f => f.userResult === 'Ganada');
-  
-  const totalFollowed = userFollows.length;
+
+  const totalFollowed = state.userFollows.length;
   const myWinrate = resolvedFollows.length > 0 ? (wonFollows.length / resolvedFollows.length * 100).toFixed(2) : 0;
   
   let totalStaked = 0;
@@ -2074,7 +2007,7 @@ function filterFollowedPicks() {
   const resultFilter = document.getElementById('followFilterResult').value;
   const matchFilter = document.getElementById('followFilterMatch').value;
   
-  let filtered = [...userFollows];
+  let filtered = [...state.userFollows];
   
   if (tipsterFilter !== 'all') {
     filtered = filtered.filter(f => f.tipsterId === parseInt(tipsterFilter));
@@ -2086,12 +2019,12 @@ function filterFollowedPicks() {
   
   if (matchFilter === 'match') {
     filtered = filtered.filter(f => {
-      const pick = picks.find(p => p.id === f.pickId);
+      const pick = state.picks.find(p => p.id === f.pickId);
       return pick && f.userResult === pick.result;
     });
   } else if (matchFilter === 'diverge') {
     filtered = filtered.filter(f => {
-      const pick = picks.find(p => p.id === f.pickId);
+      const pick = state.picks.find(p => p.id === f.pickId);
       return pick && f.userResult !== pick.result && f.isResolved;
     });
   }
@@ -2106,9 +2039,9 @@ function filterFollowedPicks() {
   const sortedFollows = filtered.sort((a, b) => new Date(b.dateFollowed) - new Date(a.dateFollowed));
   
   tbody.innerHTML = sortedFollows.map(follow => {
-    const pick = picks.find(p => p.id === follow.pickId);
-    const tipster = tipsters.find(t => t.id === follow.tipsterId);
-    
+    const pick = state.picks.find(p => p.id === follow.pickId);
+    const tipster = state.tipsters.find(t => t.id === follow.tipsterId);
+
     const match = pick && follow.userResult === pick.result;
     const diverge = pick && follow.userResult !== pick.result && follow.isResolved;
     
@@ -2137,7 +2070,7 @@ function filterFollowedPicks() {
 }
 
 function renderTipsterFollows(tipsterId) {
-  const tipsterFollows = userFollows.filter(f => f.tipsterId === tipsterId);
+  const tipsterFollows = state.userFollows.filter(f => f.tipsterId === tipsterId);
   const tbody = document.getElementById('tipsterFollowsBody');
   
   if (tipsterFollows.length === 0) {
@@ -2148,7 +2081,7 @@ function renderTipsterFollows(tipsterId) {
   const sortedFollows = tipsterFollows.sort((a, b) => new Date(b.dateFollowed) - new Date(a.dateFollowed));
   
   tbody.innerHTML = sortedFollows.map(follow => {
-    const pick = picks.find(p => p.id === follow.pickId);
+    const pick = state.picks.find(p => p.id === follow.pickId);
     
     return `
       <tr>
@@ -2169,7 +2102,7 @@ function renderTipsterFollows(tipsterId) {
 }
 
 function renderFollowComparison(tipsterId) {
-  const tipsterFollows = userFollows.filter(f => f.tipsterId === tipsterId && f.isResolved && f.userResult !== 'Void');
+  const tipsterFollows = state.userFollows.filter(f => f.tipsterId === tipsterId && f.isResolved && f.userResult !== 'Void');
   
   if (tipsterFollows.length === 0) {
     document.getElementById('comparisonSection').style.display = 'none';
@@ -2177,7 +2110,7 @@ function renderFollowComparison(tipsterId) {
   }
   
   const followedPickIds = tipsterFollows.map(f => f.pickId);
-  const followedPicks = picks.filter(p => followedPickIds.includes(p.id) && p.isResolved && p.result !== 'Void');
+  const followedPicks = state.picks.filter(p => followedPickIds.includes(p.id) && p.isResolved && p.result !== 'Void');
   
   const tipsterWon = followedPicks.filter(p => p.result === 'Ganada').length;
   const tipsterWinrate = followedPicks.length > 0 ? (tipsterWon / followedPicks.length * 100).toFixed(2) : 0;
@@ -2236,7 +2169,7 @@ function renderFollowComparison(tipsterId) {
 }
 
 function renderMyStats(tipsterId) {
-  const tipsterFollows = userFollows.filter(f => f.tipsterId === tipsterId);
+  const tipsterFollows = state.userFollows.filter(f => f.tipsterId === tipsterId);
   
   if (tipsterFollows.length === 0) {
     document.getElementById('myStatsMessage').style.display = 'block';
@@ -2311,7 +2244,7 @@ function renderMyStats(tipsterId) {
   let totalOddsDiff = 0;
   let oddsDiffCount = 0;
   tipsterFollows.forEach(f => {
-    const pick = picks.find(p => p.id === f.pickId);
+    const pick = state.picks.find(p => p.id === f.pickId);
     if (pick) {
       totalOddsDiff += (f.userOdds - pick.odds);
       oddsDiffCount++;
@@ -2323,7 +2256,7 @@ function renderMyStats(tipsterId) {
   let totalStakeDiff = 0;
   let stakeDiffCount = 0;
   tipsterFollows.forEach(f => {
-    const pick = picks.find(p => p.id === f.pickId);
+    const pick = state.picks.find(p => p.id === f.pickId);
     if (pick) {
       if (f.userResult === pick.result && f.isResolved) {
         matchCount++;
@@ -2344,14 +2277,14 @@ function renderMyStats(tipsterId) {
   oddsDiffEl.style.color = parseFloat(avgOddsDiff) >= 0 ? 'var(--color-success)' : 'var(--color-error)';
   
   const chartColors = ['#1FB8CD', '#FFC185', '#B4413C', '#ECEBD5', '#5D878F', '#DB4545', '#D2BA4C', '#964325', '#944454', '#13343B'];
-  
-  if (charts.myOdds) charts.myOdds.destroy();
-  if (charts.myStake) charts.myStake.destroy();
-  if (charts.myBookmaker) charts.myBookmaker.destroy();
-  
+
+  if (state.charts.myOdds) state.charts.myOdds.destroy();
+  if (state.charts.myStake) state.charts.myStake.destroy();
+  if (state.charts.myBookmaker) state.charts.myBookmaker.destroy();
+
   const myOddsCtx = document.getElementById('myOddsDistChart');
   if (myOddsCtx) {
-    charts.myOdds = new Chart(myOddsCtx, {
+    state.charts.myOdds = new Chart(myOddsCtx, {
       type: 'bar',
       data: {
         labels: Object.keys(oddsDistribution),
@@ -2382,7 +2315,7 @@ function renderMyStats(tipsterId) {
   const myStakeCtx = document.getElementById('myStakeDistChart');
   if (myStakeCtx) {
     const stakeData = Object.entries(stakeDistribution).filter(([, percent]) => parseFloat(percent) > 0);
-    charts.myStake = new Chart(myStakeCtx, {
+    state.charts.myStake = new Chart(myStakeCtx, {
       type: 'pie',
       data: {
         labels: stakeData.map(([range]) => 'Stake ' + range),
@@ -2404,7 +2337,7 @@ function renderMyStats(tipsterId) {
   const myBookmakerCtx = document.getElementById('myBookmakerChart');
   if (myBookmakerCtx) {
     const bmData = Object.entries(bookmakerDistribution).filter(([, percent]) => parseFloat(percent) > 0);
-    charts.myBookmaker = new Chart(myBookmakerCtx, {
+    state.charts.myBookmaker = new Chart(myBookmakerCtx, {
       type: 'doughnut',
       data: {
         labels: bmData.map(([bm]) => bm),
@@ -2425,7 +2358,7 @@ function renderMyStats(tipsterId) {
 }
 
 async function confirmResetTipster(tipsterId) {
-    const tipster = tipsters.find(t => t.id === tipsterId);
+    const tipster = state.tipsters.find(t => t.id === tipsterId);
     if (!tipster) return;
     
     const confirmMessage = `⚠️ ATENCIÓN: Vas a resetear "${tipster.name}".\n\n` +
@@ -2447,9 +2380,9 @@ async function resetTipster(tipsterId) {
     showLoading(true);
     
     try {
-        const tipsterPicks = picks.filter(p => p.tipsterId === tipsterId);
+        const tipsterPicks = state.picks.filter(p => p.tipsterId === tipsterId);
         const tipsterPickIds = tipsterPicks.map(p => p.id);
-        const tipsterFollows = userFollows.filter(f => f.tipsterId === tipsterId);
+        const tipsterFollows = state.userFollows.filter(f => f.tipsterId === tipsterId);
         const followDeletePromises = tipsterFollows.map(follow => 
             deleteFollowFromFirestore(follow.id)
         );
@@ -2463,7 +2396,7 @@ async function resetTipster(tipsterId) {
         await updateTipsterInFirestore(tipsterId, { lastPickDate: null });
         
         showLoading(false);
-        alert(`✅ Tipster "${tipsters.find(t => t.id === tipsterId)?.name}" reseteado correctamente.\n\nSe eliminaron ${tipsterPicks.length} picks y ${tipsterFollows.length} follows.`);
+        alert(`✅ Tipster "${state.tipsters.find(t => t.id === tipsterId)?.name}" reseteado correctamente.\n\nSe eliminaron ${tipsterPicks.length} picks y ${tipsterFollows.length} follows.`);
         
         showView('dashboard');
         
@@ -2492,7 +2425,162 @@ async function updateTipsterInFirestore(tipsterId, data) {
     }
 }
 
+document.getElementById('navbarLogo').addEventListener('click', function() {
+  showView('dashboard');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Tabs de autenticación
+  document.getElementById('tabLogin')?.addEventListener('click', () => showAuthTab('login'));
+  document.getElementById('tabSignup')?.addEventListener('click', () => showAuthTab('signup'));
+
+  // Botones de mostrar/ocultar contraseña
+  document.getElementById('toggleLoginPassword')?.addEventListener('click', () => togglePasswordVisibility('loginPassword'));
+  document.getElementById('toggleSignupPassword')?.addEventListener('click', () => togglePasswordVisibility('signupPassword'));
+  document.getElementById('toggleSignupPasswordConfirm')?.addEventListener('click', () => togglePasswordVisibility('signupPasswordConfirm'));
+
+  // Recuperar contraseña
+  document.getElementById('forgotPasswordLink')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    showForgotPasswordModal();
+  });
+
+  // Cerrar modales
+  document.getElementById('closeForgotPasswordModal')?.addEventListener('click', () => closeModal('forgotPasswordModal'));
+  document.getElementById('closeAddTipsterModal')?.addEventListener('click', () => closeModal('addTipsterModal'));
+  document.getElementById('closeAddPickModal')?.addEventListener('click', () => closeModal('addPickModal'));
+  document.getElementById('closeEditPickModal')?.addEventListener('click', () => closeModal('editPickModal'));
+  document.getElementById('closeFollowPickModal')?.addEventListener('click', () => closeModal('followPickModal'));
+
+  // Cancelar en modal
+  document.getElementById('cancelForgotPasswordModal')?.addEventListener('click', () => closeModal('forgotPasswordModal'));
+  document.getElementById('cancelAddTipsterModal')?.addEventListener('click', () => closeModal('addTipsterModal'));
+  document.getElementById('cancelAddPickModal')?.addEventListener('click', () => closeModal('addPickModal'));
+  document.getElementById('cancelEditPickModal')?.addEventListener('click', () => closeModal('editPickModal'));
+  document.getElementById('cancelFollowPickModal')?.addEventListener('click', () => closeModal('followPickModal'));
+
+  // Mostrar modales
+  document.getElementById('showAddTipsterModalBtn')?.addEventListener('click', showAddTipsterModal);
+  document.getElementById('showAddPickModalBtn')?.addEventListener('click', showAddPickModal);
+
+  // Limpiar filtros
+  document.getElementById('resetFiltersBtn')?.addEventListener('click', resetFilters);
+
+  // Navegación
+  document.getElementById('tabDashboard')?.addEventListener('click', () => showView('dashboard'));
+  document.getElementById('tabAllPicks')?.addEventListener('click', () => showView('allPicks'));
+    document.getElementById('tabDashboard2')?.addEventListener('click', () => showView('dashboard'));
+  document.getElementById('tabAllPicks2')?.addEventListener('click', () => showView('allPicks'));
+  document.getElementById('tabDashboard3')?.addEventListener('click', () => showView('dashboard'));
+  document.getElementById('tabAllPicks3')?.addEventListener('click', () => showView('allPicks'));
+  document.getElementById('tabMisPicks')?.addEventListener('click', () => showView('misPicks'));
+
+  // Dashboard acciones
+  document.getElementById('addTipsterBtn')?.addEventListener('click', showAddTipsterModal);
+  document.getElementById('addPickBtn')?.addEventListener('click', showAddPickModal);
+  document.getElementById('signOutBtn')?.addEventListener('click', handleSignOut);
+
+  // Navegación en detalle tipster
+  document.getElementById('backToDashboardBtn')?.addEventListener('click', () => showView('dashboard'));
+  document.getElementById('resetTipsterBtn')?.addEventListener('click', () => confirmResetTipster(state.currentTipsterId));
+  document.getElementById('tabStatsBtn')?.addEventListener('click', () => showDetailTab('stats'));
+  document.getElementById('tabMyStatsBtn')?.addEventListener('click', () => showDetailTab('myStats'));
+  document.getElementById('tabFollowsBtn')?.addEventListener('click', () => showDetailTab('follows'));
+
+  // Dropdown filtros
+  document.getElementById('sportDropdownToggle')?.addEventListener('click', () => toggleDropdown('sportDropdown'));
+  document.getElementById('channelDropdownToggle')?.addEventListener('click', () => toggleDropdown('channelDropdown'));
+});
+
+
 window.addEventListener('DOMContentLoaded', () => {
   console.log('App loaded, waiting for authentication...');
+  // Autenticación
+  document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
+  document.getElementById('signupForm')?.addEventListener('submit', handleSignup);
+  document.getElementById('forgotPasswordForm')?.addEventListener('submit', handleForgotPassword);
+  
+  // Modal Tipster
+  document.getElementById('addTipsterForm')?.addEventListener('submit', addTipster);
+
+  // Modal Pick
+  document.getElementById('addPickForm')?.addEventListener('submit', addPick);
+
+  // Editar Pick
+  document.getElementById('editPickForm')?.addEventListener('submit', updatePick);
+
+  // Seguir Pick (Follow)
+  document.getElementById('followPickForm')?.addEventListener('submit', addFollow);
+
+  document.getElementById('filterTipster')?.addEventListener('change', filterPicks);
+  document.getElementById('filterSport')?.addEventListener('change', filterPicks);
+  document.getElementById('filterStatus')?.addEventListener('change', filterPicks);
+  document.getElementById('filterChannel')?.addEventListener('change', filterPicks);
+  document.getElementById('filterBookmaker')?.addEventListener('change', filterPicks);
+  document.getElementById('filterResult')?.addEventListener('change', filterPicks);
+
+  // Filtros de picks seguidos (Mis Picks Seguidos)
+  document.getElementById('followFilterTipster')?.addEventListener('change', filterFollowedPicks);
+  document.getElementById('followFilterResult')?.addEventListener('change', filterFollowedPicks);
+  document.getElementById('followFilterMatch')?.addEventListener('change', filterFollowedPicks);
+
+  // Checkbox de seguimiento de pick (Add Pick Modal)
+  document.getElementById('pickFollowed')?.addEventListener('change', toggleFollowSection);
+
+  // Checkbox de seguimiento en edición de pick (Edit Pick Modal)
+  document.getElementById('editPickFollowed')?.addEventListener('change', toggleEditFollowSection);
+
+  // Otros inputs de filtros (usa el mismo patrón, ejemplo para Yield mínimo y demás)
+  document.getElementById('yieldMinInput')?.addEventListener('change', applyFilters);
+
+  // Si tu campo busca tipster por texto (input), usa "input" en vez de "change"
+  document.getElementById('tipsterSearch')?.addEventListener('input', applyFilters);
+
+    // Delegación para sportDropdown
+  document.getElementById('sportDropdown')?.addEventListener('click', (event) => {
+    const item = event.target.closest('.dropdown-item');
+    if (item) {
+      const sport = item.querySelector('input').value;
+      toggleFilterOption(event, 'sport', sport);
+    }
+  });
+
+  // Delegación para channelDropdown
+  document.getElementById('channelDropdown')?.addEventListener('click', (event) => {
+    const item = event.target.closest('.dropdown-item');
+    if (item) {
+      const channel = item.querySelector('input').value;
+      toggleFilterOption(event, 'channel', channel);
+    }
+  });
+
+  document.getElementById('tipstersGrid').addEventListener('click', (event) => {
+    const card = event.target.closest('.tipster-card');
+    if (card && card.dataset.tipsterId) {
+      showTipsterDetail(card.dataset.tipsterId);
+    }
+  });
+
+  const pickTables = [
+    document.getElementById('allPicksBody'),
+    document.getElementById('detailPicksBody'),
+  ].filter(Boolean);
+
+  pickTables.forEach(tbody => {
+    tbody.addEventListener('click', (event) => {
+      const tr = event.target.closest('tr[data-pick-id]');
+      if (!tr) return;
+      const pickId = tr.dataset.pickId;
+
+      if (event.target.classList.contains('status-badge-clickable')) {
+        togglePickStatus(pickId);
+      } else if (event.target.classList.contains('edit-pick-btn')) {
+        editPick(pickId);
+      } else if (event.target.classList.contains('follow-pick-btn')) {
+        showFollowPickModal(pickId);
+      }
+    });
+  });
+
   lucide.createIcons();
 });

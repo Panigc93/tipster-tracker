@@ -24,11 +24,11 @@
         <p class="auth-subtitle">Inicia sesión para gestionar tus tipsters y picks</p>
 
         <div id="authTabs" class="auth-tabs">
-          <button class="auth-tab active" onclick="showAuthTab('login')">Iniciar Sesión</button>
-          <button class="auth-tab" onclick="showAuthTab('signup')">Registrarse</button>
+          <button class="auth-tab active" id="tabLogin">Iniciar Sesión</button>
+          <button class="auth-tab" id="tabSignup">Registrarse</button>
         </div>
 
-        <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+        <form id="loginForm" class="auth-form">
           <div class="form-group">
             <label class="form-label">Email</label>
             <input type="email" id="loginEmail" class="form-control" required placeholder="tu@email.com">
@@ -37,20 +37,19 @@
             <label class="form-label">Contraseña</label>
             <div class="password-input-wrapper">
               <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••" />
-              <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('loginPassword')"
-                aria-label="Mostrar contraseña">
+              <button type="button" class="toggle-password-btn" id="toggleLoginPassword" aria-label="Mostrar contraseña">
                 <i id="loginPasswordIcon" data-lucide="eye"></i>
               </button>
             </div>
           </div>
           <div class="forgot-password-link">
-            <a href="#" onclick="showForgotPasswordModal(); return false;">¿Olvidaste tu contraseña?</a>
+            <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
           </div>
           <div id="loginError" class="auth-error"></div>
           <button type="submit" class="btn btn--primary btn--full-width">Iniciar Sesión</button>
         </form>
 
-        <form id="signupForm" class="auth-form" style="display: none;" onsubmit="handleSignup(event)">
+        <form id="signupForm" class="auth-form" style="display: none;">
           <div class="form-group">
             <label class="form-label">Email</label>
             <input type="email" id="signupEmail" class="form-control" required placeholder="tu@email.com">
@@ -60,7 +59,7 @@
             <div class="password-input-wrapper">
               <input type="password" id="signupPassword" class="form-control" required placeholder="••••••••"
                 minlength="6" />
-              <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('signupPassword')"
+              <button type="button" class="toggle-password-btn" id="toggleSignupPassword"
                 aria-label="Mostrar contraseña">
                 <i id="signupPasswordIcon" data-lucide="eye"></i>
               </button>
@@ -71,8 +70,7 @@
             <div class="password-input-wrapper">
               <input type="password" id="signupPasswordConfirm" class="form-control" required placeholder="••••••••"
                 minlength="6" />
-              <button type="button" class="toggle-password-btn"
-                onclick="togglePasswordVisibility('signupPasswordConfirm')" aria-label="Mostrar contraseña">
+              <button type="button" class="toggle-password-btn" id="toggleSignupPasswordConfirm" aria-label="Mostrar contraseña">
                 <i id="signupPasswordConfirmIcon" data-lucide="eye"></i>
               </button>
             </div>
@@ -86,9 +84,9 @@
       <div class="modal-content" style="max-width: 450px;">
         <div class="modal-header">
           <h2>Recuperar Contraseña</h2>
-          <button class="modal-close" onclick="closeModal('forgotPasswordModal')">&times;</button>
+          <button class="modal-close" id="closeForgotPasswordModal">&times;</button>
         </div>
-        <form id="forgotPasswordForm" onsubmit="handleForgotPassword(event)">
+        <form id="forgotPasswordForm">
           <p class="forgot-modal-description">
             Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.
           </p>
@@ -102,7 +100,7 @@
             <span>Email enviado correctamente. Revisa tu bandeja de entrada.</span>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn--outline" onclick="closeModal('forgotPasswordModal')">Cancelar</button>
+            <button type="button" class="btn btn--outline" id="cancelForgotPasswordModal">Cancelar</button>
             <button type="submit" class="btn btn--primary">Enviar Email</button>
           </div>
         </form>
@@ -116,15 +114,15 @@
         <img src="/assets/img/logo-filled-text.svg" alt="tipster-tracker" class="navbar-logo" id="navbarLogo">
         <div class="navbar-actions">
           <span id="userEmailDisplay" class="user-email"></span>
-          <button class="btn btn--secondary btn--outline-primary btn--sm" onclick="showAddTipsterModal()">
+          <button class="btn btn--secondary btn--outline-primary btn--sm" id="addTipsterBtn">
             <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i>
             Añadir Tipster
           </button>
-          <button class="btn btn--primary btn--sm" onclick="showAddPickModal()">
+          <button class="btn btn--primary btn--sm" id="addPickBtn">
             <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i>
             Añadir Pick
           </button>
-          <button class="btn btn--outline btn--sm btn--icon-only btn--outline--danger" onclick="handleSignOut()"
+          <button class="btn btn--outline btn--sm btn--icon-only btn--outline--danger" id="signOutBtn"
             title="Cerrar Sesión" aria-label="Cerrar Sesión">
             <i data-lucide="log-out"></i>
           </button>
@@ -137,8 +135,8 @@
         <div class="view-header">
           <h2>Panel Principal</h2>
           <div class="view-tabs">
-            <button class="tab-btn active" id="tabDashboard" onclick="showView('dashboard')">Dashboard</button>
-            <button class="tab-btn" id="tabAllPicks" onclick="showView('allPicks')">Todos los Picks</button>
+            <button class="tab-btn active" id="tabDashboard">Dashboard</button>
+            <button class="tab-btn" id="tabAllPicks">Todos los Picks</button>
           </div>
         </div>
 
@@ -187,16 +185,16 @@
               <div class="search-input-wrapper">
                 <i data-lucide="search" class="search-input-icon"></i>
                 <input type="text" id="tipsterSearch" class="form-control search-input-compact"
-                  placeholder="Buscar por nombre" oninput="applyFilters()">
+                  placeholder="Buscar por nombre">
               </div>
-              <button class="btn btn--secondary btn--sm" onclick="resetFilters()">Limpiar</button>
+              <button class="btn btn--secondary btn--sm" id="resetFiltersBtn">Limpiar</button>
             </div>
           </div>
           <div class="filters-controls-row">
             <div class="filter-group">
               <label class="form-label">Deportes</label>
               <div class="custom-dropdown">
-                <div class="dropdown-toggle" onclick="toggleDropdown('sportDropdown')">
+                <div class="dropdown-toggle" id="sportDropdownToggle">
                   <span class="dropdown-toggle-text" id="sportDropdownText">Seleccionar deportes</span>
                   <span class="dropdown-arrow"></span>
                 </div>
@@ -207,7 +205,7 @@
             <div class="filter-group">
               <label class="form-label">Canal</label>
               <div class="custom-dropdown">
-                <div class="dropdown-toggle" onclick="toggleDropdown('channelDropdown')">
+                <div class="dropdown-toggle" id="channelDropdownToggle">
                   <span class="dropdown-toggle-text" id="channelDropdownText">Seleccionar canales</span>
                   <span class="dropdown-arrow"></span>
                 </div>
@@ -246,7 +244,7 @@
 
         <div id="emptyState" class="empty-state" style="display: none;">
           <p>No hay tipsters registrados. Comienza añadiendo tu primer tipster.</p>
-          <button class="btn btn--primary" onclick="showAddTipsterModal()">Añadir Primer Tipster</button>
+          <button class="btn btn--primary" id="showAddTipsterModalBtn">Añadir Primer Tipster</button>
         </div>
       </div>
 
@@ -254,31 +252,31 @@
         <div class="view-header">
           <h2>Todos los Picks</h2>
           <div class="view-tabs">
-            <button class="tab-btn" id="tabDashboard2" onclick="showView('dashboard')">Dashboard</button>
-            <button class="tab-btn active" id="tabAllPicks2" onclick="showView('allPicks')">Todos los Picks</button>
+            <button class="tab-btn" id="tabDashboard2" >Dashboard</button>
+            <button class="tab-btn active" id="tabAllPicks2" >Todos los Picks</button>
           </div>
         </div>
 
         <div class="filters-container">
-          <select id="filterTipster" class="form-control" onchange="filterPicks()">
+          <select id="filterTipster" class="form-control" >
             <option value="all">Todos los Tipsters</option>
           </select>
-          <select id="filterSport" class="form-control" onchange="filterPicks()">
+          <select id="filterSport" class="form-control" >
             <option value="all">Todos los Deportes</option>
           </select>
-          <select id="filterStatus" class="form-control" onchange="filterPicks()">
+          <select id="filterStatus" class="form-control" >
             <option value="all">Todos los Estados</option>
             <option value="Seguido">Seguido</option>
             <option value="No Seguido">No Seguido</option>
             <option value="Error">Error</option>
           </select>
-          <select id="filterChannel" class="form-control" onchange="filterPicks()">
+          <select id="filterChannel" class="form-control" >
             <option value="all">Todos los Canales</option>
           </select>
-          <select id="filterBookmaker" class="form-control" onchange="filterPicks()">
+          <select id="filterBookmaker" class="form-control" >
             <option value="all">Todas las Casas</option>
           </select>
-          <select id="filterResult" class="form-control" onchange="filterPicks()">
+          <select id="filterResult" class="form-control" >
             <option value="all">Todos los Resultados</option>
             <option value="Ganada">Ganada</option>
             <option value="Perdida">Perdida</option>
@@ -315,9 +313,9 @@
         <div class="view-header">
           <h2>Mis Picks Seguidos</h2>
           <div class="view-tabs">
-            <button class="tab-btn" onclick="showView('dashboard')">Dashboard</button>
-            <button class="tab-btn" onclick="showView('allPicks')">Todos los Picks</button>
-            <button class="tab-btn active" onclick="showView('misPicks')">Mis Picks</button>
+            <button class="tab-btn" id="tabDashboard3">Dashboard</button>
+            <button class="tab-btn" id="tabAllPicks3">Todos los Picks</button>
+            <button class="tab-btn active" id="tabMisPicks">Mis Picks</button>
           </div>
         </div>
 
@@ -341,17 +339,17 @@
         </div>
 
         <div class="filters-container">
-          <select id="followFilterTipster" class="form-control" onchange="filterFollowedPicks()">
+          <select id="followFilterTipster" class="form-control">
             <option value="all">Todos los Tipsters</option>
           </select>
-          <select id="followFilterResult" class="form-control" onchange="filterFollowedPicks()">
+          <select id="followFilterResult" class="form-control">
             <option value="all">Todos los Resultados</option>
             <option value="Ganada">Ganada</option>
             <option value="Perdida">Perdida</option>
             <option value="Void">Void</option>
             <option value="Pendiente">Pendiente</option>
           </select>
-          <select id="followFilterMatch" class="form-control" onchange="filterFollowedPicks()">
+          <select id="followFilterMatch" class="form-control">
             <option value="all">Todos</option>
             <option value="match">Mismo Resultado</option>
             <option value="diverge">Resultado Diferente</option>
@@ -385,18 +383,18 @@
 
       <div id="tipsterDetailView" class="view">
         <div class="view-header">
-          <button class="btn btn--outline btn--sm" onclick="showView('dashboard')">← Volver al Dashboard</button>
+          <button class="btn btn--outline btn--sm" id="backToDashboardBtn">← Volver al Dashboard</button>
           <h2 id="tipsterDetailName">Detalle del Tipster</h2>
-          <button class="btn btn--danger btn--sm" onclick="confirmResetTipster(currentTipsterId)">
+          <button class="btn btn--danger btn--sm" id="resetTipsterBtn">
               <i data-lucide="refresh-cw"></i>
               Resetear Tipster
           </button>
         </div>
 
         <div class="detail-tabs">
-          <button class="detail-tab active" onclick="showDetailTab('stats')">Estadísticas del Tipster</button>
-          <button class="detail-tab" onclick="showDetailTab('myStats')">Mis Estadísticas</button>
-          <button class="detail-tab" onclick="showDetailTab('follows')">Historial de Follows</button>
+          <button class="detail-tab active" id="tabStatsBtn">Estadísticas del Tipster</button>
+          <button class="detail-tab" id="tabMyStatsBtn">Mis Estadísticas</button>
+          <button class="detail-tab" id="tabFollowsBtn">Historial de Follows</button>
         </div>
 
         <div id="statsTab" class="detail-tab-content active">
@@ -637,9 +635,9 @@
       <div class="modal-content">
         <div class="modal-header">
           <h2>Añadir Nuevo Tipster</h2>
-          <button class="modal-close" onclick="closeModal('addTipsterModal')">&times;</button>
+          <button class="modal-close" id="closeAddTipsterModal">&times;</button>
         </div>
-        <form id="addTipsterForm" onsubmit="addTipster(event)">
+        <form id="addTipsterForm">
           <div class="form-group">
             <label class="form-label">Nombre del Tipster *</label>
             <input type="text" class="form-control" id="tipsterName" required>
@@ -657,7 +655,7 @@
             </select>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn--outline" onclick="closeModal('addTipsterModal')">Cancelar</button>
+            <button type="button" class="btn btn--outline" id="cancelAddTipsterModal">Cancelar</button>
             <button type="submit" class="btn btn--primary">Añadir Tipster</button>
           </div>
         </form>
@@ -668,9 +666,9 @@
       <div class="modal-content">
         <div class="modal-header">
           <h2>Añadir Nuevo Pick</h2>
-          <button class="modal-close" onclick="closeModal('addPickModal')">&times;</button>
+          <button class="modal-close" id="closeAddPickModal">&times;</button>
         </div>
-        <form id="addPickForm" onsubmit="addPick(event)">
+        <form id="addPickForm">
           <div class="form-group">
             <label class="form-label">Tipster *</label>
             <select class="form-control" id="pickTipster" required>
@@ -761,7 +759,7 @@
           <div class="seguibilidad-section">
             <div class="form-group">
               <label class="checkbox-label">
-                <input type="checkbox" id="pickFollowed" onchange="toggleFollowSection()">
+                <input type="checkbox" id="pickFollowed">
                 ¿Seguiste este pick?
               </label>
             </div>
@@ -839,7 +837,7 @@
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn--outline" onclick="closeModal('addPickModal')">Cancelar</button>
+            <button type="button" class="btn btn--outline" id="cancelAddPickModal">Cancelar</button>
             <button type="submit" class="btn btn--primary">Añadir Pick</button>
           </div>
         </form>
@@ -850,9 +848,9 @@
       <div class="modal-content">
         <div class="modal-header">
           <h2>Editar Pick</h2>
-          <button class="modal-close" onclick="closeModal('editPickModal')">&times;</button>
+          <button class="modal-close" id="closeEditPickModal">&times;</button>
         </div>
-        <form id="editPickForm" onsubmit="updatePick(event)">
+        <form id="editPickForm">
           <input type="hidden" id="editPickId">
           <div class="form-group">
             <label class="form-label">Partido/Evento *</label>
@@ -934,7 +932,7 @@
           <div class="seguibilidad-section">
             <div class="form-group">
               <label class="checkbox-label">
-                <input type="checkbox" id="editPickFollowed" onchange="toggleEditFollowSection()">
+                <input type="checkbox" id="editPickFollowed">
                 ¿Seguiste este pick?
               </label>
             </div>
@@ -1058,7 +1056,7 @@
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn--outline" onclick="closeModal('editPickModal')">Cancelar</button>
+            <button type="button" class="btn btn--outline" id="cancelEditPickModal">Cancelar</button>
             <button type="submit" class="btn btn--primary">Guardar Cambios</button>
           </div>
         </form>
@@ -1069,9 +1067,9 @@
       <div class="modal-content">
         <div class="modal-header">
           <h2>Seguir Pick</h2>
-          <button class="modal-close" onclick="closeModal('followPickModal')">&times;</button>
+          <button class="modal-close" id="closeFollowPickModal">&times;</button>
         </div>
-        <form id="followPickForm" onsubmit="addFollow(event)">
+        <form id="followPickForm">
           <input type="hidden" id="followPickId">
           <input type="hidden" id="followTipsterId">
           <div class="follow-pick-info" id="followPickInfo">
@@ -1144,7 +1142,7 @@
             </select>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn--outline" onclick="closeModal('followPickModal')">Cancelar</button>
+            <button type="button" class="btn btn--outline" id="cancelFollowPickModal">Cancelar</button>
             <button type="submit" class="btn btn--primary">Guardar Follow</button>
           </div>
         </form>
@@ -1171,7 +1169,7 @@
     <script src="/js/ui/renders.js"></script>
     <script src="/js/ui/charts.js"></script> -->
 
-  <script src="/js/app.js"></script>
+  <script type="module" src="/js/app.js"></script>
 </body>
 
 </html>
