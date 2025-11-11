@@ -54,12 +54,13 @@ const sportIcons = {
   'Golf': '⛳',
   'Rugby': '🏉',
   'Cricket': '🏏',
+  'Tenis de mesa': '🏓',
   'Otro': '🎲'
 };
 
-const allSports = ['Fútbol', 'Baloncesto', 'Tenis', 'Fútbol Americano', 'Hockey', 'Béisbol', 'Dardos', 'Caballos', 'Motor', 'Esports', 'Fórmula 1', 'Golf', 'Rugby', 'Cricket', 'Otro'];
+const allSports = ['Fútbol', 'Baloncesto', 'Tenis', 'Fútbol Americano', 'Hockey', 'Béisbol', 'Dardos', 'Caballos', 'Motor', 'Esports', 'Fórmula 1', 'Golf', 'Rugby', 'Cricket', 'Tenis de mesa', 'Otro'];
 const allChannels = ['BlogaBet', 'Telegram', 'TipsterLand', 'Twitter/X', 'Discord', 'Otro'];
-const allBookmakers = ['1xBet', 'Betfair', 'Bet365', 'William Hill', 'Marathonbet', 'Pinnacle', 'Supabets', 'Otro'];
+const allBookmakers = ['1xBet', 'Betfair', 'Bet365', 'William Hill', 'Marathonbet', '888', 'Bwin','Codere', 'Luckia', 'Sportium', 'Betsson', 'Betway', 'Interwetten','Kirolbet', 'Casumo', 'LeoVegas', 'Winamax', 'Paf', 'Pastón', 'Olybet','TonyBet', 'Marca Apuestas', 'Suertia', 'Yaas', 'Versus', 'Retabet','Opabets', 'Otro'];
 
 
 function showAuthTab(tab) {
@@ -567,6 +568,8 @@ async function addPickToFirestore(pickData) {
       pickType: pickData.pickType,
       betType: pickData.betType,
       date: pickData.date,
+      time: pickData.time,
+      dateTime: pickData.dateTime,   
       result: pickData.result,
       isResolved: pickData.isResolved,
       match: pickData.match,
@@ -603,9 +606,11 @@ async function addFollowToFirestore(followData) {
       userResult: followData.userResult,
       isError: followData.isError || false,
       dateFollowed: followData.dateFollowed,
+      timeFollowed: followData.timeFollowed,
+      dateTimeFollowed: followData.dateTimeFollowed,
       isResolved: followData.isResolved,
       profitFromFollow: followData.profitFromFollow,
-      commentarios: followData.commentarios || ''
+      comments: followData.comments || ''
     });
     return docRef.id;
   } catch (error) {
@@ -829,7 +834,7 @@ function loadSampleData() {
       dateFollowed: '2025-10-20',
       isResolved: true,
       profitFromFollow: 4.1,
-      commentarios: 'Apostar en diferente casa funcionó bien'
+      comments: 'Apostar en diferente casa funcionó bien'
     },
     {
       id: 2,
@@ -845,7 +850,7 @@ function loadSampleData() {
       dateFollowed: '2025-10-22',
       isResolved: true,
       profitFromFollow: 4.2,
-      commentarios: 'Cambié la línea pero salió bien'
+      comments: 'Cambié la línea pero salió bien'
     },
     {
       id: 3,
@@ -861,7 +866,7 @@ function loadSampleData() {
       dateFollowed: '2025-10-25',
       isResolved: true,
       profitFromFollow: -5,
-      commentarios: 'La casa cambió la línea'
+      comments: 'La casa cambió la línea'
     },
     {
       id: 4,
@@ -877,7 +882,7 @@ function loadSampleData() {
       dateFollowed: '2025-10-30',
       isResolved: true,
       profitFromFollow: 5.28,
-      commentarios: 'Bien apostado'
+      comments: 'Bien apostado'
     },
     {
       id: 5,
@@ -893,7 +898,7 @@ function loadSampleData() {
       dateFollowed: '2025-11-01',
       isResolved: true,
       profitFromFollow: 2.25,
-      commentarios: ''
+      comments: ''
     },
     {
       id: 6,
@@ -909,7 +914,7 @@ function loadSampleData() {
       dateFollowed: '2025-11-02',
       isResolved: true,
       profitFromFollow: -2,
-      commentarios: 'Error al leer la carrera'
+      comments: 'Error al leer la carrera'
     },
     {
       id: 7,
@@ -925,7 +930,7 @@ function loadSampleData() {
       dateFollowed: '2025-11-05',
       isResolved: true,
       profitFromFollow: 3.4,
-      commentarios: 'Buena apuesta'
+      comments: 'Buena apuesta'
     }
   ];
   
@@ -1093,7 +1098,7 @@ function calculateStats(tipsterId) {
   });
   
   const pickTypeDistribution = {};
-  const types = ['Prematch Simple', 'Combinado', 'Live'];
+  const types = ['Pre', 'Combinado', 'Live'];
   types.forEach(type => {
     const count = tipsterPicks.filter(p => p.pickType === type).length;
     pickTypeDistribution[type] = tipsterPicks.length > 0
@@ -1309,7 +1314,7 @@ function renderAllPicks() {
     const statusClass = status.toLowerCase().replace(/\s+/g, '-');
     
     const sportIcon = sportIcons[pick.sport] || '🎯';
-    const displayType = pick.pickType === 'Prematch Simple' ? 'Pre' : pick.pickType;
+    const displayType = pick.pickType === 'Pre' ? 'Pre' : pick.pickType;
     return `
       <tr>
         <td>${formatDate(pick.date)}</td>
@@ -1321,12 +1326,12 @@ function renderAllPicks() {
         <td>${pick.odds.toFixed(2)}</td>
         <td>${pick.stake}</td>
         <td>
-          <span class="status-badge ${statusClass}" onclick="togglePickStatus(${pick.id})">${status}</span>
+          <span class="status-badge ${statusClass}" onclick="togglePickStatus('${pick.id}')">${status}</span>
         </td>
         <td><span class="result-badge ${pick.result.toLowerCase()}">${pick.result}</span></td>
         <td><span class="profit ${profit >= 0 ? 'positive' : 'negative'}">${profit > 0 ? '+' : ''}${profit.toFixed(2)}u</span></td>
         <td>
-          <button class="action-btn" onclick="editPick(${pick.id})">Editar</button>
+          <button class="action-btn" onclick="editPick('${pick.id}')">Editar</button>
         </td>
       </tr>
     `;
@@ -1389,7 +1394,7 @@ function filterPicks() {
     const status = pick.status || 'No Seguido';
     const statusClass = status.toLowerCase().replace(/\s+/g, '-');
     const sportIcon = sportIcons[pick.sport] || '🎯';
-    const displayType = pick.pickType === 'Prematch Simple' ? 'Pre' : pick.pickType;
+    const displayType = pick.pickType === 'Pre' ? 'Pre' : pick.pickType;
     
     return `
       <tr>
@@ -1402,12 +1407,12 @@ function filterPicks() {
         <td>${pick.odds.toFixed(2)}</td>
         <td>${pick.stake}</td>
         <td>
-          <span class="status-badge ${statusClass}" onclick="togglePickStatus(${pick.id})">${status}</span>
+          <span class="status-badge ${statusClass}" onclick="togglePickStatus('${pick.id}')">${status}</span>
         </td>
         <td><span class="result-badge ${pick.result.toLowerCase()}">${pick.result}</span></td>
         <td><span class="profit ${profit >= 0 ? 'positive' : 'negative'}">${profit > 0 ? '+' : ''}${profit.toFixed(2)}u</span></td>
         <td>
-          <button class="action-btn" onclick="editPick(${pick.id})">Editar</button>
+          <button class="action-btn" onclick="editPick('${pick.id}')">Editar</button>
         </td>
       </tr>
     `;
@@ -1453,7 +1458,7 @@ function renderTipsterDetail(tipsterId) {
       const status = pick.status || 'No Seguido';
       const statusClass = status.toLowerCase().replace(/\s+/g, '-');
       const sportIcon = sportIcons[pick.sport] || '🎯';
-      const displayType = pick.pickType === 'Prematch Simple' ? 'Pre' : pick.pickType;
+      const displayType = pick.pickType === 'Pre' ? 'Pre' : pick.pickType;
       return `
         <tr>
           <td>${formatDate(pick.date)}</td>
@@ -1466,11 +1471,11 @@ function renderTipsterDetail(tipsterId) {
           <td><span class="result-badge ${pick.result.toLowerCase()}">${pick.result}</span></td>
           <td><span class="profit ${profit >= 0 ? 'positive' : 'negative'}">${profit > 0 ? '+' : ''}${profit.toFixed(2)}u</span></td>
           <td>
-            <span class="status-badge ${statusClass}" onclick="togglePickStatus(${pick.id})">${status}</span>
+            <span class="status-badge ${statusClass}" onclick="togglePickStatus('${pick.id}')">${status}</span>
           </td>
           <td>
-            <button class="action-btn" onclick="editPick(${pick.id})">Editar</button>
-            ${!isFollowed ? `<button class="action-btn" onclick="showFollowPickModal(${pick.id})" style="margin-left: 4px;">Seguir</button>` : ''}
+            <button class="action-btn" onclick="editPick('${pick.id}')">Editar</button>
+            ${!isFollowed ? `<button class="action-btn" onclick="showFollowPickModal('${pick.id}')" style="margin-left: 4px;">Seguir</button>` : ''}
           </td>
         </tr>
       `;
@@ -1568,7 +1573,6 @@ function renderCharts(stats) {
   if (pickTypesCtx) {
     const typeData = Object.entries(stats.pickTypeDistribution)
       .filter(([type, percent]) => parseFloat(percent) > 0);
-    
     charts.pickTypes = new Chart(pickTypesCtx, {
       type: 'bar',
       data: {
@@ -1611,8 +1615,9 @@ function showAddPickModal() {
   }
   document.getElementById('addPickModal').classList.add('active');
   document.getElementById('addPickForm').reset();
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('pickDate').value = today;
+  const now = new Date();
+  document.getElementById('pickDate').value = now.toISOString().split('T')[0];
+  document.getElementById('pickTime').value = now.toTimeString().slice(0, 5); // HH:MM
 }
 
 function closeModal(modalId) {
@@ -1660,10 +1665,11 @@ function addPick(event) {
   const odds = parseFloat(document.getElementById('pickOdds').value);
   const stake = parseInt(document.getElementById('pickStake').value);
   const date = document.getElementById('pickDate').value;
+  const time = document.getElementById('pickTime').value;
   const result = document.getElementById('pickResult').value;
   const comments = document.getElementById('pickComments').value.trim();
-  
   const followed = document.getElementById('pickFollowed').checked;
+  const dateTime = `${date}T${time}:00`;
   
   const newPick = {
     tipsterId: tipsterId,
@@ -1674,6 +1680,8 @@ function addPick(event) {
     odds: odds,
     stake: stake,
     date: date,
+    time: time,
+    dateTime: dateTime,
     result: result,
     isResolved: result !== 'Pendiente',
     comments: comments,
@@ -1690,6 +1698,9 @@ function addPick(event) {
         const userBetType = document.getElementById('pickUserBetType').value;
         const bookmaker = document.getElementById('pickUserBookmaker').value;
         const userResult = document.getElementById('pickUserResult').value;
+        const userDate = document.getElementById('pickUserDate').value || date;
+        const userTime = document.getElementById('pickUserTime').value || time;
+        const userDateTime = `${userDate}T${userTime}:00`;
         
         if (userOdds && userStake && userBetType && bookmaker) {
           let profitFromFollow = 0;
@@ -1707,7 +1718,9 @@ function addPick(event) {
             userBetType: userBetType,
             userBookmaker: bookmaker,
             userResult: userResult,
-            dateFollowed: date,
+            dateFollowed: userDate,
+            timeFollowed: userTime,
+            dateTimeFollowed: userDateTime,
             isResolved: userResult !== 'Pendiente',
             profitFromFollow: profitFromFollow
           };
@@ -1722,8 +1735,9 @@ function addPick(event) {
       document.getElementById('addPickForm').reset();
       document.getElementById('pickFollowed').checked = false;
       document.getElementById('followSection').style.display = 'none';
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('pickDate').value = today;
+      const now = new Date();
+      document.getElementById('pickDate').value = now.toISOString().split('T')[0];
+      document.getElementById('pickTime').value = now.toTimeString().slice(0, 5);
       showLoading(false);
     })
     .catch(error => {
@@ -1744,6 +1758,7 @@ function editPick(pickId) {
   document.getElementById('editPickOdds').value = pick.odds;
   document.getElementById('editPickStake').value = pick.stake;
   document.getElementById('editPickDate').value = pick.date;
+  document.getElementById('editPickTime').value = pick.time;
   document.getElementById('editPickResult').value = pick.result;
   document.getElementById('editPickComments').value = pick.comments || '';
   
@@ -1758,8 +1773,10 @@ function editPick(pickId) {
     document.getElementById('editPickUserBookmaker').value = follow.userBookmaker || '';
     document.getElementById('editPickTipsterBookmaker').value = follow.tipsterBookmaker || '';
     document.getElementById('editPickUserResult').value = follow.userResult;
+    document.getElementById('editPickUserDate').value = follow.dateFollowed || pick.date;
+    document.getElementById('editPickUserTime').value = follow.timeFollowed || pick.time;
     document.getElementById('editPickIsError').checked = follow.isError || false;
-    document.getElementById('editPickFollowComments').value = follow.commentarios || '';
+    document.getElementById('editPickFollowComments').value = follow.comments || '';
   } else {
     document.getElementById('editPickFollowed').checked = false;
     document.getElementById('editFollowSection').style.display = 'none';
@@ -1770,90 +1787,103 @@ function editPick(pickId) {
 }
 
 function updatePick(event) {
-  event.preventDefault();
-  
-  const pickId = document.getElementById('editPickId').value;
-  const pick = picks.find(p => p.id === pickId);
-  if (!pick) return;
-  
-  const updatedPick = {
-    match: document.getElementById('editPickMatch').value.trim(),
-    betType: document.getElementById('editPickBetType').value,
-    sport: document.getElementById('editPickSport').value,
-    pickType: document.getElementById('editPickType').value,
-    odds: parseFloat(document.getElementById('editPickOdds').value),
-    stake: parseInt(document.getElementById('editPickStake').value),
-    date: document.getElementById('editPickDate').value,
-    result: document.getElementById('editPickResult').value,
-    isResolved: document.getElementById('editPickResult').value !== 'Pendiente',
-    comments: document.getElementById('editPickComments').value.trim()
-  };
-  
-  const followed = document.getElementById('editPickFollowed').checked;
-  const isError = document.getElementById('editPickIsError').checked;
-  const existingFollowId = document.getElementById('editFollowId').value;
-  
-  showLoading(true);
-  
-  let promise = updatePickInFirestore(pickId, updatedPick);
-  
-  if (followed) {
-    const userOdds = parseFloat(document.getElementById('editPickUserOdds').value);
-    const userStake = parseFloat(document.getElementById('editPickUserStake').value);
-    const userBetType = document.getElementById('editPickUserBetType').value;
-    const bookmaker = document.getElementById('editPickUserBookmaker').value;
-    const userResult = document.getElementById('editPickUserResult').value;
-    const tipsterBookmaker = document.getElementById('editPickTipsterBookmaker').value;
-    const followComments = document.getElementById('editPickFollowComments').value.trim();
+    event.preventDefault();
     
-    if (userOdds && userStake && userBetType && bookmaker) {
-      let profitFromFollow = 0;
-      if (userResult === 'Ganada') {
-        profitFromFollow = (userOdds - 1) * userStake;
-      } else if (userResult === 'Perdida') {
-        profitFromFollow = -userStake;
-      }
-      
-      const followData = {
-        userOdds: userOdds,
-        userStake: userStake,
-        userBetType: userBetType,
-        userBookmaker: bookmaker,
-        tipsterBookmaker: tipsterBookmaker,
-        userResult: userResult,
-        isError: isError,
-        isResolved: userResult !== 'Pendiente',
-        profitFromFollow: profitFromFollow,
-        commentarios: followComments
-      };
-      
-      updatedPick.status = isError ? 'Error' : 'Seguido';
-      
-      if (existingFollowId) {
-        promise = promise.then(() => updateFollowInFirestore(existingFollowId, followData));
-      } else {
-        followData.tipsterId = pick.tipsterId;
-        followData.pickId = pickId;
-        followData.dateFollowed = updatedPick.date;
-        promise = promise.then(() => addFollowToFirestore(followData));
-      }
+    const pickId = document.getElementById('editPickId').value;
+    const pick = picks.find(p => p.id === pickId);
+    
+    if (!pick) return;
+    
+    const followed = document.getElementById('editPickFollowed').checked;
+    const isError = document.getElementById('editPickIsError').checked;
+    const existingFollowId = document.getElementById('editFollowId').value;
+    
+    let pickStatus = 'No Seguido';
+    if (followed) {
+        pickStatus = isError ? 'Error' : 'Seguido';
+    } else if (existingFollowId) {
+        pickStatus = 'No Seguido';
+    } else {
+        pickStatus = pick.status || 'No Seguido';
     }
-  } else if (existingFollowId) {
-    updatedPick.status = 'No Seguido';
-    promise = promise.then(() => deleteFollowFromFirestore(existingFollowId));
-  }
-  
-  promise = promise.then(() => updatePickInFirestore(pickId, { status: updatedPick.status }));
-  
-  promise
-    .then(() => {
-      closeModal('editPickModal');
-      showLoading(false);
-    })
-    .catch(error => {
-      showLoading(false);
-      alert('Error al actualizar pick: ' + error.message);
-    });
+    
+    const updatedPick = {
+        match: document.getElementById('editPickMatch').value.trim(),
+        betType: document.getElementById('editPickBetType').value,
+        sport: document.getElementById('editPickSport').value,
+        pickType: document.getElementById('editPickType').value,
+        odds: parseFloat(document.getElementById('editPickOdds').value),
+        stake: parseInt(document.getElementById('editPickStake').value),
+        date: document.getElementById('editPickDate').value,
+        time: document.getElementById('editPickTime').value || '12:00',
+        dateTime: `${document.getElementById('editPickDate').value}T${document.getElementById('editPickTime').value || '12:00'}:00`,
+        result: document.getElementById('editPickResult').value,
+        isResolved: document.getElementById('editPickResult').value !== 'Pendiente',
+        comments: document.getElementById('editPickComments').value.trim(),
+        status: pickStatus
+    };
+    
+    showLoading(true);
+    
+    let promise = updatePickInFirestore(pickId, updatedPick);
+    
+    if (followed) {
+        const userOdds = parseFloat(document.getElementById('editPickUserOdds').value);
+        const userStake = parseFloat(document.getElementById('editPickUserStake').value);
+        const userBetType = document.getElementById('editPickUserBetType').value;
+        const bookmaker = document.getElementById('editPickUserBookmaker').value;
+        const userResult = document.getElementById('editPickUserResult').value;
+        const userDate = document.getElementById('editPickUserDate').value || updatedPick.date;
+        const userTime = document.getElementById('editPickUserTime').value || updatedPick.time;
+        const userDateTime = `${userDate}T${userTime}:00`;
+        const tipsterBookmaker = document.getElementById('editPickTipsterBookmaker').value;
+        const followComments = document.getElementById('editPickFollowComments').value.trim();
+        
+        if (userOdds && userStake && userBetType && bookmaker) {
+            let profitFromFollow = 0;
+            if (userResult === 'Ganada') {
+                profitFromFollow = (userOdds - 1) * userStake;
+            } else if (userResult === 'Perdida') {
+                profitFromFollow = -userStake;
+            }
+            
+            const followData = {
+                userOdds: userOdds,
+                userStake: userStake,
+                userBetType: userBetType,
+                userBookmaker: bookmaker,
+                tipsterBookmaker: tipsterBookmaker || '',
+                userResult: userResult,
+                dateFollowed: userDate,
+                timeFollowed: userTime,
+                dateTimeFollowed: userDateTime,
+                isError: isError,
+                isResolved: userResult !== 'Pendiente',
+                profitFromFollow: profitFromFollow,
+                comments: followComments
+            };
+            
+            if (existingFollowId) {
+                promise = promise.then(() => updateFollowInFirestore(existingFollowId, followData));
+            } else {
+                followData.tipsterId = pick.tipsterId;
+                followData.pickId = pickId;
+                promise = promise.then(() => addFollowToFirestore(followData));
+            }
+        }
+    } else if (existingFollowId) {
+        promise = promise.then(() => deleteFollowFromFirestore(existingFollowId));
+    }
+    
+    promise
+        .then(() => {
+            closeModal('editPickModal');
+            showLoading(false);
+        })
+        .catch((error) => {
+            showLoading(false);
+            alert('Error al actualizar pick: ' + error.message);
+        });
 }
 
 function updatePickTipsterSelect() {
@@ -1953,6 +1983,10 @@ function showFollowPickModal(pickId) {
     </div>
   `;
   
+  const now = new Date();
+  document.getElementById('followUserDate').value = now.toISOString().split('T')[0];
+  document.getElementById('followUserTime').value = now.toTimeString().slice(0, 5);
+
   document.getElementById('followPickModal').classList.add('active');
 }
 
@@ -1966,6 +2000,8 @@ function addFollow(event) {
   const userBetType = document.getElementById('followBetType').value;
   const bookmaker = document.getElementById('followBookmaker').value;
   const userResult = document.getElementById('followResult').value;
+  const userDate = document.getElementById('followUserDate').value;
+  const userTime = document.getElementById('followUserTime').value;
   
   const pick = picks.find(p => p.id === pickId);
   if (!pick) return;
@@ -1985,7 +2021,9 @@ function addFollow(event) {
     userBetType: userBetType,
     userBookmaker: bookmaker,
     userResult: userResult,
-    dateFollowed: pick.date,
+    dateFollowed: userDate,
+    timeFollowed: userTime,
+    dateTimeFollowed: `${userDate}T${userTime}:00`,
     isResolved: userResult !== 'Pendiente',
     profitFromFollow: profitFromFollow
   };
@@ -2088,8 +2126,8 @@ function filterFollowedPicks() {
         <td>${follow.userOdds.toFixed(2)}</td>
         <td>${pick ? pick.stake : 'N/A'}</td>
         <td>${follow.userStake}</td>
-        <td>${follow.bookmaker}</td>
-        <td><span class="result-badge ${pick ? pick.result.toLowerCase() : 'pendiente'}">${pick ? pick.result : 'N/A'}</span></td>
+        <td>${follow.userBookmaker}</td>
+        <td><span class="result-badge ${pick ? pick.result.toLowerCase() : 'pending'}">${pick ? pick.result : 'N/A'}</span></td>
         <td><span class="result-badge ${follow.userResult.toLowerCase()}">${follow.userResult}</span></td>
         <td><span class="profit ${follow.profitFromFollow >= 0 ? 'positive' : 'negative'}">${follow.profitFromFollow > 0 ? '+' : ''}${follow.profitFromFollow.toFixed(2)}u</span></td>
         <td>${matchIndicator}</td>
@@ -2121,8 +2159,8 @@ function renderTipsterFollows(tipsterId) {
         <td>${follow.userOdds.toFixed(2)}</td>
         <td>${pick ? pick.stake : 'N/A'}</td>
         <td>${follow.userStake}</td>
-        <td>${follow.bookmaker}</td>
-        <td><span class="result-badge ${pick ? pick.result.toLowerCase() : 'pendiente'}">${pick ? pick.result : 'N/A'}</span></td>
+        <td>${follow.userBookmaker}</td>
+        <td><span class="result-badge ${pick ? pick.result.toLowerCase() : 'pending'}">${pick ? pick.result : 'N/A'}</span></td>
         <td><span class="result-badge ${follow.userResult.toLowerCase()}">${follow.userResult}</span></td>
         <td><span class="profit ${follow.profitFromFollow >= 0 ? 'positive' : 'negative'}">${follow.profitFromFollow > 0 ? '+' : ''}${follow.profitFromFollow.toFixed(2)}u</span></td>
       </tr>
@@ -2178,7 +2216,7 @@ function renderFollowComparison(tipsterId) {
   
   const bookmakers = {};
   tipsterFollows.forEach(f => {
-    bookmakers[f.bookmaker] = (bookmakers[f.bookmaker] || 0) + 1;
+    bookmakers[f.userBookmaker] = (bookmakers[f.userBookmaker] || 0) + 1;
   });
   const mostUsedBook = Object.keys(bookmakers).length > 0 ? Object.keys(bookmakers).reduce((a, b) => bookmakers[a] > bookmakers[b] ? a : b) : '-';
   
@@ -2262,7 +2300,7 @@ function renderMyStats(tipsterId) {
   
   const bookmakers = {};
   tipsterFollows.forEach(f => {
-    bookmakers[f.bookmaker] = (bookmakers[f.bookmaker] || 0) + 1;
+    bookmakers[f.userBookmaker] = (bookmakers[f.userBookmaker] || 0) + 1;
   });
   
   const bookmakerDistribution = {};

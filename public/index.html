@@ -1,1015 +1,1162 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIPSTER TRACKER</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="icon" type="image/svg+xml" href="/assets/img/icon.svg" class="favicon">
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIPSTER TRACKER</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="icon" type="image/svg+xml" href="/assets/img/icon.svg" class="favicon">
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 
 </head>
+
 <body>
-    <div id="authScreen" class="auth-screen">
-        <div class="auth-container">
-            <div class="auth-card">
-                <img width="40px" src="/assets/img/logo-filled-text.svg" alt="tipster-tracker" class="auth-card-logo">
-                <p class="auth-subtitle">Inicia sesión para gestionar tus tipsters y picks</p>
-                
-                <div id="authTabs" class="auth-tabs">
-                    <button class="auth-tab active" onclick="showAuthTab('login')">Iniciar Sesión</button>
-                    <button class="auth-tab" onclick="showAuthTab('signup')">Registrarse</button>
-                </div>
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-container">
+      <div class="auth-card">
+        <img width="40px" src="/assets/img/logo-filled-text.svg" alt="tipster-tracker" class="auth-card-logo">
+        <p class="auth-subtitle">Inicia sesión para gestionar tus tipsters y picks</p>
 
-                <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" id="loginEmail" class="form-control" required placeholder="tu@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Contraseña</label>
-                        <div class="password-input-wrapper">
-                            <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••"/>
-                            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('loginPassword')" aria-label="Mostrar contraseña">
-                                <i id="loginPasswordIcon" data-lucide="eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="forgot-password-link">
-                        <a href="#" onclick="showForgotPasswordModal(); return false;">¿Olvidaste tu contraseña?</a>
-                    </div>
-                    <div id="loginError" class="auth-error"></div>
-                    <button type="submit" class="btn btn--primary btn--full-width">Iniciar Sesión</button>
-                </form>
+        <div id="authTabs" class="auth-tabs">
+          <button class="auth-tab active" onclick="showAuthTab('login')">Iniciar Sesión</button>
+          <button class="auth-tab" onclick="showAuthTab('signup')">Registrarse</button>
+        </div>
 
-                <form id="signupForm" class="auth-form" style="display: none;" onsubmit="handleSignup(event)">
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" id="signupEmail" class="form-control" required placeholder="tu@email.com">
-                    </div>
-                    <div class="form-group">
-                    <label class="form-label">Contraseña</label>
-                    <div class="password-input-wrapper">
-                        <input type="password" id="signupPassword" class="form-control" required placeholder="••••••••" minlength="6"/>
-                        <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('signupPassword')" aria-label="Mostrar contraseña">
-                            <i id="signupPasswordIcon" data-lucide="eye"></i>
-                        </button>
-                    </div>
-                    </div>
-                    <div class="form-group">
-                    <label class="form-label">Confirmar Contraseña</label>
-                    <div class="password-input-wrapper">
-                        <input type="password" id="signupPasswordConfirm" class="form-control" required placeholder="••••••••" minlength="6"/>
-                        <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('signupPasswordConfirm')" aria-label="Mostrar contraseña">
-                            <i id="signupPasswordConfirmIcon" data-lucide="eye"></i>
-                        </button>
-                    </div>
-                    </div>
-                    <div id="signupError" class="auth-error"></div>
-                    <button type="submit" class="btn btn--primary btn--full-width">Registrarse</button>
-                </form>
+        <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="loginEmail" class="form-control" required placeholder="tu@email.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••" />
+              <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('loginPassword')"
+                aria-label="Mostrar contraseña">
+                <i id="loginPasswordIcon" data-lucide="eye"></i>
+              </button>
             </div>
+          </div>
+          <div class="forgot-password-link">
+            <a href="#" onclick="showForgotPasswordModal(); return false;">¿Olvidaste tu contraseña?</a>
+          </div>
+          <div id="loginError" class="auth-error"></div>
+          <button type="submit" class="btn btn--primary btn--full-width">Iniciar Sesión</button>
+        </form>
+
+        <form id="signupForm" class="auth-form" style="display: none;" onsubmit="handleSignup(event)">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="signupEmail" class="form-control" required placeholder="tu@email.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="signupPassword" class="form-control" required placeholder="••••••••"
+                minlength="6" />
+              <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('signupPassword')"
+                aria-label="Mostrar contraseña">
+                <i id="signupPasswordIcon" data-lucide="eye"></i>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar Contraseña</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="signupPasswordConfirm" class="form-control" required placeholder="••••••••"
+                minlength="6" />
+              <button type="button" class="toggle-password-btn"
+                onclick="togglePasswordVisibility('signupPasswordConfirm')" aria-label="Mostrar contraseña">
+                <i id="signupPasswordConfirmIcon" data-lucide="eye"></i>
+              </button>
+            </div>
+          </div>
+          <div id="signupError" class="auth-error"></div>
+          <button type="submit" class="btn btn--primary btn--full-width">Registrarse</button>
+        </form>
+      </div>
+    </div>
+    <div id="forgotPasswordModal" class="modal">
+      <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-header">
+          <h2>Recuperar Contraseña</h2>
+          <button class="modal-close" onclick="closeModal('forgotPasswordModal')">&times;</button>
         </div>
-        <div id="forgotPasswordModal" class="modal">
-            <div class="modal-content" style="max-width: 450px;">
-                <div class="modal-header">
-                    <h2>Recuperar Contraseña</h2>
-                    <button class="modal-close" onclick="closeModal('forgotPasswordModal')">&times;</button>
+        <form id="forgotPasswordForm" onsubmit="handleForgotPassword(event)">
+          <p class="forgot-modal-description">
+            Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="forgotEmail" class="form-control" required placeholder="tuemail@example.com" />
+          </div>
+          <div id="forgotError" class="auth-error"></div>
+          <div id="forgotSuccess" class="forgot-success-message" style="display: none; align-items: center; gap: 8px;">
+            <i data-lucide="check-circle" style="width: 18px; height: 18px; flex-shrink: 0;"></i>
+            <span>Email enviado correctamente. Revisa tu bandeja de entrada.</span>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn--outline" onclick="closeModal('forgotPasswordModal')">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Enviar Email</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="mainApp" style="display: none;">
+    <nav class="navbar">
+      <div class="navbar-container">
+        <img src="/assets/img/logo-filled-text.svg" alt="tipster-tracker" class="navbar-logo" id="navbarLogo">
+        <div class="navbar-actions">
+          <span id="userEmailDisplay" class="user-email"></span>
+          <button class="btn btn--secondary btn--outline-primary btn--sm" onclick="showAddTipsterModal()">
+            <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i>
+            Añadir Tipster
+          </button>
+          <button class="btn btn--primary btn--sm" onclick="showAddPickModal()">
+            <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i>
+            Añadir Pick
+          </button>
+          <button class="btn btn--outline btn--sm btn--icon-only btn--outline--danger" onclick="handleSignOut()"
+            title="Cerrar Sesión" aria-label="Cerrar Sesión">
+            <i data-lucide="log-out"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="main-container">
+      <div id="dashboardView" class="view active">
+        <div class="view-header">
+          <h2>Panel Principal</h2>
+          <div class="view-tabs">
+            <button class="tab-btn active" id="tabDashboard" onclick="showView('dashboard')">Dashboard</button>
+            <button class="tab-btn" id="tabAllPicks" onclick="showView('allPicks')">Todos los Picks</button>
+          </div>
+        </div>
+
+        <div id="personalStatsPanel" class="personal-stats-panel">
+          <h3>Tus Estadísticas Generales</h3>
+          <div class="personal-stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Picks Seguidos</div>
+              <div class="stat-value" id="dashPersonalFollowed">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Tu Winrate</div>
+              <div class="stat-value" id="dashPersonalWinrate">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Tu Yield</div>
+              <div class="stat-value" id="dashPersonalYield">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Cuota Media</div>
+              <div class="stat-value" id="dashPersonalAvgOdds">0.00</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Stake Medio</div>
+              <div class="stat-value" id="dashPersonalAvgStake">0.00</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Casa Favorita</div>
+              <div class="stat-value" id="dashPersonalFavBook">-</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Casa Mejor Profit</div>
+              <div class="stat-value" id="dashPersonalBestBook">-</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Beneficio Total</div>
+              <div class="stat-value" id="dashPersonalProfit">0u</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filters-panel">
+          <div class="filters-header-row">
+            <h3>Filtros</h3>
+            <div class="filters-header-right">
+              <div class="search-input-wrapper">
+                <i data-lucide="search" class="search-input-icon"></i>
+                <input type="text" id="tipsterSearch" class="form-control search-input-compact"
+                  placeholder="Buscar por nombre" oninput="applyFilters()">
+              </div>
+              <button class="btn btn--secondary btn--sm" onclick="resetFilters()">Limpiar</button>
+            </div>
+          </div>
+          <div class="filters-controls-row">
+            <div class="filter-group">
+              <label class="form-label">Deportes</label>
+              <div class="custom-dropdown">
+                <div class="dropdown-toggle" onclick="toggleDropdown('sportDropdown')">
+                  <span class="dropdown-toggle-text" id="sportDropdownText">Seleccionar deportes</span>
+                  <span class="dropdown-arrow"></span>
                 </div>
-                <form id="forgotPasswordForm" onsubmit="handleForgotPassword(event)">
-                    <p class="forgot-modal-description">
-                        Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.
-                    </p>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input 
-                        type="email" 
-                        id="forgotEmail" 
-                        class="form-control" 
-                        required 
-                        placeholder="tuemail@example.com"
-                        />
-                    </div>
-                    <div id="forgotError" class="auth-error"></div>
-                    <div id="forgotSuccess" class="forgot-success-message">
-                        ✓ Email enviado correctamente. Revisa tu bandeja de entrada.
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn--outline" onclick="closeModal('forgotPasswordModal')">Cancelar</button>
-                        <button type="submit" class="btn btn--primary">Enviar Email</button>
-                    </div>
-                </form>
+                <div class="dropdown-menu" id="sportDropdown">
+                </div>
+              </div>
             </div>
+            <div class="filter-group">
+              <label class="form-label">Canal</label>
+              <div class="custom-dropdown">
+                <div class="dropdown-toggle" onclick="toggleDropdown('channelDropdown')">
+                  <span class="dropdown-toggle-text" id="channelDropdownText">Seleccionar canales</span>
+                  <span class="dropdown-arrow"></span>
+                </div>
+                <div class="dropdown-menu" id="channelDropdown">
+                </div>
+              </div>
+            </div>
+            <div class="filter-group">
+              <label class="form-label">Yield Mínimo (%)</label>
+              <input type="number" id="yieldMinInput" class="form-control" min="-1000" max="100" step="1" value="-1000"
+                placeholder="-1000">
+            </div>
+            <div class="filter-group">
+              <label class="form-label">Último Pick</label>
+              <select id="lastPickFilter" class="form-control">
+                <option value="all">Todos</option>
+                <option value="7">Últimos 7 días</option>
+                <option value="14">Últimos 14 días</option>
+                <option value="30">Últimos 30 días</option>
+                <option value="90">Últimos 90 días</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="form-label">Ordenar por</label>
+              <select id="sortBy" class="form-control">
+                <option value="yield">Yield</option>
+                <option value="winrate">Winrate</option>
+                <option value="lastPick">Último Pick</option>
+              </select>
+            </div>
+          </div>
         </div>
+
+        <div id="tipstersGrid" class="tipster-grid">
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <p>No hay tipsters registrados. Comienza añadiendo tu primer tipster.</p>
+          <button class="btn btn--primary" onclick="showAddTipsterModal()">Añadir Primer Tipster</button>
+        </div>
+      </div>
+
+      <div id="allPicksView" class="view">
+        <div class="view-header">
+          <h2>Todos los Picks</h2>
+          <div class="view-tabs">
+            <button class="tab-btn" id="tabDashboard2" onclick="showView('dashboard')">Dashboard</button>
+            <button class="tab-btn active" id="tabAllPicks2" onclick="showView('allPicks')">Todos los Picks</button>
+          </div>
+        </div>
+
+        <div class="filters-container">
+          <select id="filterTipster" class="form-control" onchange="filterPicks()">
+            <option value="all">Todos los Tipsters</option>
+          </select>
+          <select id="filterSport" class="form-control" onchange="filterPicks()">
+            <option value="all">Todos los Deportes</option>
+          </select>
+          <select id="filterStatus" class="form-control" onchange="filterPicks()">
+            <option value="all">Todos los Estados</option>
+            <option value="Seguido">Seguido</option>
+            <option value="No Seguido">No Seguido</option>
+            <option value="Error">Error</option>
+          </select>
+          <select id="filterChannel" class="form-control" onchange="filterPicks()">
+            <option value="all">Todos los Canales</option>
+          </select>
+          <select id="filterBookmaker" class="form-control" onchange="filterPicks()">
+            <option value="all">Todas las Casas</option>
+          </select>
+          <select id="filterResult" class="form-control" onchange="filterPicks()">
+            <option value="all">Todos los Resultados</option>
+            <option value="Ganada">Ganada</option>
+            <option value="Perdida">Perdida</option>
+            <option value="Void">Void</option>
+            <option value="Pendiente">Pendiente</option>
+          </select>
+        </div>
+
+        <div class="table-container">
+          <table id="allPicksTable" class="picks-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipster</th>
+                <th>Partido</th>
+                <th>Deporte</th>
+                <th>Tipo</th>
+                <th>Tipo Apuesta</th>
+                <th>Cuota</th>
+                <th>Stake</th>
+                <th>Estado</th>
+                <th>Resultado</th>
+                <th>Beneficio</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="allPicksBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="misPicksView" class="view">
+        <div class="view-header">
+          <h2>Mis Picks Seguidos</h2>
+          <div class="view-tabs">
+            <button class="tab-btn" onclick="showView('dashboard')">Dashboard</button>
+            <button class="tab-btn" onclick="showView('allPicks')">Todos los Picks</button>
+            <button class="tab-btn active" onclick="showView('misPicks')">Mis Picks</button>
+          </div>
+        </div>
+
+        <div class="seguibilidad-stats">
+          <div class="stat-card">
+            <div class="stat-label">Picks Seguidos</div>
+            <div class="stat-value" id="totalFollowed">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Mi Winrate</div>
+            <div class="stat-value" id="myWinrate">0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Mi Yield</div>
+            <div class="stat-value" id="myYield">0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Mi Beneficio</div>
+            <div class="stat-value" id="myProfit">0u</div>
+          </div>
+        </div>
+
+        <div class="filters-container">
+          <select id="followFilterTipster" class="form-control" onchange="filterFollowedPicks()">
+            <option value="all">Todos los Tipsters</option>
+          </select>
+          <select id="followFilterResult" class="form-control" onchange="filterFollowedPicks()">
+            <option value="all">Todos los Resultados</option>
+            <option value="Ganada">Ganada</option>
+            <option value="Perdida">Perdida</option>
+            <option value="Void">Void</option>
+            <option value="Pendiente">Pendiente</option>
+          </select>
+          <select id="followFilterMatch" class="form-control" onchange="filterFollowedPicks()">
+            <option value="all">Todos</option>
+            <option value="match">Mismo Resultado</option>
+            <option value="diverge">Resultado Diferente</option>
+          </select>
+        </div>
+
+        <div class="table-container">
+          <table class="picks-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipster</th>
+                <th>Partido</th>
+                <th>Tipo Apuesta</th>
+                <th>Cuota Tipster</th>
+                <th>Mi Cuota</th>
+                <th>Stake Tipster</th>
+                <th>Mi Stake</th>
+                <th>Casa</th>
+                <th>Resultado Tipster</th>
+                <th>Mi Resultado</th>
+                <th>Mi Beneficio</th>
+                <th>Match</th>
+              </tr>
+            </thead>
+            <tbody id="followedPicksBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tipsterDetailView" class="view">
+        <div class="view-header">
+          <button class="btn btn--outline btn--sm" onclick="showView('dashboard')">← Volver al Dashboard</button>
+          <h2 id="tipsterDetailName">Detalle del Tipster</h2>
+          <button class="btn btn--danger btn--sm" onclick="confirmResetTipster(currentTipsterId)">
+              <i data-lucide="refresh-cw"></i>
+              Resetear Tipster
+          </button>
+        </div>
+
+        <div class="detail-tabs">
+          <button class="detail-tab active" onclick="showDetailTab('stats')">Estadísticas del Tipster</button>
+          <button class="detail-tab" onclick="showDetailTab('myStats')">Mis Estadísticas</button>
+          <button class="detail-tab" onclick="showDetailTab('follows')">Historial de Follows</button>
+        </div>
+
+        <div id="statsTab" class="detail-tab-content active">
+          <div class="stats-overview">
+            <div class="stat-card">
+              <div class="stat-label">Picks Totales</div>
+              <div class="stat-value" id="detailTotalPicks">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Winrate</div>
+              <div class="stat-value" id="detailWinrate">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Yield</div>
+              <div class="stat-value" id="detailYield">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Cuota Media</div>
+              <div class="stat-value" id="detailAvgOdds">0.00</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Stake Medio</div>
+              <div class="stat-value" id="detailAvgStake">0.00</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Beneficio Total</div>
+              <div class="stat-value" id="detailTotalProfit">0u</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Seguibilidad</div>
+              <div class="stat-value" id="detailSeguibilidad">0%</div>
+            </div>
+          </div>
+
+          <div class="charts-container">
+            <div class="chart-card">
+              <h3>Distribución de Cuotas</h3>
+              <canvas id="oddsDistChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Distribución de Stakes</h3>
+              <canvas id="stakeDistChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Deportes</h3>
+              <canvas id="sportsChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Tipos de Pick</h3>
+              <canvas id="pickTypesChart"></canvas>
+            </div>
+          </div>
+
+          <div class="comparison-section" id="comparisonSection" style="display: none;">
+            <h3>Comparación: Tipster vs Mis Follows</h3>
+            <div class="comparison-grid">
+              <div class="comparison-card">
+                <h4>Tipster</h4>
+                <div class="stat-item">
+                  <div class="stat-label">Winrate</div>
+                  <div class="stat-value" id="compTipsterWinrate">0%</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Yield</div>
+                  <div class="stat-value" id="compTipsterYield">0%</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Cuota Media</div>
+                  <div class="stat-value" id="compTipsterAvgOdds">0.00</div>
+                </div>
+              </div>
+              <div class="comparison-card">
+                <h4>Mis Follows</h4>
+                <div class="stat-item">
+                  <div class="stat-label">Winrate</div>
+                  <div class="stat-value" id="compMyWinrate">0%</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Yield</div>
+                  <div class="stat-value" id="compMyYield">0%</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Cuota Media</div>
+                  <div class="stat-value" id="compMyAvgOdds">0.00</div>
+                </div>
+              </div>
+              <div class="comparison-card">
+                <h4>Estadísticas de Seguimiento</h4>
+                <div class="stat-item">
+                  <div class="stat-label">Picks Seguidos</div>
+                  <div class="stat-value" id="compFollowCount">0</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Mismo Resultado</div>
+                  <div class="stat-value" id="compMatchRate">0%</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Casa Más Usada</div>
+                  <div class="stat-value" id="compMostUsedBook">-</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-picks-section">
+            <h3>Historial de Picks</h3>
+            <div class="table-container">
+              <table class="picks-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Partido</th>
+                    <th>Deporte</th>
+                    <th>Tipo</th>
+                    <th>Tipo Apuesta</th>
+                    <th>Cuota</th>
+                    <th>Stake</th>
+                    <th>Resultado</th>
+                    <th>Beneficio</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="detailPicksBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="myStatsTab" class="detail-tab-content">
+          <div id="myStatsMessage" class="empty-state" style="display: none;">
+            <h3>Sin datos</h3>
+            <p>No has seguido ningún pick de este tipster todavía.</p>
+          </div>
+          <div id="myStatsContent" style="display: none;">
+            <div class="stats-overview">
+              <div class="stat-card">
+                <div class="stat-label">Picks Seguidos</div>
+                <div class="stat-value" id="myStatsFollowed">0</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Mi Winrate</div>
+                <div class="stat-value" id="myStatsWinrate">0%</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Mi Yield</div>
+                <div class="stat-value" id="myStatsYield">0%</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Mi Cuota Media</div>
+                <div class="stat-value" id="myStatsAvgOdds">0.00</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Mi Stake Medio</div>
+                <div class="stat-value" id="myStatsAvgStake">0.00</div>
+              </div>
+            </div>
+
+            <div class="charts-container">
+              <div class="chart-card">
+                <h3>Distribución de Mis Cuotas</h3>
+                <canvas id="myOddsDistChart"></canvas>
+              </div>
+              <div class="chart-card">
+                <h3>Distribución de Mis Stakes</h3>
+                <canvas id="myStakeDistChart"></canvas>
+              </div>
+              <div class="chart-card">
+                <h3>Mi Casa Favorita</h3>
+                <canvas id="myBookmakerChart"></canvas>
+              </div>
+              <div class="chart-card">
+                <h3>Diferencia de Cuotas</h3>
+                <p
+                  style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--space-12);">
+                  Promedio: Mis cuotas vs cuotas del tipster</p>
+                <div style="text-align: center; padding: var(--space-24);">
+                  <div style="font-size: var(--font-size-4xl); font-weight: var(--font-weight-bold);" id="myOddsDiff">
+                    0.00</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="comparison-section">
+              <h3>Comparación de Rendimiento</h3>
+              <div class="comparison-grid">
+                <div class="comparison-card">
+                  <h4>Tasa de Éxito</h4>
+                  <div class="stat-item">
+                    <div class="stat-label">Mismo Resultado</div>
+                    <div class="stat-value" id="myStatsMatchRate">0%</div>
+                  </div>
+                </div>
+                <div class="comparison-card">
+                  <h4>Diferencias Promedio</h4>
+                  <div class="stat-item">
+                    <div class="stat-label">Cuotas</div>
+                    <div class="stat-value" id="myStatsOddsDiffAvg">0.00</div>
+                  </div>
+                  <div class="stat-item">
+                    <div class="stat-label">Stakes</div>
+                    <div class="stat-value" id="myStatsStakeDiffAvg">0.00</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="followsTab" class="detail-tab-content">
+          <div class="table-container">
+            <table class="picks-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Partido</th>
+                  <th>Tipo Apuesta</th>
+                  <th>Cuota Tipster</th>
+                  <th>Mi Cuota</th>
+                  <th>Stake Tipster</th>
+                  <th>Mi Stake</th>
+                  <th>Casa</th>
+                  <th>Resultado Tipster</th>
+                  <th>Mi Resultado</th>
+                  <th>Mi Beneficio</th>
+                </tr>
+              </thead>
+              <tbody id="tipsterFollowsBody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div id="mainApp" style="display: none;">
-        <nav class="navbar">
-            <div class="navbar-container">
-                <img src="/assets/img/logo-filled-text.svg" alt="tipster-tracker" class="navbar-logo" id="navbarLogo">
-                <div class="navbar-actions">
-                    <span id="userEmailDisplay" class="user-email"></span>
-                    <button class="btn btn--primary btn--sm" onclick="showAddTipsterModal()">
-                        + Añadir Tipster
-                    </button>
-                    <button class="btn btn--secondary btn--sm" onclick="showAddPickModal()">
-                        + Añadir Pick
-                    </button>
-                    <button class="btn btn--outline btn--sm" onclick="handleSignOut()">
-                        Cerrar Sesión
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        <div class="main-container">
-            <div id="dashboardView" class="view active">
-                <div class="view-header">
-                    <h2>Panel Principal</h2>
-                    <div class="view-tabs">
-                        <button class="tab-btn active" id="tabDashboard" onclick="showView('dashboard')">Dashboard</button>
-                        <button class="tab-btn" id="tabAllPicks" onclick="showView('allPicks')">Todos los Picks</button>
-                    </div>
-                </div>
-                
-                <div id="personalStatsPanel" class="personal-stats-panel">
-                    <h3>Tus Estadísticas Generales</h3>
-                    <div class="personal-stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-label">Picks Seguidos</div>
-                            <div class="stat-value" id="dashPersonalFollowed">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Tu Winrate</div>
-                            <div class="stat-value" id="dashPersonalWinrate">0%</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Tu Yield</div>
-                            <div class="stat-value" id="dashPersonalYield">0%</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Cuota Media</div>
-                            <div class="stat-value" id="dashPersonalAvgOdds">0.00</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Stake Medio</div>
-                            <div class="stat-value" id="dashPersonalAvgStake">0.00</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Casa Favorita</div>
-                            <div class="stat-value" id="dashPersonalFavBook">-</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Casa Mejor Profit</div>
-                            <div class="stat-value" id="dashPersonalBestBook">-</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Beneficio Total</div>
-                            <div class="stat-value" id="dashPersonalProfit">0u</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="filters-panel">
-                    <div class="filters-header-row">
-                        <h3>Filtros</h3>
-                        <div class="filters-header-right">
-                            <input type="text" id="tipsterSearch" class="form-control search-input-compact" placeholder="🔍 Buscar por nombre" oninput="applyFilters()">
-                            <button class="btn btn--secondary btn--sm" onclick="resetFilters()">Limpiar</button>
-                        </div>
-                    </div>
-                    <div class="filters-controls-row">
-                        <div class="filter-group">
-                            <label class="form-label">Deportes</label>
-                            <div class="custom-dropdown">
-                                <div class="dropdown-toggle" onclick="toggleDropdown('sportDropdown')">
-                                    <span class="dropdown-toggle-text" id="sportDropdownText">Seleccionar deportes</span>
-                                    <span class="dropdown-arrow"></span>
-                                </div>
-                                <div class="dropdown-menu" id="sportDropdown">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="filter-group">
-                            <label class="form-label">Canal</label>
-                            <div class="custom-dropdown">
-                                <div class="dropdown-toggle" onclick="toggleDropdown('channelDropdown')">
-                                    <span class="dropdown-toggle-text" id="channelDropdownText">Seleccionar canales</span>
-                                    <span class="dropdown-arrow"></span>
-                                </div>
-                                <div class="dropdown-menu" id="channelDropdown">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="filter-group">
-                            <label class="form-label">Yield Mínimo (%)</label>
-                            <input type="number" id="yieldMinInput" class="form-control" min="-1000" max="100" step="1" value="-1000" placeholder="-1000">
-                        </div>
-                        <div class="filter-group">
-                            <label class="form-label">Último Pick</label>
-                            <select id="lastPickFilter" class="form-control">
-                                <option value="all">Todos</option>
-                                <option value="7">Últimos 7 días</option>
-                                <option value="14">Últimos 14 días</option>
-                                <option value="30">Últimos 30 días</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label class="form-label">Ordenar por</label>
-                            <select id="sortBy" class="form-control">
-                                <option value="yield">Yield</option>
-                                <option value="winrate">Winrate</option>
-                                <option value="lastPick">Último Pick</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="tipstersGrid" class="tipster-grid">
-                </div>
-
-                <div id="emptyState" class="empty-state" style="display: none;">
-                    <h3>👋 Bienvenido</h3>
-                    <p>No hay tipsters registrados. Comienza añadiendo tu primer tipster.</p>
-                    <button class="btn btn--primary" onclick="showAddTipsterModal()">Añadir Primer Tipster</button>
-                </div>
-            </div>
-
-            <div id="allPicksView" class="view">
-                <div class="view-header">
-                    <h2>Todos los Picks</h2>
-                    <div class="view-tabs">
-                        <button class="tab-btn" id="tabDashboard2" onclick="showView('dashboard')">Dashboard</button>
-                        <button class="tab-btn active" id="tabAllPicks2" onclick="showView('allPicks')">Todos los Picks</button>
-                    </div>
-                </div>
-
-                <div class="filters-container">
-                    <select id="filterTipster" class="form-control" onchange="filterPicks()">
-                        <option value="all">Todos los Tipsters</option>
-                    </select>
-                    <select id="filterSport" class="form-control" onchange="filterPicks()">
-                        <option value="all">Todos los Deportes</option>
-                    </select>
-                    <select id="filterStatus" class="form-control" onchange="filterPicks()">
-                        <option value="all">Todos los Estados</option>
-                        <option value="Seguido">Seguido</option>
-                        <option value="No Seguido">No Seguido</option>
-                        <option value="Error">Error</option>
-                    </select>
-                    <select id="filterChannel" class="form-control" onchange="filterPicks()">
-                        <option value="all">Todos los Canales</option>
-                    </select>
-                    <select id="filterBookmaker" class="form-control" onchange="filterPicks()">
-                        <option value="all">Todas las Casas</option>
-                    </select>
-                    <select id="filterResult" class="form-control" onchange="filterPicks()">
-                        <option value="all">Todos los Resultados</option>
-                        <option value="Ganada">Ganada</option>
-                        <option value="Perdida">Perdida</option>
-                        <option value="Void">Void</option>
-                        <option value="Pendiente">Pendiente</option>
-                    </select>
-                </div>
-
-                <div class="table-container">
-                    <table id="allPicksTable" class="picks-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Tipster</th>
-                                <th>Partido</th>
-                                <th>Deporte</th>
-                                <th>Tipo</th>
-                                <th>Tipo Apuesta</th>
-                                <th>Cuota</th>
-                                <th>Stake</th>
-                                <th>Estado</th>
-                                <th>Resultado</th>
-                                <th>Beneficio</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="allPicksBody">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="misPicksView" class="view">
-                <div class="view-header">
-                    <h2>Mis Picks Seguidos</h2>
-                    <div class="view-tabs">
-                        <button class="tab-btn" onclick="showView('dashboard')">Dashboard</button>
-                        <button class="tab-btn" onclick="showView('allPicks')">Todos los Picks</button>
-                        <button class="tab-btn active" onclick="showView('misPicks')">Mis Picks</button>
-                    </div>
-                </div>
-
-                <div class="seguibilidad-stats">
-                    <div class="stat-card">
-                        <div class="stat-label">Picks Seguidos</div>
-                        <div class="stat-value" id="totalFollowed">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Mi Winrate</div>
-                        <div class="stat-value" id="myWinrate">0%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Mi Yield</div>
-                        <div class="stat-value" id="myYield">0%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Mi Beneficio</div>
-                        <div class="stat-value" id="myProfit">0u</div>
-                    </div>
-                </div>
-
-                <div class="filters-container">
-                    <select id="followFilterTipster" class="form-control" onchange="filterFollowedPicks()">
-                        <option value="all">Todos los Tipsters</option>
-                    </select>
-                    <select id="followFilterResult" class="form-control" onchange="filterFollowedPicks()">
-                        <option value="all">Todos los Resultados</option>
-                        <option value="Ganada">Ganada</option>
-                        <option value="Perdida">Perdida</option>
-                        <option value="Void">Void</option>
-                        <option value="Pendiente">Pendiente</option>
-                    </select>
-                    <select id="followFilterMatch" class="form-control" onchange="filterFollowedPicks()">
-                        <option value="all">Todos</option>
-                        <option value="match">Mismo Resultado</option>
-                        <option value="diverge">Resultado Diferente</option>
-                    </select>
-                </div>
-
-                <div class="table-container">
-                    <table class="picks-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Tipster</th>
-                                <th>Partido</th>
-                                <th>Tipo Apuesta</th>
-                                <th>Cuota Tipster</th>
-                                <th>Mi Cuota</th>
-                                <th>Stake Tipster</th>
-                                <th>Mi Stake</th>
-                                <th>Casa</th>
-                                <th>Resultado Tipster</th>
-                                <th>Mi Resultado</th>
-                                <th>Mi Beneficio</th>
-                                <th>Match</th>
-                            </tr>
-                        </thead>
-                        <tbody id="followedPicksBody">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="tipsterDetailView" class="view">
-                <div class="view-header">
-                    <button class="btn btn--outline btn--sm" onclick="showView('dashboard')">← Volver al Dashboard</button>
-                    <h2 id="tipsterDetailName">Detalle del Tipster</h2>
-                    <button class="btn btn--danger btn--sm" onclick="confirmResetTipster(currentTipsterId)">✖️ Resetear Tipster</button>
-                </div>
-
-                <div class="detail-tabs">
-                    <button class="detail-tab active" onclick="showDetailTab('stats')">Estadísticas del Tipster</button>
-                    <button class="detail-tab" onclick="showDetailTab('myStats')">Mis Estadísticas</button>
-                    <button class="detail-tab" onclick="showDetailTab('follows')">Historial de Follows</button>
-                </div>
-
-                <div id="statsTab" class="detail-tab-content active">
-                <div class="stats-overview">
-                    <div class="stat-card">
-                        <div class="stat-label">Picks Totales</div>
-                        <div class="stat-value" id="detailTotalPicks">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Winrate</div>
-                        <div class="stat-value" id="detailWinrate">0%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Yield</div>
-                        <div class="stat-value" id="detailYield">0%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Cuota Media</div>
-                        <div class="stat-value" id="detailAvgOdds">0.00</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Stake Medio</div>
-                        <div class="stat-value" id="detailAvgStake">0.00</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Beneficio Total</div>
-                        <div class="stat-value" id="detailTotalProfit">0u</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Seguibilidad</div>
-                        <div class="stat-value" id="detailSeguibilidad">0%</div>
-                    </div>
-                </div>
-
-                <div class="charts-container">
-                    <div class="chart-card">
-                        <h3>Distribución de Cuotas</h3>
-                        <canvas id="oddsDistChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Distribución de Stakes</h3>
-                        <canvas id="stakeDistChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Deportes</h3>
-                        <canvas id="sportsChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Tipos de Pick</h3>
-                        <canvas id="pickTypesChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="comparison-section" id="comparisonSection" style="display: none;">
-                    <h3>Comparación: Tipster vs Mis Follows</h3>
-                    <div class="comparison-grid">
-                        <div class="comparison-card">
-                            <h4>Tipster</h4>
-                            <div class="stat-item">
-                                <div class="stat-label">Winrate</div>
-                                <div class="stat-value" id="compTipsterWinrate">0%</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Yield</div>
-                                <div class="stat-value" id="compTipsterYield">0%</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Cuota Media</div>
-                                <div class="stat-value" id="compTipsterAvgOdds">0.00</div>
-                            </div>
-                        </div>
-                        <div class="comparison-card">
-                            <h4>Mis Follows</h4>
-                            <div class="stat-item">
-                                <div class="stat-label">Winrate</div>
-                                <div class="stat-value" id="compMyWinrate">0%</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Yield</div>
-                                <div class="stat-value" id="compMyYield">0%</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Cuota Media</div>
-                                <div class="stat-value" id="compMyAvgOdds">0.00</div>
-                            </div>
-                        </div>
-                        <div class="comparison-card">
-                            <h4>Estadísticas de Seguimiento</h4>
-                            <div class="stat-item">
-                                <div class="stat-label">Picks Seguidos</div>
-                                <div class="stat-value" id="compFollowCount">0</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Mismo Resultado</div>
-                                <div class="stat-value" id="compMatchRate">0%</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Casa Más Usada</div>
-                                <div class="stat-value" id="compMostUsedBook">-</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="detail-picks-section">
-                    <h3>Historial de Picks</h3>
-                    <div class="table-container">
-                        <table class="picks-table">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Partido</th>
-                                    <th>Deporte</th>
-                                    <th>Tipo</th>
-                                    <th>Tipo Apuesta</th>
-                                    <th>Cuota</th>
-                                    <th>Stake</th>
-                                    <th>Resultado</th>
-                                    <th>Beneficio</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="detailPicksBody">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                </div>
-
-                <div id="myStatsTab" class="detail-tab-content">
-                    <div id="myStatsMessage" class="empty-state" style="display: none;">
-                        <h3>Sin datos</h3>
-                        <p>No has seguido ningún pick de este tipster todavía.</p>
-                    </div>
-                    <div id="myStatsContent" style="display: none;">
-                        <div class="stats-overview">
-                            <div class="stat-card">
-                                <div class="stat-label">Picks Seguidos</div>
-                                <div class="stat-value" id="myStatsFollowed">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Mi Winrate</div>
-                                <div class="stat-value" id="myStatsWinrate">0%</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Mi Yield</div>
-                                <div class="stat-value" id="myStatsYield">0%</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Mi Cuota Media</div>
-                                <div class="stat-value" id="myStatsAvgOdds">0.00</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Mi Stake Medio</div>
-                                <div class="stat-value" id="myStatsAvgStake">0.00</div>
-                            </div>
-                        </div>
-
-                        <div class="charts-container">
-                            <div class="chart-card">
-                                <h3>Distribución de Mis Cuotas</h3>
-                                <canvas id="myOddsDistChart"></canvas>
-                            </div>
-                            <div class="chart-card">
-                                <h3>Distribución de Mis Stakes</h3>
-                                <canvas id="myStakeDistChart"></canvas>
-                            </div>
-                            <div class="chart-card">
-                                <h3>Mi Casa Favorita</h3>
-                                <canvas id="myBookmakerChart"></canvas>
-                            </div>
-                            <div class="chart-card">
-                                <h3>Diferencia de Cuotas</h3>
-                                <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--space-12);">Promedio: Mis cuotas vs cuotas del tipster</p>
-                                <div style="text-align: center; padding: var(--space-24);">
-                                    <div style="font-size: var(--font-size-4xl); font-weight: var(--font-weight-bold);" id="myOddsDiff">0.00</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="comparison-section">
-                            <h3>Comparación de Rendimiento</h3>
-                            <div class="comparison-grid">
-                                <div class="comparison-card">
-                                    <h4>Tasa de Éxito</h4>
-                                    <div class="stat-item">
-                                        <div class="stat-label">Mismo Resultado</div>
-                                        <div class="stat-value" id="myStatsMatchRate">0%</div>
-                                    </div>
-                                </div>
-                                <div class="comparison-card">
-                                    <h4>Diferencias Promedio</h4>
-                                    <div class="stat-item">
-                                        <div class="stat-label">Cuotas</div>
-                                        <div class="stat-value" id="myStatsOddsDiffAvg">0.00</div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <div class="stat-label">Stakes</div>
-                                        <div class="stat-value" id="myStatsStakeDiffAvg">0.00</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="followsTab" class="detail-tab-content">
-                    <div class="table-container">
-                        <table class="picks-table">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Partido</th>
-                                    <th>Tipo Apuesta</th>
-                                    <th>Cuota Tipster</th>
-                                    <th>Mi Cuota</th>
-                                    <th>Stake Tipster</th>
-                                    <th>Mi Stake</th>
-                                    <th>Casa</th>
-                                    <th>Resultado Tipster</th>
-                                    <th>Mi Resultado</th>
-                                    <th>Mi Beneficio</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tipsterFollowsBody">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+    <div id="addTipsterModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Añadir Nuevo Tipster</h2>
+          <button class="modal-close" onclick="closeModal('addTipsterModal')">&times;</button>
         </div>
-
-        <div id="addTipsterModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Añadir Nuevo Tipster</h2>
-                    <button class="modal-close" onclick="closeModal('addTipsterModal')">&times;</button>
-                </div>
-                <form id="addTipsterForm" onsubmit="addTipster(event)">
-                    <div class="form-group">
-                        <label class="form-label">Nombre del Tipster *</label>
-                        <input type="text" class="form-control" id="tipsterName" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Canal *</label>
-                        <select class="form-control" id="tipsterChannel" required>
-                            <option value="">Selecciona un canal</option>
-                            <option value="BlogaBet">BlogaBet</option>
-                            <option value="Telegram">Telegram</option>
-                            <option value="TipsterLand">TipsterLand</option>
-                            <option value="Twitter/X">Twitter/X</option>
-                            <option value="Discord">Discord</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn--outline" onclick="closeModal('addTipsterModal')">Cancelar</button>
-                        <button type="submit" class="btn btn--primary">Añadir Tipster</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="addPickModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Añadir Nuevo Pick</h2>
-                    <button class="modal-close" onclick="closeModal('addPickModal')">&times;</button>
-                </div>
-                <form id="addPickForm" onsubmit="addPick(event)">
-                    <div class="form-group">
-                        <label class="form-label">Tipster *</label>
-                        <select class="form-control" id="pickTipster" required>
-                            <option value="">Selecciona un tipster</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Partido/Evento *</label>
-                        <input type="text" class="form-control" id="pickMatch" required placeholder="Ej: Real Madrid vs Barcelona">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Tipo de Apuesta *</label>
-                        <input type="text" class="form-control" id="pickBetType" required placeholder="Ej: Vencedor Madrid, Goles Over 2.5, Handicap +1">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Deporte *</label>
-                            <select class="form-control" id="pickSport" required>
-                                <option value="">Selecciona deporte</option>
-                                <option value="Fútbol">⚽ Fútbol</option>
-                                <option value="Baloncesto">🏀 Baloncesto</option>
-                                <option value="Tenis">🎾 Tenis</option>
-                                <option value="Fútbol Americano">🏈 Fútbol Americano</option>
-                                <option value="Hockey">🏒 Hockey</option>
-                                <option value="Béisbol">⚾ Béisbol</option>
-                                <option value="Dardos">🎯 Dardos</option>
-                                <option value="Caballos">🐴 Caballos</option>
-                                <option value="Motor">🏎️ Motor</option>
-                                <option value="Esports">🎮 Esports</option>
-                                <option value="Fórmula 1">🏁 Fórmula 1</option>
-                                <option value="Golf">⛳ Golf</option>
-                                <option value="Rugby">🏉 Rugby</option>
-                                <option value="Cricket">🏏 Cricket</option>
-                                <option value="Otro">🎲 Otro</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Tipo de Pick *</label>
-                            <select class="form-control" id="pickType" required>
-                                <option value="">Selecciona tipo</option>
-                                <option value="Pre">Pre</option>
-                                <option value="Combinado">Combinado</option>
-                                <option value="Live">Live</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Cuota *</label>
-                            <input type="number" class="form-control" id="pickOdds" step="0.01" min="1.01" required placeholder="1.85">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Stake (1-10) *</label>
-                            <input type="number" class="form-control" id="pickStake" min="1" max="10" required placeholder="5">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Fecha *</label>
-                            <input type="date" class="form-control" id="pickDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Resultado</label>
-                            <select class="form-control" id="pickResult">
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="Ganada">Ganada</option>
-                                <option value="Perdida">Perdida</option>
-                                <option value="Void">Void</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Comentarios</label>
-                        <textarea class="form-control" id="pickComments" rows="3" placeholder="Notas adicionales sobre este pick (opcional)"></textarea>
-                    </div>
-
-                    <div class="seguibilidad-section">
-                        <div class="form-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="pickFollowed" onchange="toggleFollowSection()">
-                                ¿Seguiste este pick?
-                            </label>
-                        </div>
-                        <div id="followSection" style="display: none;">
-                            <h4 style="font-size: var(--font-size-lg); margin-bottom: var(--space-16); color: var(--color-text);">Datos de tu seguimiento</h4>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Mi Cuota</label>
-                                    <input type="number" class="form-control" id="pickUserOdds" step="0.01" min="1.01" placeholder="1.85">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Mi Stake</label>
-                                    <input type="number" class="form-control" id="pickUserStake" min="0.1" step="0.1" placeholder="5">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Mi Tipo de Apuesta</label>
-                                <input type="text" class="form-control" id="pickUserBetType" placeholder="Ej: Vencedor Madrid">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Casa de Apuestas</label>
-                                <select class="form-control" id="pickUserBookmaker">
-                                    <option value="">Selecciona casa</option>
-                                    <option value="1xBet">1xBet</option>
-                                    <option value="Betfair">Betfair</option>
-                                    <option value="Bet365">Bet365</option>
-                                    <option value="William Hill">William Hill</option>
-                                    <option value="Marathonbet">Marathonbet</option>
-                                    <option value="Pinnacle">Pinnacle</option>
-                                    <option value="Supabets">Supabets</option>
-                                    <option value="Otro">Otro</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Mi Resultado</label>
-                                <select class="form-control" id="pickUserResult">
-                                    <option value="Pendiente">Pendiente</option>
-                                    <option value="Ganada">Ganada</option>
-                                    <option value="Perdida">Perdida</option>
-                                    <option value="Void">Void</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn--outline" onclick="closeModal('addPickModal')">Cancelar</button>
-                        <button type="submit" class="btn btn--primary">Añadir Pick</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="editPickModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Editar Pick</h2>
-                    <button class="modal-close" onclick="closeModal('editPickModal')">&times;</button>
-                </div>
-                <form id="editPickForm" onsubmit="updatePick(event)">
-                    <input type="hidden" id="editPickId">
-                    <div class="form-group">
-                        <label class="form-label">Partido/Evento *</label>
-                        <input type="text" class="form-control" id="editPickMatch" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Tipo de Apuesta *</label>
-                        <input type="text" class="form-control" id="editPickBetType" required placeholder="Ej: Vencedor Madrid">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Deporte *</label>
-                            <select class="form-control" id="editPickSport" required>
-                                <option value="Fútbol">⚽ Fútbol</option>
-                                <option value="Baloncesto">🏀 Baloncesto</option>
-                                <option value="Tenis">🎾 Tenis</option>
-                                <option value="Fútbol Americano">🏈 Fútbol Americano</option>
-                                <option value="Hockey">🏒 Hockey</option>
-                                <option value="Béisbol">⚾ Béisbol</option>
-                                <option value="Dardos">🎯 Dardos</option>
-                                <option value="Caballos">🐴 Caballos</option>
-                                <option value="Motor">🏎️ Motor</option>
-                                <option value="Esports">🎮 Esports</option>
-                                <option value="Fórmula 1">🏁 Fórmula 1</option>
-                                <option value="Golf">⛳ Golf</option>
-                                <option value="Rugby">🏉 Rugby</option>
-                                <option value="Cricket">🏏 Cricket</option>
-                                <option value="Otro">🎲 Otro</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Tipo de Pick *</label>
-                            <select class="form-control" id="editPickType" required>
-                                <option value="Pre">Pre</option>
-                                <option value="Combinado">Combinado</option>
-                                <option value="Live">Live</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Cuota *</label>
-                            <input type="number" class="form-control" id="editPickOdds" step="0.01" min="1.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Stake (1-10) *</label>
-                            <input type="number" class="form-control" id="editPickStake" min="1" max="10" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Fecha *</label>
-                            <input type="date" class="form-control" id="editPickDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Resultado *</label>
-                            <select class="form-control" id="editPickResult" required>
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="Ganada">Ganada</option>
-                                <option value="Perdida">Perdida</option>
-                                <option value="Void">Void</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Comentarios</label>
-                        <textarea class="form-control" id="editPickComments" rows="3" placeholder="Notas adicionales sobre este pick (opcional)"></textarea>
-                    </div>
-
-                    <div class="seguibilidad-section">
-                        <div class="form-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="editPickFollowed" onchange="toggleEditFollowSection()">
-                                ¿Seguiste este pick?
-                            </label>
-                        </div>
-                        <div id="editFollowSection" style="display: none;">
-                            <input type="hidden" id="editFollowId">
-                            <h4 style="font-size: var(--font-size-lg); margin-bottom: var(--space-16); color: var(--color-text);">Datos de tu seguimiento</h4>
-                            <div class="form-group">
-                                <label class="form-label">Casa del Tipster (opcional)</label>
-                                <select class="form-control" id="editPickTipsterBookmaker">
-                                    <option value="">Selecciona casa</option>
-                                    <option value="1xBet">1xBet</option>
-                                    <option value="Betfair">Betfair</option>
-                                    <option value="Bet365">Bet365</option>
-                                    <option value="William Hill">William Hill</option>
-                                    <option value="Marathonbet">Marathonbet</option>
-                                    <option value="Pinnacle">Pinnacle</option>
-                                    <option value="Supabets">Supabets</option>
-                                    <option value="Otro">Otro</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Mi Casa</label>
-                                <select class="form-control" id="editPickUserBookmaker">
-                                    <option value="">Selecciona casa</option>
-                                    <option value="1xBet">1xBet</option>
-                                    <option value="Betfair">Betfair</option>
-                                    <option value="Bet365">Bet365</option>
-                                    <option value="William Hill">William Hill</option>
-                                    <option value="Marathonbet">Marathonbet</option>
-                                    <option value="Pinnacle">Pinnacle</option>
-                                    <option value="Supabets">Supabets</option>
-                                    <option value="Otro">Otro</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Mi Tipo de Apuesta</label>
-                                <input type="text" class="form-control" id="editPickUserBetType">
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Mi Cuota</label>
-                                    <input type="number" class="form-control" id="editPickUserOdds" step="0.01" min="1.01">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Mi Stake</label>
-                                    <input type="number" class="form-control" id="editPickUserStake" min="0.1" step="0.1">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Mi Resultado</label>
-                                <select class="form-control" id="editPickUserResult">
-                                    <option value="Pendiente">Pendiente</option>
-                                    <option value="Ganada">Ganada</option>
-                                    <option value="Perdida">Perdida</option>
-                                    <option value="Void">Void</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="editPickIsError">
-                                    ¿Es error?
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Comentarios del Follow</label>
-                                <textarea class="form-control" id="editPickFollowComments" rows="2" placeholder="Notas sobre este follow (opcional)"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn--outline" onclick="closeModal('editPickModal')">Cancelar</button>
-                        <button type="submit" class="btn btn--primary">Guardar Cambios</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="followPickModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Seguir Pick</h2>
-                    <button class="modal-close" onclick="closeModal('followPickModal')">&times;</button>
-                </div>
-                <form id="followPickForm" onsubmit="addFollow(event)">
-                    <input type="hidden" id="followPickId">
-                    <input type="hidden" id="followTipsterId">
-                    <div class="follow-pick-info" id="followPickInfo">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Mi Cuota *</label>
-                            <input type="number" class="form-control" id="followOdds" step="0.01" min="1.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Mi Stake *</label>
-                            <input type="number" class="form-control" id="followStake" min="0.1" step="0.1" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Mi Tipo de Apuesta *</label>
-                        <input type="text" class="form-control" id="followBetType" required placeholder="Ej: Vencedor Madrid">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Casa de Apuestas *</label>
-                        <select class="form-control" id="followBookmaker" required>
-                            <option value="">Selecciona casa</option>
-                            <option value="1xBet">1xBet</option>
-                            <option value="Betfair">Betfair</option>
-                            <option value="Bet365">Bet365</option>
-                            <option value="William Hill">William Hill</option>
-                            <option value="Marathonbet">Marathonbet</option>
-                            <option value="Pinnacle">Pinnacle</option>
-                            <option value="Supabets">Supabets</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Mi Resultado *</label>
-                        <select class="form-control" id="followResult" required>
-                            <option value="Pendiente">Pendiente</option>
-                            <option value="Ganada">Ganada</option>
-                            <option value="Perdida">Perdida</option>
-                            <option value="Void">Void</option>
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn--outline" onclick="closeModal('followPickModal')">Cancelar</button>
-                        <button type="submit" class="btn btn--primary">Guardar Follow</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <form id="addTipsterForm" onsubmit="addTipster(event)">
+          <div class="form-group">
+            <label class="form-label">Nombre del Tipster *</label>
+            <input type="text" class="form-control" id="tipsterName" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Canal *</label>
+            <select class="form-control" id="tipsterChannel" required>
+              <option value="">Selecciona un canal</option>
+              <option value="BlogaBet">BlogaBet</option>
+              <option value="Telegram">Telegram</option>
+              <option value="TipsterLand">TipsterLand</option>
+              <option value="Twitter/X">Twitter/X</option>
+              <option value="Discord">Discord</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn--outline" onclick="closeModal('addTipsterModal')">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Añadir Tipster</button>
+          </div>
+        </form>
+      </div>
     </div>
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-spinner"></div>
-        <p>Cargando...</p>
+
+    <div id="addPickModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Añadir Nuevo Pick</h2>
+          <button class="modal-close" onclick="closeModal('addPickModal')">&times;</button>
+        </div>
+        <form id="addPickForm" onsubmit="addPick(event)">
+          <div class="form-group">
+            <label class="form-label">Tipster *</label>
+            <select class="form-control" id="pickTipster" required>
+              <option value="">Selecciona un tipster</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Partido/Evento *</label>
+            <input type="text" class="form-control" id="pickMatch" required placeholder="Ej: Real Madrid vs Barcelona">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo de Apuesta *</label>
+            <input type="text" class="form-control" id="pickBetType" required
+              placeholder="Ej: Vencedor Madrid, Goles Over 2.5, Handicap +1">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Deporte *</label>
+              <select class="form-control" id="pickSport" required>
+                <option value="">Selecciona deporte</option>
+                <option value="Fútbol">⚽ Fútbol</option>
+                <option value="Baloncesto">🏀 Baloncesto</option>
+                <option value="Tenis">🎾 Tenis</option>
+                <option value="Fútbol Americano">🏈 Fútbol Americano</option>
+                <option value="Hockey">🏒 Hockey</option>
+                <option value="Béisbol">⚾ Béisbol</option>
+                <option value="Dardos">🎯 Dardos</option>
+                <option value="Caballos">🐴 Caballos</option>
+                <option value="Motor">🏎️ Motor</option>
+                <option value="Esports">🎮 Esports</option>
+                <option value="Fórmula 1">🏁 Fórmula 1</option>
+                <option value="Golf">⛳ Golf</option>
+                <option value="Rugby">🏉 Rugby</option>
+                <option value="Cricket">🏏 Cricket</option>
+                <option value="Tenis de mesa">🏓 Tenis de mesa</option>
+                <option value="Otro">🎲 Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tipo de Pick *</label>
+              <select class="form-control" id="pickType" required>
+                <option value="">Selecciona tipo</option>
+                <option value="Pre">Pre</option>
+                <option value="Combinado">Combinado</option>
+                <option value="Live">Live</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Cuota *</label>
+              <input type="number" class="form-control" id="pickOdds" step="0.01" min="1.01" required
+                placeholder="1.85">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stake (1-10) *</label>
+              <input type="number" class="form-control" id="pickStake" min="1" max="10" required placeholder="5">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Fecha</label>
+                    <input type="date" class="form-control" id="pickDate" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Hora</label>
+                    <input type="time" class="form-control" id="pickTime" required />
+                </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Resultado</label>
+              <select class="form-control" id="pickResult">
+                <option value="Pendiente">Pendiente</option>
+                <option value="Ganada">Ganada</option>
+                <option value="Perdida">Perdida</option>
+                <option value="Void">Void</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Comentarios</label>
+            <textarea class="form-control" id="pickComments" rows="3"
+              placeholder="Notas adicionales sobre este pick (opcional)"></textarea>
+          </div>
+
+          <div class="seguibilidad-section">
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="pickFollowed" onchange="toggleFollowSection()">
+                ¿Seguiste este pick?
+              </label>
+            </div>
+            <div id="followSection" style="display: none;">
+              <h4 style="font-size: var(--font-size-lg); margin-bottom: var(--space-16); color: var(--color-text);">
+                Datos de tu seguimiento</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Mi Cuota</label>
+                  <input type="number" class="form-control" id="pickUserOdds" step="0.01" min="1.01" placeholder="1.85">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Mi Stake</label>
+                  <input type="number" class="form-control" id="pickUserStake" min="0.1" step="0.1" placeholder="5">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mi Tipo de Apuesta</label>
+                <input type="text" class="form-control" id="pickUserBetType" placeholder="Ej: Vencedor Madrid">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Casa de Apuestas</label>
+                <select class="form-control" id="pickUserBookmaker">
+                  <option value="">Selecciona casa</option>
+                  <option value="1xBet">1xBet</option>
+                  <option value="Betfair">Betfair</option>
+                  <option value="Bet365">Bet365</option>
+                  <option value="William Hill">William Hill</option>
+                  <option value="Marathonbet">Marathonbet</option>
+                  <option value="888">888</option>
+                  <option value="Bwin">Bwin</option>
+                  <option value="Codere">Codere</option>
+                  <option value="Luckia">Luckia</option>
+                  <option value="Sportium">Sportium</option>
+                  <option value="Betsson">Betsson</option>
+                  <option value="Betway">Betway</option>
+                  <option value="Interwetten">Interwetten</option>
+                  <option value="Kirolbet">Kirolbet</option>
+                  <option value="Casumo">Casumo</option>
+                  <option value="LeoVegas">LeoVegas</option>
+                  <option value="Winamax">Winamax</option>
+                  <option value="Paf">Paf</option>
+                  <option value="Paston">Pastón</option>
+                  <option value="Olybet">Olybet</option>
+                  <option value="TonyBet">TonyBet</option>
+                  <option value="Marca Apuestas">Marca Apuestas</option>
+                  <option value="Suertia">Suertia</option>
+                  <option value="Yaas">Yaas</option>
+                  <option value="Versus">Versus</option>
+                  <option value="Retabet">Retabet</option>
+                  <option value="Opabets">Opabets</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Fecha que seguí</label>
+                    <input type="date" class="form-control" id="pickUserDate" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Hora que seguí</label>
+                    <input type="time" class="form-control" id="pickUserTime" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mi Resultado</label>
+                <select class="form-control" id="pickUserResult">
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="Ganada">Ganada</option>
+                  <option value="Perdida">Perdida</option>
+                  <option value="Void">Void</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn--outline" onclick="closeModal('addPickModal')">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Añadir Pick</button>
+          </div>
+        </form>
+      </div>
     </div>
-    <script src="/assets/js/config/firebase.config.js"></script>
-    <!-- 
+
+    <div id="editPickModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Editar Pick</h2>
+          <button class="modal-close" onclick="closeModal('editPickModal')">&times;</button>
+        </div>
+        <form id="editPickForm" onsubmit="updatePick(event)">
+          <input type="hidden" id="editPickId">
+          <div class="form-group">
+            <label class="form-label">Partido/Evento *</label>
+            <input type="text" class="form-control" id="editPickMatch" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo de Apuesta *</label>
+            <input type="text" class="form-control" id="editPickBetType" required placeholder="Ej: Vencedor Madrid">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Deporte *</label>
+              <select class="form-control" id="editPickSport" required>
+                <option value="Fútbol">⚽ Fútbol</option>
+                <option value="Baloncesto">🏀 Baloncesto</option>
+                <option value="Tenis">🎾 Tenis</option>
+                <option value="Fútbol Americano">🏈 Fútbol Americano</option>
+                <option value="Hockey">🏒 Hockey</option>
+                <option value="Béisbol">⚾ Béisbol</option>
+                <option value="Dardos">🎯 Dardos</option>
+                <option value="Caballos">🐴 Caballos</option>
+                <option value="Motor">🏎️ Motor</option>
+                <option value="Esports">🎮 Esports</option>
+                <option value="Fórmula 1">🏁 Fórmula 1</option>
+                <option value="Golf">⛳ Golf</option>
+                <option value="Rugby">🏉 Rugby</option>
+                <option value="Cricket">🏏 Cricket</option>
+                <option value="Tenis de mesa">🏓 Tenis de mesa</option>
+                <option value="Otro">🎲 Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tipo de Pick *</label>
+              <select class="form-control" id="editPickType" required>
+                <option value="Pre">Pre</option>
+                <option value="Combinado">Combinado</option>
+                <option value="Live">Live</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Cuota *</label>
+              <input type="number" class="form-control" id="editPickOdds" step="0.01" min="1.01" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stake (1-10) *</label>
+              <input type="number" class="form-control" id="editPickStake" min="1" max="10" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Fecha</label>
+                    <input type="date" class="form-control" id="editPickDate" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Hora</label>
+                    <input type="time" class="form-control" id="editPickTime" required />
+                </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Resultado *</label>
+              <select class="form-control" id="editPickResult" required>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Ganada">Ganada</option>
+                <option value="Perdida">Perdida</option>
+                <option value="Void">Void</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Comentarios</label>
+            <textarea class="form-control" id="editPickComments" rows="3"
+              placeholder="Notas adicionales sobre este pick (opcional)"></textarea>
+          </div>
+
+          <div class="seguibilidad-section">
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="editPickFollowed" onchange="toggleEditFollowSection()">
+                ¿Seguiste este pick?
+              </label>
+            </div>
+            <div id="editFollowSection" style="display: none;">
+              <input type="hidden" id="editFollowId">
+              <h4 style="font-size: var(--font-size-lg); margin-bottom: var(--space-16); color: var(--color-text);">
+                Datos de tu seguimiento</h4>
+              <div class="form-group">
+                <label class="form-label">Casa del Tipster (opcional)</label>
+                <select class="form-control" id="editPickTipsterBookmaker">
+                  <option value="">Selecciona casa</option>
+                  <option value="1xBet">1xBet</option>
+                  <option value="Betfair">Betfair</option>
+                  <option value="Bet365">Bet365</option>
+                  <option value="William Hill">William Hill</option>
+                  <option value="Marathonbet">Marathonbet</option>
+                  <option value="888">888</option>
+                  <option value="Bwin">Bwin</option>
+                  <option value="Codere">Codere</option>
+                  <option value="Luckia">Luckia</option>
+                  <option value="Sportium">Sportium</option>
+                  <option value="Betsson">Betsson</option>
+                  <option value="Betway">Betway</option>
+                  <option value="Interwetten">Interwetten</option>
+                  <option value="Kirolbet">Kirolbet</option>
+                  <option value="Casumo">Casumo</option>
+                  <option value="LeoVegas">LeoVegas</option>
+                  <option value="Winamax">Winamax</option>
+                  <option value="Paf">Paf</option>
+                  <option value="Paston">Pastón</option>
+                  <option value="Olybet">Olybet</option>
+                  <option value="TonyBet">TonyBet</option>
+                  <option value="Marca Apuestas">Marca Apuestas</option>
+                  <option value="Suertia">Suertia</option>
+                  <option value="Yaas">Yaas</option>
+                  <option value="Versus">Versus</option>
+                  <option value="Retabet">Retabet</option>
+                  <option value="Opabets">Opabets</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mi Casa</label>
+                <select class="form-control" id="editPickUserBookmaker">
+                  <option value="">Selecciona casa</option>
+                  <option value="1xBet">1xBet</option>
+                  <option value="Betfair">Betfair</option>
+                  <option value="Bet365">Bet365</option>
+                  <option value="William Hill">William Hill</option>
+                  <option value="Marathonbet">Marathonbet</option>
+                  <option value="888">888</option>
+                  <option value="Bwin">Bwin</option>
+                  <option value="Codere">Codere</option>
+                  <option value="Luckia">Luckia</option>
+                  <option value="Sportium">Sportium</option>
+                  <option value="Betsson">Betsson</option>
+                  <option value="Betway">Betway</option>
+                  <option value="Interwetten">Interwetten</option>
+                  <option value="Kirolbet">Kirolbet</option>
+                  <option value="Casumo">Casumo</option>
+                  <option value="LeoVegas">LeoVegas</option>
+                  <option value="Winamax">Winamax</option>
+                  <option value="Paf">Paf</option>
+                  <option value="Paston">Pastón</option>
+                  <option value="Olybet">Olybet</option>
+                  <option value="TonyBet">TonyBet</option>
+                  <option value="Marca Apuestas">Marca Apuestas</option>
+                  <option value="Suertia">Suertia</option>
+                  <option value="Yaas">Yaas</option>
+                  <option value="Versus">Versus</option>
+                  <option value="Retabet">Retabet</option>
+                  <option value="Opabets">Opabets</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mi Tipo de Apuesta</label>
+                <input type="text" class="form-control" id="editPickUserBetType">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Mi Cuota</label>
+                  <input type="number" class="form-control" id="editPickUserOdds" step="0.01" min="1.01">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Mi Stake</label>
+                  <input type="number" class="form-control" id="editPickUserStake" min="0.1" step="0.1">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Fecha que seguí</label>
+                    <input type="date" class="form-control" id="editPickUserDate" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Hora que seguí</label>
+                    <input type="time" class="form-control" id="editPickUserTime" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mi Resultado</label>
+                <select class="form-control" id="editPickUserResult">
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="Ganada">Ganada</option>
+                  <option value="Perdida">Perdida</option>
+                  <option value="Void">Void</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="editPickIsError">
+                  ¿Es error?
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Comentarios del Follow</label>
+                <textarea class="form-control" id="editPickFollowComments" rows="2"
+                  placeholder="Notas sobre este follow (opcional)"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn--outline" onclick="closeModal('editPickModal')">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Guardar Cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="followPickModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Seguir Pick</h2>
+          <button class="modal-close" onclick="closeModal('followPickModal')">&times;</button>
+        </div>
+        <form id="followPickForm" onsubmit="addFollow(event)">
+          <input type="hidden" id="followPickId">
+          <input type="hidden" id="followTipsterId">
+          <div class="follow-pick-info" id="followPickInfo">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Mi Cuota *</label>
+              <input type="number" class="form-control" id="followOdds" step="0.01" min="1.01" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mi Stake *</label>
+              <input type="number" class="form-control" id="followStake" min="0.1" step="0.1" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mi Tipo de Apuesta *</label>
+            <input type="text" class="form-control" id="followBetType" required placeholder="Ej: Vencedor Madrid">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Casa de Apuestas *</label>
+            <select class="form-control" id="followBookmaker" required>
+              <option value="">Selecciona casa</option>
+              <option value="1xBet">1xBet</option>
+              <option value="Betfair">Betfair</option>
+              <option value="Bet365">Bet365</option>
+              <option value="William Hill">William Hill</option>
+              <option value="Marathonbet">Marathonbet</option>
+              <option value="888">888</option>
+              <option value="Bwin">Bwin</option>
+              <option value="Codere">Codere</option>
+              <option value="Luckia">Luckia</option>
+              <option value="Sportium">Sportium</option>
+              <option value="Betsson">Betsson</option>
+              <option value="Betway">Betway</option>
+              <option value="Interwetten">Interwetten</option>
+              <option value="Kirolbet">Kirolbet</option>
+              <option value="Casumo">Casumo</option>
+              <option value="LeoVegas">LeoVegas</option>
+              <option value="Winamax">Winamax</option>
+              <option value="Paf">Paf</option>
+              <option value="Paston">Pastón</option>
+              <option value="Olybet">Olybet</option>
+              <option value="TonyBet">TonyBet</option>
+              <option value="Marca Apuestas">Marca Apuestas</option>
+              <option value="Suertia">Suertia</option>
+              <option value="Yaas">Yaas</option>
+              <option value="Versus">Versus</option>
+              <option value="Retabet">Retabet</option>
+              <option value="Opabets">Opabets</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Fecha que seguí</label>
+                <input type="date" class="form-control" id="followUserDate" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Hora que seguí</label>
+                <input type="time" class="form-control" id="followUserTime" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mi Resultado *</label>
+            <select class="form-control" id="followResult" required>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Ganada">Ganada</option>
+              <option value="Perdida">Perdida</option>
+              <option value="Void">Void</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn--outline" onclick="closeModal('followPickModal')">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Guardar Follow</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Cargando...</p>
+  </div>
+  <script src="/assets/js/config/firebase.config.js"></script>
+  <!-- 
     <script src="/assets/js/utils/constants.js"></script>
     <script src="/assets/js/utils/helpers.js"></script>
     <script src="/assets/js/utils/calculations.js"></script>
@@ -1024,6 +1171,7 @@
     <script src="/assets/js/ui/renders.js"></script>
     <script src="/assets/js/ui/charts.js"></script> -->
 
-    <script src="/assets/js/app-bulk.js"></script>
+  <script src="/assets/js/app-bulk.js"></script>
 </body>
+
 </html>

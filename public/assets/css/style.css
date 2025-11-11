@@ -205,6 +205,7 @@ pre code {
 /* ===== BUTTONS ===== */
 .btn {
   display: inline-flex;
+  gap: var(--space-6);
   align-items: center;
   justify-content: center;
   padding: var(--space-8) var(--space-16);
@@ -254,11 +255,20 @@ pre code {
   background: var(--color-secondary-active);
 }
 
-
 .btn--outline {
   background: transparent;
   border: 1px solid var(--color-border);
   color: var(--color-text);
+}
+
+.btn--outline--danger {
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  background-color: rgba(var(--color-error-rgb), var(--status-bg-opacity));
+}
+
+.btn--outline-primary {
+  border: 1px solid var(--color-primary);
 }
 
 .btn--outline:hover:not(:disabled) {
@@ -294,6 +304,41 @@ pre code {
   background-color: rgba(var(--color-error-rgb), 0.75);
 }
 
+.btn svg {
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.btn--sm svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== ICON ONLY BUTTONS ===== */
+.btn--icon-only {
+  padding: var(--space-4);
+  min-width: auto;
+  aspect-ratio: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn--icon-only svg {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.btn--sm.btn--icon-only {
+  padding: 6px;
+}
+
+.btn--sm.btn--icon-only svg {
+  width: 14px;
+  height: 14px;
+}
+
 /* ===== FORMS ===== */
 .form-control {
   display: block;
@@ -302,7 +347,7 @@ pre code {
   font-size: var(--font-size-base);
   line-height: 1.5;
   color: var(--color-text);
-  background-color: var(--color-surface);
+  background-color: var(--color-dark-secondary-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-base);
   transition: border-color var(--duration-fast) var(--ease-standard), 
@@ -722,6 +767,27 @@ select.form-control {
   padding: var(--space-8) var(--space-12);
   font-size: var(--font-size-sm);
 }
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 12px;
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-input-wrapper .search-input-compact {
+  padding-left: 40px;
+  width: 100%;
+}
 
 /* ===== CUSTOM DROPDOWN ===== */
 .custom-dropdown {
@@ -915,8 +981,7 @@ select.form-control {
 
 .result-badge.pendiente {
   background: rgba(var(--color-info-rgb), 0.15);
-  color: var(--color-info);
-  border: 1px solid rgba(var(--color-info-rgb), 0.25);
+  border: 1px solid rgba(var(--color-info-rgb), 0.55);
 }
 
 /* ===== PROFIT DISPLAY ===== */
@@ -1028,7 +1093,7 @@ select.form-control {
 }
 
 .modal-header {
-  padding: var(--space-24);
+  padding: var(--space-20);
   border-bottom: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
@@ -1297,7 +1362,7 @@ select.form-control {
   color: var(--color-white);
 }
 
-.match-indicator.pending {
+.match-indicator.pendiente {
   background: var(--color-info);
   color: var(--color-white);
 }
@@ -1492,7 +1557,13 @@ select.form-control {
 }
 
 .forgot-success-message.visible {
-  display: block;
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.forgot-success-message svg {
+  flex-shrink: 0;
 }
 
 /* ===== LOADING OVERLAY ===== */
