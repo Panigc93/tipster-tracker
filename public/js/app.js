@@ -1,189 +1,9 @@
-import { auth, db, state, sportIcons, allSports, allChannels, allBookmakers } from './core/init.js';
+import { allChannels, allSports, db, sportIcons, state } from './core/init.js';
+import { clearSearchUI, closeModal, formatDate, showLoading, switchDetailTabUI, switchViewUI, toggleDropdown, toggleFilterCheckboxUI, updateDropdownText } from './utils/ui-helpers.js';
+import { setupAuthListeners } from '/js/core/auth.js';
 
 
-function showAuthTab(tab) {
-  const tabs = document.querySelectorAll('.auth-tab');
-  tabs.forEach(t => t.classList.remove('active'));
-  t
-  if (tab === 'login') {
-    tabs[0].classList.add('active');
-    document.getElementById('loginForm').style.display = 'block';
-    document.getElementById('signupForm').style.display = 'none';
-  } else {
-    tabs[1].classList.add('active');
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('signupForm').style.display = 'block';
-  }
-}
-
-function handleLogin(event) {
-  event.preventDefault();
-  const email = document.getElementById('loginEmail').value;
-  const password = document.getElementById('loginPassword').value;
-  const errorEl = document.getElementById('loginError');
-  
-  showLoading(true);
-  
-  auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      errorEl.classList.remove('visible');
-    })
-    .catch(error => {
-      showLoading(false);
-      errorEl.textContent = getAuthErrorMessage(error.code);
-      errorEl.classList.add('visible');
-    });
-}
-
-function handleSignup(event) {
-  event.preventDefault();
-  const email = document.getElementById('signupEmail').value;
-  const password = document.getElementById('signupPassword').value;
-  const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
-  const errorEl = document.getElementById('signupError');
-  
-  if (password !== passwordConfirm) {
-    errorEl.textContent = 'Las contraseñas no coinciden';
-    errorEl.classList.add('visible');
-    return;
-  }
-  
-  showLoading(true);
-  
-  auth.createUserWithEmailAndPassword(email, password)
-    .then(() => {
-      errorEl.classList.remove('visible');
-    })
-    .catch(error => {
-      showLoading(false);
-      errorEl.textContent = getAuthErrorMessage(error.code);
-      errorEl.classList.add('visible');
-    });
-}
-
-function handleSignOut() {
-  if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-    auth.signOut();
-  }
-}
-
-function getAuthErrorMessage(code) {
-  const errors = {
-    'auth/email-already-in-use': 'Este email ya está registrado',
-    'auth/invalid-email': 'Email inválido',
-    'auth/user-not-found': 'Usuario no encontrado',
-    'auth/wrong-password': 'Contraseña incorrecta',
-    'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres',
-    'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde',
-    'auth/network-request-failed': 'Error de red. Verifica tu conexión'
-  };
-  return errors[code] || 'Error de autenticación: ' + code;
-}
-
-function togglePasswordVisibility(inputId) {
-  const input = document.getElementById(inputId);
-  const icon = document.getElementById(inputId + 'Icon');
-  
-  if (!input || !icon) return;
-  
-  if (input.type === 'password') {
-    input.type = 'text';
-    icon.setAttribute('data-lucide', 'eye-off');
-  } else {
-    input.type = 'password';
-    icon.setAttribute('data-lucide', 'eye');
-  }
-  lucide.createIcons();
-}
-
-function showForgotPasswordModal() {
-  const modal = document.getElementById('forgotPasswordModal');
-  const emailInput = document.getElementById('forgotEmail');
-  const errorEl = document.getElementById('forgotError');
-  const successEl = document.getElementById('forgotSuccess');
-  
-  console.log(modal)
-  modal.classList.add('active');
-  emailInput.value = '';
-  errorEl.classList.remove('visible');
-  successEl.classList.remove('visible');
-  emailInput.focus();
-}
-
-function handleForgotPassword(event) {
-  event.preventDefault();
-  
-  const email = document.getElementById('forgotEmail').value;
-  const errorEl = document.getElementById('forgotError');
-  const successEl = document.getElementById('forgotSuccess');
-  
-  errorEl.classList.remove('visible');
-  successEl.classList.remove('visible');
-  
-  showLoading(true);
-  
-  auth.sendPasswordResetEmail(email)
-    .then(() => {
-      showLoading(false);
-      successEl.classList.add('visible');
-      errorEl.classList.remove('visible');
-      
-      setTimeout(() => {
-        closeModal('forgotPasswordModal');
-      }, 3000);
-    })
-    .catch((error) => {
-      showLoading(false);
-      errorEl.textContent = getPasswordResetErrorMessage(error.code);
-      errorEl.classList.add('visible');
-      successEl.classList.remove('visible');
-    });
-}
-
-function getPasswordResetErrorMessage(code) {
-  const errors = {
-    'auth/user-not-found': 'No existe ninguna cuenta con este email',
-    'auth/invalid-email': 'Email inválido',
-    'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde',
-    'auth/network-request-failed': 'Error de red. Verifica tu conexión'
-  };
-  return errors[code] || `Error al enviar email: ${code}`;
-}
-
-
-function showLoading(show) {
-  const overlay = document.getElementById('loadingOverlay');
-  if (show) {
-    overlay.classList.add('visible');
-  } else {
-    overlay.classList.remove('visible');
-  }
-}
-
-auth.onAuthStateChanged(user => {
-  if (user) {
-    state.currentUser = user;
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    document.getElementById('userEmailDisplay').textContent = user.email;
-    initApp();
-  } else {
-    state.currentUser = null;
-    document.getElementById('authScreen').style.display = 'flex';
-    document.getElementById('mainApp').style.display = 'none';
-    showLoading(false);
-
-    if (state.unsubscribeTipsters) state.unsubscribeTipsters();
-    if (state.unsubscribePicks) state.unsubscribePicks();
-    if (state.unsubscribeFollows) state.unsubscribeFollows();
-
-    state.tipsters = [];
-    state.picks = [];
-    state.userFollows = [];
-  }
-});
-
-function initApp() {
+export function initApp() {
   if (!state.currentUser) return;
   
   showLoading(true);
@@ -302,50 +122,6 @@ function initializeFilters() {
   document.getElementById('sortBy').addEventListener('change', applyFilters);
 }
 
-function toggleDropdown(dropdownId) {
-  const dropdown = document.getElementById(dropdownId);
-  const toggle = dropdown.previousElementSibling;
-  
-  document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
-    if (menu.id !== dropdownId) {
-      menu.classList.remove('active');
-      menu.previousElementSibling.classList.remove('active');
-    }
-  });
-  
-  dropdown.classList.toggle('active');
-  toggle.classList.toggle('active');
-}
-
-function toggleFilterOption(event, type, value) {
-  event.stopPropagation();
-  const checkbox = event.currentTarget.querySelector('input[type="checkbox"]');
-  checkbox.checked = !checkbox.checked;
-  updateDropdownText();
-  applyFilters();
-}
-
-function updateDropdownText() {
-  const sportCheckboxes = document.querySelectorAll('#sportDropdown input:checked');
-  const sportText = document.getElementById('sportDropdownText');
-  if (sportCheckboxes.length === 0) {
-    sportText.textContent = 'Seleccionar deportes';
-  } else if (sportCheckboxes.length === 1) {
-    sportText.textContent = sportCheckboxes[0].value;
-  } else {
-    sportText.textContent = `${sportCheckboxes.length} deportes seleccionados`;
-  }
-  
-  const channelCheckboxes = document.querySelectorAll('#channelDropdown input:checked');
-  const channelText = document.getElementById('channelDropdownText');
-  if (channelCheckboxes.length === 0) {
-    channelText.textContent = 'Seleccionar canales';
-  } else if (channelCheckboxes.length === 1) {
-    channelText.textContent = channelCheckboxes[0].value;
-  } else {
-    channelText.textContent = `${channelCheckboxes.length} canales seleccionados`;
-  }
-}
 
 document.addEventListener('click', function(event) {
   if (!event.target.closest('.custom-dropdown')) {
@@ -355,6 +131,11 @@ document.addEventListener('click', function(event) {
     });
   }
 });
+
+function toggleFilterOption(event, type, value) {
+  toggleFilterCheckboxUI(event);
+  applyFilters();
+}
 
 function updateDashboardFilters() {
   const sportCheckboxes = document.querySelectorAll('#sportDropdown input:checked');
@@ -379,15 +160,15 @@ function updateDashboardFilters() {
   }
 }
 
-function clearSearch() {
-  document.getElementById('tipsterSearch').value = '';
-  applyFilters();
-}
-
 function applyFilters() {
   updateDashboardFilters();
   renderDashboard();
   renderDashboardPersonalStats();
+}
+
+function clearSearch() {
+  clearSearchUI();
+  applyFilters();
 }
 
 function resetFilters() {
@@ -505,6 +286,7 @@ async function addPickToFirestore(pickData) {
       stake: pickData.stake,
       pickType: pickData.pickType,
       betType: pickData.betType,
+      bookmaker: pickData.bookmaker,
       date: pickData.date,
       time: pickData.time,
       dateTime: pickData.dateTime,   
@@ -536,7 +318,6 @@ async function addFollowToFirestore(followData) {
       uid: state.currentUser.uid,
       tipsterId: followData.tipsterId,
       pickId: followData.pickId,
-      tipsterBookmaker: followData.tipsterBookmaker || '',
       userBookmaker: followData.userBookmaker,
       userOdds: followData.userOdds,
       userStake: followData.userStake,
@@ -889,55 +670,29 @@ function loadSampleData() {
 }
 
 function showView(viewName) {
-  const views = document.querySelectorAll('.view');
-  views.forEach(view => view.classList.remove('active'));
-  
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  switchViewUI(viewName);
+    state.currentView = viewName;
   
   if (viewName === 'dashboard') {
-    document.getElementById('dashboardView').classList.add('active');
-    const tab1 = document.getElementById('tabDashboard');
-    const tab2 = document.getElementById('tabDashboard2');
-    if (tab1) tab1.classList.add('active');
-    if (tab2) tab2.classList.remove('active');
     renderDashboard();
   } else if (viewName === 'allPicks') {
-    document.getElementById('allPicksView').classList.add('active');
-    const tab1 = document.getElementById('tabAllPicks');
-    const tab2 = document.getElementById('tabAllPicks2');
-    if (tab1) tab1.classList.remove('active');
-    if (tab2) tab2.classList.add('active');
     updateFilterSelects();
     renderAllPicks();
   } else if (viewName === 'misPicks') {
-    document.getElementById('misPicksView').classList.add('active');
     renderMisPicks();
   } else if (viewName === 'tipsterDetail') {
-    document.getElementById('tipsterDetailView').classList.add('active');
     renderTipsterDetail(state.currentTipsterId);
   }
-  
-  state.currentView = viewName;
 }
 
 function showDetailTab(tabName) {
-  document.querySelectorAll('.detail-tab').forEach(tab => tab.classList.remove('active'));
-  document.querySelectorAll('.detail-tab-content').forEach(content => content.classList.remove('active'));
+  switchDetailTabUI(tabName);
   
-  if (tabName === 'stats') {
-    document.querySelectorAll('.detail-tab')[0].classList.add('active');
-    document.getElementById('statsTab').classList.add('active');
-    document.getElementById('comparisonSection').style.display = 'none';
-  } else if (tabName === 'myStats') {
-    document.querySelectorAll('.detail-tab')[1].classList.add('active');
-    document.getElementById('myStatsTab').classList.add('active');
+  if (tabName === 'myStats') {
     renderMyStats(state.currentTipsterId);
   } else if (tabName === 'follows') {
-    document.querySelectorAll('.detail-tab')[2].classList.add('active');
-    document.getElementById('followsTab').classList.add('active');
     renderTipsterFollows(state.currentTipsterId);
     renderFollowComparison(state.currentTipsterId);
-    document.getElementById('comparisonSection').style.display = 'block';
   }
 }
 
@@ -1553,10 +1308,6 @@ function showAddPickModal() {
   document.getElementById('pickTime').value = now.toTimeString().slice(0, 5); // HH:MM
 }
 
-function closeModal(modalId) {
-  document.getElementById(modalId).classList.remove('active');
-}
-
 function addTipster(event) {
   event.preventDefault();
   
@@ -1593,6 +1344,7 @@ function addPick(event) {
   const tipsterId = document.getElementById('pickTipster').value;
   const match = document.getElementById('pickMatch').value.trim();
   const betType = document.getElementById('pickBetType').value;
+  const bookmaker = document.getElementById('pickTipsterBookmaker').value;
   const sport = document.getElementById('pickSport').value;
   const pickType = document.getElementById('pickType').value;
   const odds = parseFloat(document.getElementById('pickOdds').value);
@@ -1610,6 +1362,7 @@ function addPick(event) {
     sport: sport,
     pickType: pickType,
     betType: betType,
+    bookmaker: bookmaker,
     odds: odds,
     stake: stake,
     date: date,
@@ -1620,6 +1373,7 @@ function addPick(event) {
     comments: comments,
     status: followed ? 'Seguido' : 'No Seguido'
   };
+  console.log('Adding pick:', newPick);
   
   showLoading(true);
   
@@ -1629,13 +1383,13 @@ function addPick(event) {
         const userOdds = parseFloat(document.getElementById('pickUserOdds').value);
         const userStake = parseFloat(document.getElementById('pickUserStake').value);
         const userBetType = document.getElementById('pickUserBetType').value;
-        const bookmaker = document.getElementById('pickUserBookmaker').value;
+        const userBookmaker = document.getElementById('pickUserBookmaker').value;
         const userResult = document.getElementById('pickUserResult').value;
         const userDate = document.getElementById('pickUserDate').value || date;
         const userTime = document.getElementById('pickUserTime').value || time;
         const userDateTime = `${userDate}T${userTime}:00`;
-        
-        if (userOdds && userStake && userBetType && bookmaker) {
+
+        if (userOdds && userStake && userBetType && userBookmaker) {
           let profitFromFollow = 0;
           if (userResult === 'Ganada') {
             profitFromFollow = (userOdds - 1) * userStake;
@@ -1649,7 +1403,7 @@ function addPick(event) {
             userOdds: userOdds,
             userStake: userStake,
             userBetType: userBetType,
-            userBookmaker: bookmaker,
+            userBookmaker: userBookmaker,
             userResult: userResult,
             dateFollowed: userDate,
             timeFollowed: userTime,
@@ -1682,10 +1436,12 @@ function addPick(event) {
 function editPick(pickId) {
   const pick = state.picks.find(p => p.id === pickId);
   if (!pick) return;
+  console.log('Editing pick:', pick);
   
   document.getElementById('editPickId').value = pick.id;
   document.getElementById('editPickMatch').value = pick.match;
   document.getElementById('editPickBetType').value = pick.betType || '';
+  document.getElementById('editPickTipsterBookmaker').value = pick.bookmaker || '';
   document.getElementById('editPickSport').value = pick.sport;
   document.getElementById('editPickType').value = pick.pickType;
   document.getElementById('editPickOdds').value = pick.odds;
@@ -1745,6 +1501,7 @@ function updatePick(event) {
         betType: document.getElementById('editPickBetType').value,
         sport: document.getElementById('editPickSport').value,
         pickType: document.getElementById('editPickType').value,
+        bookmaker: document.getElementById('editPickTipsterBookmaker').value,
         odds: parseFloat(document.getElementById('editPickOdds').value),
         stake: parseInt(document.getElementById('editPickStake').value),
         date: document.getElementById('editPickDate').value,
@@ -1769,7 +1526,6 @@ function updatePick(event) {
         const userDate = document.getElementById('editPickUserDate').value || updatedPick.date;
         const userTime = document.getElementById('editPickUserTime').value || updatedPick.time;
         const userDateTime = `${userDate}T${userTime}:00`;
-        const tipsterBookmaker = document.getElementById('editPickTipsterBookmaker').value;
         const followComments = document.getElementById('editPickFollowComments').value.trim();
         
         if (userOdds && userStake && userBetType && bookmaker) {
@@ -1785,7 +1541,6 @@ function updatePick(event) {
                 userStake: userStake,
                 userBetType: userBetType,
                 userBookmaker: bookmaker,
-                tipsterBookmaker: tipsterBookmaker || '',
                 userResult: userResult,
                 dateFollowed: userDate,
                 timeFollowed: userTime,
@@ -1863,11 +1618,6 @@ function calculatePickProfit(pick) {
     return -pick.stake;
   }
   return 0;
-}
-
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
 function showFollowPickModal(pickId) {
@@ -2425,35 +2175,19 @@ async function updateTipsterInFirestore(tipsterId, data) {
     }
 }
 
-document.getElementById('navbarLogo').addEventListener('click', function() {
-  showView('dashboard');
-});
-
 document.addEventListener('DOMContentLoaded', () => {
-  // Tabs de autenticación
-  document.getElementById('tabLogin')?.addEventListener('click', () => showAuthTab('login'));
-  document.getElementById('tabSignup')?.addEventListener('click', () => showAuthTab('signup'));
-
-  // Botones de mostrar/ocultar contraseña
-  document.getElementById('toggleLoginPassword')?.addEventListener('click', () => togglePasswordVisibility('loginPassword'));
-  document.getElementById('toggleSignupPassword')?.addEventListener('click', () => togglePasswordVisibility('signupPassword'));
-  document.getElementById('toggleSignupPasswordConfirm')?.addEventListener('click', () => togglePasswordVisibility('signupPasswordConfirm'));
-
-  // Recuperar contraseña
-  document.getElementById('forgotPasswordLink')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    showForgotPasswordModal();
+  setupAuthListeners();
+  document.getElementById('navbarLogo').addEventListener('click', function() {
+    showView('dashboard');
   });
 
   // Cerrar modales
-  document.getElementById('closeForgotPasswordModal')?.addEventListener('click', () => closeModal('forgotPasswordModal'));
   document.getElementById('closeAddTipsterModal')?.addEventListener('click', () => closeModal('addTipsterModal'));
   document.getElementById('closeAddPickModal')?.addEventListener('click', () => closeModal('addPickModal'));
   document.getElementById('closeEditPickModal')?.addEventListener('click', () => closeModal('editPickModal'));
   document.getElementById('closeFollowPickModal')?.addEventListener('click', () => closeModal('followPickModal'));
 
   // Cancelar en modal
-  document.getElementById('cancelForgotPasswordModal')?.addEventListener('click', () => closeModal('forgotPasswordModal'));
   document.getElementById('cancelAddTipsterModal')?.addEventListener('click', () => closeModal('addTipsterModal'));
   document.getElementById('cancelAddPickModal')?.addEventListener('click', () => closeModal('addPickModal'));
   document.getElementById('cancelEditPickModal')?.addEventListener('click', () => closeModal('editPickModal'));
@@ -2469,7 +2203,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Navegación
   document.getElementById('tabDashboard')?.addEventListener('click', () => showView('dashboard'));
   document.getElementById('tabAllPicks')?.addEventListener('click', () => showView('allPicks'));
-    document.getElementById('tabDashboard2')?.addEventListener('click', () => showView('dashboard'));
+  document.getElementById('tabDashboard2')?.addEventListener('click', () => showView('dashboard'));
   document.getElementById('tabAllPicks2')?.addEventListener('click', () => showView('allPicks'));
   document.getElementById('tabDashboard3')?.addEventListener('click', () => showView('dashboard'));
   document.getElementById('tabAllPicks3')?.addEventListener('click', () => showView('allPicks'));
@@ -2478,7 +2212,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Dashboard acciones
   document.getElementById('addTipsterBtn')?.addEventListener('click', showAddTipsterModal);
   document.getElementById('addPickBtn')?.addEventListener('click', showAddPickModal);
-  document.getElementById('signOutBtn')?.addEventListener('click', handleSignOut);
 
   // Navegación en detalle tipster
   document.getElementById('backToDashboardBtn')?.addEventListener('click', () => showView('dashboard'));
@@ -2490,15 +2223,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Dropdown filtros
   document.getElementById('sportDropdownToggle')?.addEventListener('click', () => toggleDropdown('sportDropdown'));
   document.getElementById('channelDropdownToggle')?.addEventListener('click', () => toggleDropdown('channelDropdown'));
-});
-
-
-window.addEventListener('DOMContentLoaded', () => {
-  console.log('App loaded, waiting for authentication...');
-  // Autenticación
-  document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
-  document.getElementById('signupForm')?.addEventListener('submit', handleSignup);
-  document.getElementById('forgotPasswordForm')?.addEventListener('submit', handleForgotPassword);
   
   // Modal Tipster
   document.getElementById('addTipsterForm')?.addEventListener('submit', addTipster);
@@ -2536,7 +2260,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // Si tu campo busca tipster por texto (input), usa "input" en vez de "change"
   document.getElementById('tipsterSearch')?.addEventListener('input', applyFilters);
 
-    // Delegación para sportDropdown
+  // Delegación para sportDropdown
   document.getElementById('sportDropdown')?.addEventListener('click', (event) => {
     const item = event.target.closest('.dropdown-item');
     if (item) {

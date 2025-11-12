@@ -50,7 +50,7 @@ Aplicación web con Firebase para seguibilidad de tipsters
 │ │ ├── views/
 │ │ │ ├── dashboard.js # renderDashboard + filtros dashboard
 │ │ │ ├── all-picks.js # renderAllPicks + filtros all picks
-│ │ │ ├── mis-picks.js # renderMisPicks + filtros mis picks
+│ │ │ ├── my-picks.js # renderMisPicks + filtros mis picks
 │ │ │ └── tipster-detail.js # renderTipsterDetail + tabs + charts
 │ │ ├── modals/
 │ │ │ ├── tipster-modal.js # showAddTipsterModal, handleAddTipster
@@ -187,7 +187,7 @@ Aplicación web con Firebase para seguibilidad de tipsters
   - Filtros avanzados por tipster, sport, status, channel, bookmaker
   - Acciones: editar, eliminar, seguir
 
-- **views/mis-picks.js**:
+- **views/my-picks.js**:
   - Función `renderMisPicks()`: tabla de picks seguidas
   - Estadísticas de seguibilidad
   - Comparación tipster vs usuario (match/diverge)
