@@ -50,7 +50,7 @@ Aplicación web con Firebase para seguibilidad de tipsters
 │ │ ├── views/
 │ │ │ ├── dashboard.js # renderDashboard + filtros dashboard
 │ │ │ ├── all-picks.js # renderAllPicks + filtros all picks
-│ │ │ ├── my-picks.js # renderMisPicks + filtros mis picks
+│ │ │ ├── my-picks.js # renderMyPicks + filtros mis picks
 │ │ │ └── tipster-detail.js # renderTipsterDetail + tabs + charts
 │ │ ├── modals/
 │ │ │ ├── tipster-modal.js # showAddTipsterModal, handleAddTipster
@@ -154,7 +154,7 @@ Aplicación web con Firebase para seguibilidad de tipsters
 
 - **utils/calculations.js**:
   - Cálculos de estadísticas: `calculateYield()`, `calculateWinrate()`, `calculateProfit()`
-  - Lógica de seguibilidad: `calculateSeguibilidad()`
+  - Lógica de seguibilidad: `calculateTraceability()`
   - Fórmulas: 
     - Yield: `(profit / totalStaked) * 100`
     - Winrate: `(wonPicks / totalPicks) * 100`
@@ -162,7 +162,7 @@ Aplicación web con Firebase para seguibilidad de tipsters
 
 - **utils/filters.js**:
   - Lógica de filtrado para dashboard y picks
-  - Funciones: `applyDashboardFilters()`, `applyPicksFilters()`, `applyMisPicksFilters()`
+  - Funciones: `applyDashboardFilters()`, `applyPicksFilters()`, `applyMyPicksFilters()`
   - Búsqueda, ordenación y filtrado multi-criterio
 
 - **utils/ui-helpers.js**:
@@ -188,7 +188,7 @@ Aplicación web con Firebase para seguibilidad de tipsters
   - Acciones: editar, eliminar, seguir
 
 - **views/my-picks.js**:
-  - Función `renderMisPicks()`: tabla de picks seguidas
+  - Función `renderMyPicks()`: tabla de picks seguidas
   - Estadísticas de seguibilidad
   - Comparación tipster vs usuario (match/diverge)
 
@@ -306,7 +306,7 @@ import { renderDashboard } from './views/dashboard.js';
 **Pantallas principales:**
 1. **Dashboard** (`#dashboardView`): Grid de tipsters con estadísticas y filtros
 2. **All Picks** (`#allPicksView`): Tabla de todas las picks con filtros avanzados
-3. **Mis Picks** (`#misPicksView`): Picks seguidas por el usuario
+3. **Mis Picks** (`#myPicksView`): Picks seguidas por el usuario
 4. **Tipster Detail** (`#tipsterDetailView`): Detalle con 3 tabs (Stats, My Stats, Follows)
 
 **Flujo de datos:**
@@ -319,7 +319,7 @@ import { renderDashboard } from './views/dashboard.js';
 - `tipsters[]`: array de tipsters del usuario
 - `picks[]`: array de picks de todos los tipsters
 - `userFollows[]`: array de picks seguidas por el usuario
-- `currentView`: vista activa ('dashboard', 'allPicks', 'misPicks', 'tipsterDetail')
+- `currentView`: vista activa ('dashboard', 'allPicks', 'myPicks', 'tipsterDetail')
 - `currentTipsterId`: ID del tipster en vista detalle
 - `dashboardFilters`: objeto con filtros activos
 - `charts`: objeto con instancias de Chart.js
@@ -329,7 +329,7 @@ import { renderDashboard } from './views/dashboard.js';
 **Arquitectura:**
 - Single Page Application (SPA) con múltiples vistas ocultas/visibles
 - 2 pantallas principales: `#authScreen` y `#mainApp`
-- 4 vistas principales dentro de `#mainApp`: dashboard, allPicks, misPicks, tipsterDetail
+- 4 vistas principales dentro de `#mainApp`: dashboard, allPicks, myPicks, tipsterDetail
 
 **Secciones principales:**
 
@@ -355,7 +355,7 @@ import { renderDashboard } from './views/dashboard.js';
    - Tabla con todas las picks (`#allPicksTable`)
    - Acciones: editar, eliminar, seguir
 
-5. **Mis Picks View** (`#misPicksView`):
+5. **Mis Picks View** (`#myPicksView`):
    - Stats de seguibilidad (4 stat-cards)
    - Filtros: tipster, resultado, match/diverge
    - Tabla comparativa con resultado tipster vs usuario
@@ -388,7 +388,7 @@ import { renderDashboard } from './views/dashboard.js';
 - Firebase 10.7.1: app-compat, auth-compat, firestore-compat
 
 **IDs importantes:**
-- Todas las views: `#dashboardView`, `#allPicksView`, `#misPicksView`, `#tipsterDetailView`
+- Todas las views: `#dashboardView`, `#allPicksView`, `#myPicksView`, `#tipsterDetailView`
 - Todos los forms: `#loginForm`, `#signupForm`, `#addTipsterForm`, `#addPickForm`, etc.
 - Todos los modals: `#addTipsterModal`, `#addPickModal`, `#editPickModal`, `#followPickModal`
 - Elementos dinámicos: `#tipstersGrid`, `#allPicksBody`, `#followedPicksBody`, `#detailPicksBody`

@@ -22,62 +22,7 @@ try {
   alert('Error: Firebase no está configurado correctamente. Revisa la configuración en app.js');
 }
 
-const state = {
-  currentUser: null,
-  unsubscribeTipsters: null,
-  unsubscribePicks: null,
-  unsubscribeFollows: null,
-  tipsters: [],
-  picks: [],
-  userFollows: [],
-  currentView: 'dashboard',
-  currentTipsterId: null,
-  nextTipsterId: 1,
-  nextPickId: 1,
-  nextFollowId: 1,
-  charts: {},
-  dashboardFilters: {
-    sports: [],
-    channels: [],
-    yieldMin: -1000,
-    lastPickDays: 'all',
-    sortBy: 'yield',
-    searchQuery: ''
-  },
-  yieldDebounceTimer: null
-};
-
-const sportIcons = {
-  'Fútbol': '⚽',
-  'Baloncesto': '🏀',
-  'Tenis': '🎾',
-  'Fútbol Americano': '🏈',
-  'Hockey': '🏒',
-  'Béisbol': '⚾',
-  'Dardos': '🎯',
-  'Caballos': '🐴',
-  'Motor': '🏎️',
-  'Esports': '🎮',
-  'Fórmula 1': '🏁',
-  'Golf': '⛳',
-  'Rugby': '🏉',
-  'Cricket': '🏏',
-  'Tenis de mesa': '🏓',
-  'Otro': '🎲'
-};
-
-const allSports = ['Fútbol', 'Baloncesto', 'Tenis', 'Fútbol Americano', 'Hockey', 'Béisbol', 'Dardos', 'Caballos', 'Motor', 'Esports', 'Fórmula 1', 'Golf', 'Rugby', 'Cricket', 'Tenis de mesa', 'Otro'];
-
-const allChannels = ['BlogaBet', 'Telegram', 'TipsterLand', 'Twitter/X', 'Discord', 'Otro'];
-
-const allBookmakers = ['1xBet', 'Betfair', 'Bet365', 'William Hill', 'Marathonbet', '888', 'Bwin','Codere', 'Luckia', 'Sportium', 'Betsson', 'Betway', 'Interwetten','Kirolbet', 'Casumo', 'LeoVegas', 'Winamax', 'Paf', 'Pastón', 'Olybet','TonyBet', 'Marca Apuestas', 'Suertia', 'Yaas', 'Versus', 'Retabet','Opabets', 'Otro'];
-
 export {
   auth,
-  db,
-  state,
-  sportIcons,
-  allSports,
-  allChannels,
-  allBookmakers
+  db
 };

@@ -5,7 +5,8 @@
 
 import { initApp } from '../app.js';
 import {closeModal, showLoading} from '../utils/ui-helpers.js';
-import { auth, state } from './init.js';
+import { auth } from './init.js';
+import { state } from './state.js';
 
 function showAuthTab(tab) {
     const tabs = document.querySelectorAll('.auth-tab');
@@ -192,8 +193,6 @@ function setupAuthListeners() {
         e.preventDefault();
         showForgotPasswordModal();
     });
-
-    document.getElementById('signOutBtn')?.addEventListener('click', handleSignOut);
 }
 
 export {

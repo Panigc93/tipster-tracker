@@ -1245,7 +1245,7 @@ select.form-control {
   margin-bottom: 0;
 }
 /* ===== SEGUIBILIDAD STATS ===== */
-.seguibilidad-stats {
+.traceability-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: var(--space-16);
@@ -1286,7 +1286,7 @@ select.form-control {
 }
 
 /* ===== SEGUIBILIDAD SECTION ===== */
-.seguibilidad-section {
+.traceability-section {
   margin-top: var(--space-24);
   padding-top: var(--space-24);
   border-top: 2px solid var(--color-border);

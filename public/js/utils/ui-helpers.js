@@ -3,6 +3,9 @@
  * @module utils/ui-helpers
  */
 
+import { state } from "../core/state.js";
+import { sportIcons } from "../data/constants.js";
+
 function showLoading(show) {
   const overlay = document.getElementById('loadingOverlay');
   if (show) {
@@ -31,11 +34,6 @@ function toggleDropdown(dropdownId) {
   toggle.classList.toggle('active');
 }
 
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
-
 function switchViewUI(viewName) {
   const views = document.querySelectorAll('.view');
   views.forEach(view => view.classList.remove('active'));
@@ -54,8 +52,8 @@ function switchViewUI(viewName) {
     const tab2 = document.getElementById('tabAllPicks2');
     if (tab1) tab1.classList.remove('active');
     if (tab2) tab2.classList.add('active');
-  } else if (viewName === 'misPicks') {
-    document.getElementById('misPicksView').classList.add('active');
+  } else if (viewName === 'myPicks') {
+    document.getElementById('myPicksView').classList.add('active');
   } else if (viewName === 'tipsterDetail') {
     document.getElementById('tipsterDetailView').classList.add('active');
   }
@@ -112,14 +110,52 @@ function clearSearchUI() {
   document.getElementById('tipsterSearch').value = '';
 }
 
+function updatePickTipsterSelect() {
+  const select = document.getElementById('pickTipster');
+  select.innerHTML = '<option value="">Selecciona un tipster</option>' +
+    state.tipsters.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+}
+
+function updateFilterSelects() {
+  const tipsterFilter = document.getElementById('filterTipster');
+  tipsterFilter.innerHTML = '<option value="all">Todos los Tipsters</option>' +
+    state.tipsters.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+
+  const sports = [...new Set(state.picks.map(p => p.sport))];
+  const sportFilter = document.getElementById('filterSport');
+  sportFilter.innerHTML = '<option value="all">Todos los Deportes</option>' +
+    sports.map(s => {
+      const icon = sportIcons[s] || '🎲';
+      return `<option value="${s}">${icon} ${s}</option>`;
+    }).join('');
+  
+  const channels = [...new Set(state.tipsters.map(t => t.channel))];
+  const channelFilter = document.getElementById('filterChannel');
+  channelFilter.innerHTML = '<option value="all">Todos los Canales</option>' +
+    channels.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  const bookmakers = [...new Set(state.userFollows.map(f => f.userBookmaker).filter(b => b))];
+  const bookmakerFilter = document.getElementById('filterBookmaker');
+  bookmakerFilter.innerHTML = '<option value="all">Todas las Casas</option>' +
+    bookmakers.map(b => `<option value="${b}">${b}</option>`).join('');
+}
+
+function updateFollowFilterSelects() {
+  const tipsterFilter = document.getElementById('followFilterTipster');
+  tipsterFilter.innerHTML = '<option value="all">Todos los Tipsters</option>' +
+    state.tipsters.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+}
+
 export {
   showLoading,
   closeModal,
   toggleDropdown,
-  formatDate,
   switchViewUI,
   switchDetailTabUI,
   updateDropdownText,
   toggleFilterCheckboxUI,
-  clearSearchUI
+  clearSearchUI,
+  updatePickTipsterSelect,
+  updateFilterSelects,
+  updateFollowFilterSelects
 };
