@@ -25,7 +25,7 @@
 - **Arquitectura**: Feature-based con principios SOLID
 - **Estado**: Context API + Custom Hooks (preparado para Zustand/Redux si es necesario)
 - **UI**: Componentes React funcionales
-- **Estilos**: CSS Modules / Styled Components (manteniendo design system)
+- **Estilos**: Tailwind CSS (manteniendo design system)
 - **Routing**: React Router v6
 - **Testing**: Jest + React Testing Library
 
@@ -136,7 +136,7 @@ feature/
 #### [📖 Ver detalle completo de Fase 1](#fase-1-fundamentos-y-abstracciones-detallado)
 
 ### **FASE 2: Shared Components y Design System**
-- Migración del design system CSS a CSS Modules/Styled Components
+- Migración del design system CSS a Tailwind CSS
 - Creación de componentes UI base (Button, Input, Card, Modal, etc.)
 - Implementación de sistema de iconos (Lucide React)
 - Creación de layout components (Header, Sidebar, etc.)
@@ -370,6 +370,13 @@ npm install chart.js react-chartjs-2
 
 # Iconos
 npm install lucide-react
+
+# Tailwind CSS
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+
+# Utilidades para Tailwind
+npm install clsx tailwind-merge
 
 # Forms (opcional, recomendado)
 npm install react-hook-form
@@ -750,96 +757,250 @@ trim_trailing_whitespace = false
 
 ---
 
-### 4. Configuración del Design System
+### 4. Configuración de Tailwind CSS
 
-#### 4.1 Migración de Variables CSS
-**Crear `src/styles/variables.css`:**
-```css
-/* Copiar del style.css actual */
-:root {
-  /* Colores */
-  --color-primary: #3B82F6;
-  --color-background: #0F172A;
-  --color-surface: #1E293B;
-  --color-text: #E0E0E0;
-  --color-success: #10B981;
-  --color-error: #EF4444;
-  --color-warning: #F59E0B;
-  --color-info: #6B7280;
-  
-  /* Typography */
-  --font-family: 'FKGroteskNeue', 'Geist', 'Inter', sans-serif;
-  --font-mono: 'Berkeley Mono', monospace;
-  --font-size-xs: 11px;
-  --font-size-sm: 13px;
-  --font-size-base: 14px;
-  --font-size-lg: 16px;
-  --font-size-xl: 18px;
-  --font-size-2xl: 20px;
-  --font-size-3xl: 24px;
-  --font-size-4xl: 30px;
-  
-  /* Spacing */
-  --space-1: 1px;
-  --space-4: 4px;
-  --space-8: 8px;
-  --space-12: 12px;
-  --space-16: 16px;
-  --space-20: 20px;
-  --space-24: 24px;
-  --space-32: 32px;
-  
-  /* Border radius */
-  --radius-sm: 6px;
-  --radius-base: 8px;
-  --radius-md: 10px;
-  --radius-lg: 12px;
-  --radius-full: 9999px;
-  
-  /* Shadows */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  
-  /* Animations */
-  --transition-fast: 150ms;
-  --transition-normal: 250ms;
-  --transition-slow: 400ms;
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+#### 4.1 Configuración de tailwind.config.js
+**Archivo `tailwind.config.js`:**
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3B82F6',
+        background: '#0F172A',
+        surface: '#1E293B',
+        text: '#E0E0E0',
+        success: '#10B981',
+        error: '#EF4444',
+        warning: '#F59E0B',
+        info: '#6B7280',
+      },
+      fontFamily: {
+        sans: ['FKGroteskNeue', 'Geist', 'Inter', 'sans-serif'],
+        mono: ['Berkeley Mono', 'monospace'],
+      },
+      fontSize: {
+        xs: '11px',
+        sm: '13px',
+        base: '14px',
+        lg: '16px',
+        xl: '18px',
+        '2xl': '20px',
+        '3xl': '24px',
+        '4xl': '30px',
+      },
+      spacing: {
+        '1': '1px',
+        '4': '4px',
+        '8': '8px',
+        '12': '12px',
+        '16': '16px',
+        '20': '20px',
+        '24': '24px',
+        '32': '32px',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'base': '8px',
+        'md': '10px',
+        'lg': '12px',
+        'full': '9999px',
+      },
+      boxShadow: {
+        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        'sm': '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+        'md': '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+      },
+      transitionDuration: {
+        'fast': '150ms',
+        'normal': '250ms',
+        'slow': '400ms',
+      },
+      transitionTimingFunction: {
+        'custom': 'cubic-bezier(0.16, 1, 0.3, 1)',
+      },
+    },
+  },
+  plugins: [],
 }
 ```
 
-#### 4.2 CSS Modules vs Styled Components
-**Decisión: CSS Modules (mantiene coherencia con CSS actual)**
+#### 4.2 Configuración de PostCSS
+**Archivo `postcss.config.js` (generado automáticamente):**
+```javascript
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+```
 
-**Configuración en Vite (ya incluida por defecto):**
-- Archivos `.module.css` se tratan como CSS Modules
-- Scope local automático
-- TypeScript support con vite-plugin-css-modules
+#### 4.3 Archivo de Estilos Principal
+**Crear `src/styles/index.css`:**
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos base personalizados */
+@layer base {
+  body {
+    @apply bg-background text-text font-sans antialiased;
+  }
+
+  /* Scrollbar personalizado */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-surface;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/50 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary;
+  }
+}
+
+/* Componentes reutilizables con @layer */
+@layer components {
+  .btn {
+    @apply px-24 py-12 rounded-base font-medium transition-all duration-normal;
+    @apply hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-white;
+  }
+
+  .btn-secondary {
+    @apply btn bg-surface text-text border border-primary/20;
+  }
+
+  .btn-outline {
+    @apply btn bg-transparent text-primary border border-primary hover:bg-primary hover:text-white;
+  }
+
+  .btn-danger {
+    @apply btn bg-error text-white;
+  }
+
+  .card {
+    @apply bg-surface rounded-lg border border-primary/10 p-16 shadow-sm;
+    @apply hover:shadow-md transition-shadow duration-normal;
+  }
+
+  .input {
+    @apply w-full px-12 py-8 bg-surface text-text rounded-base;
+    @apply border border-primary/20 focus:border-primary focus:ring-2 focus:ring-primary/20;
+    @apply outline-none transition-all duration-fast;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-text/80 mb-4;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center px-8 py-4 rounded-full text-xs font-medium;
+  }
+
+  .status-success {
+    @apply status-badge bg-success/10 text-success border border-success/20;
+  }
+
+  .status-error {
+    @apply status-badge bg-error/10 text-error border border-error/20;
+  }
+
+  .status-warning {
+    @apply status-badge bg-warning/10 text-warning border border-warning/20;
+  }
+
+  .status-info {
+    @apply status-badge bg-info/10 text-info border border-info/20;
+  }
+}
+
+/* Utilidades personalizadas */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+```
+
+#### 4.4 Utilidad cn() para Combinar Clases
+**Crear `src/shared/utils/cn.ts`:**
+```typescript
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+/**
+ * Combina clases de Tailwind resolviendo conflictos
+ * Usa clsx para condicionales y twMerge para resolver conflictos
+ * 
+ * @example
+ * cn('px-2 py-1', condition && 'bg-primary', { 'text-white': isActive })
+ */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
 
 **Ejemplo de uso:**
 ```typescript
-// Button.module.css
-.button {
-  padding: var(--space-12) var(--space-24);
-  border-radius: var(--radius-base);
-  transition: all var(--transition-normal) var(--ease);
-}
+import { cn } from '@shared/utils/cn';
 
-.button--primary {
-  background-color: var(--color-primary);
-  color: white;
-}
-
-// Button.tsx
-import styles from './Button.module.css'
-
-export const Button = ({ variant = 'primary', children }) => (
-  <button className={`${styles.button} ${styles[`button--${variant}`]}`}>
+export const Button = ({ variant = 'primary', className, children }) => (
+  <button
+    className={cn(
+      'btn',
+      variant === 'primary' && 'btn-primary',
+      variant === 'secondary' && 'btn-secondary',
+      className
+    )}
+  >
     {children}
   </button>
-)
+);
+```
+
+#### 4.5 Configurar IntelliSense para Tailwind
+**Archivo `.vscode/settings.json`:**
+```json
+{
+  "tailwindCSS.experimental.classRegex": [
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"]
+  ],
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "css.validate": false,
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  }
+}
 ```
 
 ---
@@ -1018,9 +1179,9 @@ Usar Vite como bundler y dev server.
    - Contras: Builds lentos, menos flexible, proyecto en mantenimiento
 ```
 
-**ADR-002: CSS Modules sobre Styled Components**
+**ADR-002: Tailwind CSS como Solución de Estilos**
 ```markdown
-# 2. Uso de CSS Modules en lugar de Styled Components
+# 2. Uso de Tailwind CSS para simplificar desarrollo
 
 Fecha: 2025-11-13
 
@@ -1028,31 +1189,53 @@ Fecha: 2025-11-13
 Aceptado
 
 ## Contexto
-El proyecto actual usa CSS vanilla con variables CSS. Necesitamos decidir cómo manejar estilos en React.
+El proyecto actual usa CSS vanilla con variables CSS. Necesitamos decidir cómo manejar estilos en React de manera que simplifique el desarrollo y mantenga el design system.
 
 ## Decisión
-Usar CSS Modules para mantener coherencia con el design system actual.
+Usar Tailwind CSS con configuración personalizada que preserva todo el design system actual.
 
 ## Consecuencias
 ### Positivas
-- Migración más directa del CSS existente
-- Mantiene variables CSS del design system
-- Scope local sin runtime overhead
-- Type-safe con TypeScript
-- Menor bundle size que CSS-in-JS
+- Desarrollo más rápido con utility classes
+- No necesidad de crear archivos CSS separados
+- Design system completo configurado en tailwind.config.js
+- Purge automático de CSS no utilizado
+- Excelente DX con IntelliSense
+- Responsive design simplificado
+- Sin runtime overhead (CSS estático)
+- Comunidad muy activa y documentación excelente
 
 ### Negativas
-- No tiene props dinámicos nativos (se puede resolver con CSS variables)
-- Menos features que Styled Components
+- Clases largas en algunos componentes (se mitiga con cn() utility)
+- Curva de aprendizaje inicial para el equipo
+- Requiere configuración para mantener design system actual
+
+### Riesgos
+- HTML con muchas clases puede ser menos legible (mitigado con componentes reutilizables)
 
 ## Alternativas Consideradas
-1. Styled Components
-   - Pros: Props dinámicos, theming, popular
-   - Contras: Runtime overhead, migración más compleja
-   
-2. Tailwind CSS
-   - Pros: Utility-first, muy popular
-   - Contras: Cambio radical de paradigma, pérdida del design system actual
+1. CSS Modules
+   - Pros: Scope local, migración directa del CSS existente
+   - Contras: Archivos separados, menos productivo, más código
+
+2. Styled Components
+   - Pros: CSS-in-JS, props dinámicos, popular
+   - Contras: Runtime overhead, bundle size mayor, complejidad adicional
+
+3. Vanilla CSS
+   - Pros: Familiar, sin dependencias
+   - Contras: No escalable, difícil mantenimiento, scope global
+
+## Implementación
+Se preserva el design system actual mediante configuración personalizada:
+- Colores: primary, background, surface, text, success, error, warning, info
+- Typography: FKGroteskNeue, tamaños personalizados
+- Spacing: 1px, 4px, 8px, 12px, 16px, 20px, 24px, 32px
+- Border radius: sm, base, md, lg, full
+- Shadows: xs, sm, md, lg
+- Transitions: fast, normal, slow
+
+Se utiliza utility cn() (clsx + tailwind-merge) para combinar clases sin conflictos.
 ```
 
 **ADR-003: Feature-Based Architecture**
@@ -1142,7 +1325,7 @@ npm run format
 - **Commits**: Conventional Commits
 - **Naming**: PascalCase para componentes, camelCase para funciones/variables
 - **Testing**: Vitest + React Testing Library
-- **Estilos**: CSS Modules con variables CSS
+- **Estilos**: Tailwind CSS con configuración personalizada
 
 ## Migración
 
@@ -1258,10 +1441,8 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 
-// Estilos globales
-import '@styles/reset.css'
-import '@styles/variables.css'
-import '@styles/global.css'
+// Tailwind CSS
+import './styles/index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -1276,9 +1457,17 @@ import { FC } from 'react'
 
 const App: FC = () => {
   return (
-    <div className="app">
-      <h1>Tipster Tracker - React Migration</h1>
-      <p>Phase 0: Setup Complete ✅</p>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-primary mb-4">
+          Tipster Tracker - React Migration
+        </h1>
+        <p className="text-lg text-text">Phase 0: Setup Complete ✅</p>
+        <div className="mt-8 flex gap-4 justify-center">
+          <button className="btn btn-primary">Primary Button</button>
+          <button className="btn btn-secondary">Secondary Button</button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -1333,6 +1522,16 @@ foreach ($folder in $folders) {
 - [ ] firebase.json actualizado para servir React app
 - [ ] Verificado que emuladores funcionan
 
+#### ✅ Tailwind CSS
+- [ ] Tailwind CSS y PostCSS instalados
+- [ ] tailwind.config.js configurado con design system completo
+- [ ] postcss.config.js creado
+- [ ] src/styles/index.css con @tailwind directives y custom @layer
+- [ ] Utility cn() creada en src/shared/utils/cn.ts
+- [ ] IntelliSense de Tailwind funcionando en VS Code
+- [ ] Clases de Tailwind aplicándose correctamente
+- [ ] Custom components en @layer funcionando
+
 ---
 
 ### 10. Comandos de Verificación Final
@@ -1350,13 +1549,19 @@ npm run format
 # 4. Verificar build
 npm run build
 
-# 5. Verificar que dev server funciona
+# 5. Verificar que dev server funciona y Tailwind está aplicando estilos
 npm run dev
-# Abrir http://localhost:3000 y verificar "Phase 0: Setup Complete ✅"
+# Abrir http://localhost:3000 y verificar:
+# - "Phase 0: Setup Complete ✅" visible
+# - Botones con estilos de Tailwind (azul primary, gris secondary)
+# - Background oscuro (#0F172A)
+# - Texto en color claro (#E0E0E0)
+# - Hover en botones funciona
+# - Inspeccionar elemento y ver clases de Tailwind aplicadas
 
 # 6. Verificar Git hooks
 git add .
-git commit -m "feat: complete phase 0 setup"
+git commit -m "feat: complete phase 0 setup with tailwind css"
 # Verificar que lint-staged se ejecuta
 
 # 7. Verificar Firebase emulators
@@ -1404,6 +1609,44 @@ Una vez completada la Fase 0:
 - [Feature Sliced Design](https://feature-sliced.design/)
 - [Bulletproof React](https://github.com/alan2207/bulletproof-react)
 
+#### Tailwind CSS
+- [Tailwind CSS Docs](https://tailwindcss.com/docs)
+- [Tailwind CSS with Vite](https://tailwindcss.com/docs/guides/vite)
+- [Tailwind CSS Best Practices](https://tailwindcss.com/docs/reusing-styles)
+- [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)
+- [cn() utility pattern](https://ui.shadcn.com/docs/installation/manual#add-a-cn-helper)
+
+---
+
+### 13. Resumen de Fase 0
+
+**✅ Completado:**
+- Proyecto React + TypeScript + Vite configurado
+- **Tailwind CSS** instalado y configurado con design system completo
+- ESLint, Prettier, Husky configurados
+- Estructura de carpetas feature-based creada
+- Path aliases configurados
+- Firebase configurado con emuladores
+- ADRs documentados (incluyendo decisión de Tailwind CSS)
+- README.md y documentación inicial
+
+**🎨 Decisión Clave: Tailwind CSS**
+- Migración de CSS Modules a Tailwind CSS para simplificar desarrollo
+- Design system actual preservado en `tailwind.config.js`
+- Utility `cn()` creada para combinar clases sin conflictos
+- IntelliSense configurado para desarrollo eficiente
+
+**📦 Archivos Clave Creados:**
+- `tailwind.config.js` - Configuración completa del design system
+- `postcss.config.js` - Configuración de PostCSS
+- `src/styles/index.css` - Tailwind directives + custom components
+- `src/shared/utils/cn.ts` - Utility para combinar clases
+- `src/core/config/firebase.config.ts` - Configuración Firebase
+
+**⏱️ Duración Real:** 8-12 horas
+
+**➡️ Próxima Fase:** Fase 1 - Fundamentos y Abstracciones
+
 ---
 
 ## ✅ Criterios de Éxito de Fase 0
@@ -1412,9 +1655,10 @@ La Fase 0 se considera **completada** cuando:
 
 1. ✅ Todos los ítems del checklist están marcados
 2. ✅ Todos los comandos de verificación ejecutan sin errores
-3. ✅ El equipo ha revisado y aprobado el setup
-4. ✅ La documentación está completa y actualizada
-5. ✅ El branch está mergeado a `develop-react`
+3. ✅ Tailwind CSS funcionando correctamente con IntelliSense
+4. ✅ El equipo ha revisado y aprobado el setup
+5. ✅ La documentación está completa y actualizada
+6. ✅ El branch está mergeado a `develop-react`
 
 ---
 
@@ -3142,276 +3386,54 @@ La Fase 1 se considera **completada** cuando:
 
 **Nota**: Esta fase se centra exclusivamente en componentes visuales sin lógica de negocio. Todos los componentes deben ser "tontos" (presentational components).
 
+**Importante**: Todos los componentes usarán **Tailwind CSS** con utility classes. No se crearán archivos `.module.css`. Se utilizará la función `cn()` para combinar clases.
+
 ---
 
-### 1. Migración del Design System a CSS Modules
+### 1. Componentes con Tailwind CSS
 
-#### 1.1 Estructura de Estilos
-```
-src/styles/
-├── reset.css              # CSS reset
-├── variables.css          # Variables CSS (ya creado en Fase 0)
-├── global.css             # Estilos globales
-└── mixins.css             # Mixins reutilizables (opcional)
-```
+#### 1.1 Patrón de Componentes
+Todos los componentes seguirán este patrón:
+- Usar utility classes de Tailwind directamente
+- Utilizar la función `cn()` para combinar clases condicionales
+- Aprovechar las clases custom del `@layer components` cuando sea necesario
+- Mantener componentes pequeños y reutilizables
 
-#### 1.2 CSS Reset
-**Archivo `src/styles/reset.css`:**
-```css
-/* Modern CSS Reset */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+#### 1.2 Ejemplo de uso de cn()
+**Recordatorio de la función `cn()` (ya creada en Fase 0):**
+```typescript
+import { cn } from '@shared/utils/cn';
 
-* {
-  margin: 0;
-  padding: 0;
-}
+// Ejemplo 1: Clases condicionales
+<button
+  className={cn(
+    'btn btn-primary',
+    isLoading && 'opacity-50 cursor-not-allowed',
+    fullWidth && 'w-full'
+  )}
+>
+  Click me
+</button>
 
-html,
-body {
-  height: 100%;
-}
-
-body {
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-img,
-picture,
-video,
-canvas,
-svg {
-  display: block;
-  max-width: 100%;
-}
-
-input,
-button,
-textarea,
-select {
-  font: inherit;
-}
-
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  overflow-wrap: break-word;
-}
-
-#root {
-  isolation: isolate;
-  height: 100%;
-}
-```
-
-#### 1.3 Global Styles
-**Archivo `src/styles/global.css`:**
-```css
-@import './reset.css';
-@import './variables.css';
-
-body {
-  font-family: var(--font-family);
-  font-size: var(--font-size-base);
-  color: var(--color-text);
-  background-color: var(--color-background);
-}
-
-/* Utility classes */
-.flex {
-  display: flex;
-}
-
-.flex-col {
-  flex-direction: column;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.gap-8 {
-  gap: var(--space-8);
-}
-
-.gap-16 {
-  gap: var(--space-16);
-}
-
-.gap-24 {
-  gap: var(--space-24);
-}
-
-/* Text utilities */
-.text-center {
-  text-align: center;
-}
-
-.text-sm {
-  font-size: var(--font-size-sm);
-}
-
-.text-lg {
-  font-size: var(--font-size-lg);
-}
-
-.font-bold {
-  font-weight: 600;
-}
-
-/* Color utilities */
-.text-success {
-  color: var(--color-success);
-}
-
-.text-error {
-  color: var(--color-error);
-}
-
-.text-warning {
-  color: var(--color-warning);
-}
-
-/* Number formatting */
-.positive {
-  color: var(--color-success);
-}
-
-.negative {
-  color: var(--color-error);
-}
-
-/* Visually hidden (accessibility) */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
+// Ejemplo 2: Variantes
+<div
+  className={cn(
+    'px-4 py-2 rounded',
+    variant === 'primary' && 'bg-primary text-white',
+    variant === 'secondary' && 'bg-surface text-text'
+  )}
+/>
 ```
 
 ---
 
-### 2. Componentes UI Base
+### 2. Componentes UI Base con Tailwind CSS
 
 #### 2.1 Button Component
-**Archivo `src/shared/components/ui/Button/Button.module.css`:**
-```css
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-8);
-  padding: var(--space-12) var(--space-24);
-  border: none;
-  border-radius: var(--radius-base);
-  font-size: var(--font-size-base);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-normal) var(--ease);
-  white-space: nowrap;
-  user-select: none;
-}
-
-.button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.button:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-/* Variants */
-.primary {
-  background-color: var(--color-primary);
-  color: white;
-}
-
-.primary:hover:not(:disabled) {
-  background-color: #2563EB;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.secondary {
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.secondary:hover:not(:disabled) {
-  background-color: #334155;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.outline {
-  background-color: transparent;
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-}
-
-.outline:hover:not(:disabled) {
-  background-color: rgba(59, 130, 246, 0.1);
-}
-
-.danger {
-  background-color: var(--color-error);
-  color: white;
-}
-
-.danger:hover:not(:disabled) {
-  background-color: #DC2626;
-}
-
-/* Sizes */
-.sm {
-  padding: var(--space-8) var(--space-16);
-  font-size: var(--font-size-sm);
-}
-
-.lg {
-  padding: var(--space-16) var(--space-32);
-  font-size: var(--font-size-lg);
-}
-
-.fullWidth {
-  width: 100%;
-}
-
-.iconOnly {
-  padding: var(--space-12);
-  aspect-ratio: 1;
-}
-```
-
 **Archivo `src/shared/components/ui/Button/Button.tsx`:**
 ```typescript
 import { FC, ButtonHTMLAttributes, ReactNode } from 'react';
-import styles from './Button.module.css';
+import { cn } from '@shared/utils/cn';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'danger';
@@ -3422,7 +3444,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /**
- * Componente Button reutilizable
+ * Componente Button reutilizable con Tailwind CSS
  * Aplica SRP: solo renderiza un botón con estilos
  */
 export const Button: FC<ButtonProps> = ({
@@ -3430,23 +3452,39 @@ export const Button: FC<ButtonProps> = ({
   size = 'base',
   fullWidth = false,
   iconOnly = false,
-  className = '',
+  className,
   children,
   ...props
 }) => {
-  const classNames = [
-    styles.button,
-    styles[variant],
-    size !== 'base' && styles[size],
-    fullWidth && styles.fullWidth,
-    iconOnly && styles.iconOnly,
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
-    <button className={classNames} {...props}>
+    <button
+      className={cn(
+        // Estilos base
+        'inline-flex items-center justify-center gap-2',
+        'rounded-base font-medium whitespace-nowrap select-none',
+        'transition-all duration-normal',
+        'disabled:opacity-50 disabled:cursor-not-allowed',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+        
+        // Variantes
+        variant === 'primary' && 'btn-primary',
+        variant === 'secondary' && 'btn-secondary',
+        variant === 'outline' && 'btn-outline',
+        variant === 'danger' && 'btn-danger',
+        
+        // Tamaños
+        size === 'sm' && 'px-16 py-8 text-sm',
+        size === 'base' && 'px-24 py-12 text-base',
+        size === 'lg' && 'px-32 py-16 text-lg',
+        
+        // Modificadores
+        fullWidth && 'w-full',
+        iconOnly && 'p-12 aspect-square',
+        
+        className
+      )}
+      {...props}
+    >
       {children}
     </button>
   );
@@ -3460,7 +3498,7 @@ export type { ButtonProps } from './Button';
 ```
 
 #### 2.2 Input Component
-**Archivo `src/shared/components/ui/Input/Input.module.css`:**
+**Archivo `src/shared/components/ui/Input/Input.tsx`:**
 ```css
 .wrapper {
   display: flex;
@@ -3545,7 +3583,7 @@ export type { ButtonProps } from './Button';
 **Archivo `src/shared/components/ui/Input/Input.tsx`:**
 ```typescript
 import { FC, InputHTMLAttributes, ReactNode } from 'react';
-import styles from './Input.module.css';
+import { cn } from '@shared/utils/cn';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -3555,7 +3593,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 /**
- * Componente Input reutilizable
+ * Componente Input reutilizable con Tailwind CSS
  */
 export const Input: FC<InputProps> = ({
   label,
@@ -3563,32 +3601,36 @@ export const Input: FC<InputProps> = ({
   helperText,
   icon,
   required,
-  className = '',
+  className,
   ...props
 }) => {
-  const inputClasses = [
-    styles.input,
-    icon && styles.withIcon,
-    error && styles.error,
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
-    <div className={styles.wrapper}>
+    <div className="flex flex-col gap-1 w-full">
       {label && (
-        <label className={`${styles.label} ${required ? styles.required : ''}`}>
+        <label className="text-sm font-medium text-text">
           {label}
+          {required && <span className="text-error"> *</span>}
         </label>
       )}
-      <div className={styles.inputContainer}>
-        {icon && <span className={styles.icon}>{icon}</span>}
-        <input className={inputClasses} {...props} />
+      <div className="relative flex items-center">
+        {icon && (
+          <span className="absolute left-12 text-info pointer-events-none">
+            {icon}
+          </span>
+        )}
+        <input
+          className={cn(
+            'input',
+            icon && 'pl-32',
+            error && 'border-error focus:border-error focus:ring-error/20',
+            className
+          )}
+          {...props}
+        />
       </div>
-      {error && <span className={styles.errorMessage}>{error}</span>}
+      {error && <span className="text-xs text-error">{error}</span>}
       {helperText && !error && (
-        <span className={styles.helperText}>{helperText}</span>
+        <span className="text-xs text-info">{helperText}</span>
       )}
     </div>
   );
@@ -3602,46 +3644,10 @@ export type { InputProps } from './Input';
 ```
 
 #### 2.3 Card Component
-**Archivo `src/shared/components/ui/Card/Card.module.css`:**
-```css
-.card {
-  background-color: var(--color-surface);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  transition: all var(--transition-normal) var(--ease);
-}
-
-.clickable {
-  cursor: pointer;
-}
-
-.clickable:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-.header {
-  padding: var(--space-20) var(--space-24);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.body {
-  padding: var(--space-24);
-}
-
-.footer {
-  padding: var(--space-16) var(--space-24);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  background-color: rgba(0, 0, 0, 0.2);
-}
-```
-
 **Archivo `src/shared/components/ui/Card/Card.tsx`:**
 ```typescript
 import { FC, ReactNode, HTMLAttributes } from 'react';
-import styles from './Card.module.css';
+import { cn } from '@shared/utils/cn';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -3653,24 +3659,23 @@ export interface CardSectionProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * Componente Card principal
+ * Componente Card principal con Tailwind CSS
  */
 export const Card: FC<CardProps> = ({
   children,
   clickable = false,
-  className = '',
+  className,
   ...props
 }) => {
-  const classNames = [
-    styles.card,
-    clickable && styles.clickable,
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
-    <div className={classNames} {...props}>
+    <div
+      className={cn(
+        'card',
+        clickable && 'cursor-pointer hover:border-white/10 hover:shadow-md hover:-translate-y-0.5',
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -3681,11 +3686,17 @@ export const Card: FC<CardProps> = ({
  */
 export const CardHeader: FC<CardSectionProps> = ({
   children,
-  className = '',
+  className,
   ...props
 }) => {
   return (
-    <div className={`${styles.header} ${className}`} {...props}>
+    <div
+      className={cn(
+        'px-24 py-20 border-b border-white/5',
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -3696,11 +3707,11 @@ export const CardHeader: FC<CardSectionProps> = ({
  */
 export const CardBody: FC<CardSectionProps> = ({
   children,
-  className = '',
+  className,
   ...props
 }) => {
   return (
-    <div className={`${styles.body} ${className}`} {...props}>
+    <div className={cn('p-24', className)} {...props}>
       {children}
     </div>
   );
@@ -3711,11 +3722,17 @@ export const CardBody: FC<CardSectionProps> = ({
  */
 export const CardFooter: FC<CardSectionProps> = ({
   children,
-  className = '',
+  className,
   ...props
 }) => {
   return (
-    <div className={`${styles.footer} ${className}`} {...props}>
+    <div
+      className={cn(
+        'px-24 py-16 border-t border-white/5 bg-black/20',
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -3729,102 +3746,11 @@ export type { CardProps, CardSectionProps } from './Card';
 ```
 
 #### 2.4 Modal Component
-**Archivo `src/shared/components/ui/Modal/Modal.module.css`:**
-```css
-.overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: var(--space-16);
-  opacity: 0;
-  animation: fadeIn var(--transition-normal) var(--ease) forwards;
-}
-
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
-}
-
-.content {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transform: scale(0.95);
-  animation: scaleIn var(--transition-normal) var(--ease) forwards;
-}
-
-@keyframes scaleIn {
-  to {
-    transform: scale(1);
-  }
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-20) var(--space-24);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.title {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.closeButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  color: var(--color-info);
-  border-radius: var(--radius-base);
-  cursor: pointer;
-  transition: all var(--transition-fast) var(--ease);
-}
-
-.closeButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--color-text);
-}
-
-.body {
-  padding: var(--space-24);
-  overflow-y: auto;
-  flex: 1;
-}
-
-.footer {
-  display: flex;
-  gap: var(--space-12);
-  justify-content: flex-end;
-  padding: var(--space-16) var(--space-24);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-```
-
 **Archivo `src/shared/components/ui/Modal/Modal.tsx`:**
 ```typescript
 import { FC, ReactNode, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import styles from './Modal.module.css';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -3835,7 +3761,7 @@ export interface ModalProps {
 }
 
 /**
- * Componente Modal reutilizable
+ * Componente Modal reutilizable con Tailwind CSS
  * Se renderiza en un portal para evitar problemas de z-index
  */
 export const Modal: FC<ModalProps> = ({
@@ -3873,13 +3799,19 @@ export const Modal: FC<ModalProps> = ({
   if (!isOpen) return null;
 
   const modalContent = (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.content} onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[1000] p-16 animate-in fade-in duration-normal"
+      onClick={onClose}
+    >
+      <div
+        className="bg-surface rounded-lg shadow-lg max-w-[600px] w-full max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-normal"
+        onClick={(e) => e.stopPropagation()}
+      >
         {title && (
-          <div className={styles.header}>
-            <h2 className={styles.title}>{title}</h2>
+          <div className="flex items-center justify-between px-24 py-20 border-b border-white/5">
+            <h2 className="text-xl font-semibold text-text">{title}</h2>
             <button
-              className={styles.closeButton}
+              className="flex items-center justify-center w-8 h-8 border-0 bg-transparent text-info rounded-base cursor-pointer transition-all duration-fast hover:bg-white/10 hover:text-text"
               onClick={onClose}
               aria-label="Cerrar modal"
             >
@@ -3887,8 +3819,12 @@ export const Modal: FC<ModalProps> = ({
             </button>
           </div>
         )}
-        <div className={styles.body}>{children}</div>
-        {footer && <div className={styles.footer}>{footer}</div>}
+        <div className="p-24 overflow-y-auto flex-1">{children}</div>
+        {footer && (
+          <div className="flex gap-3 justify-end px-24 py-16 border-t border-white/5">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -3904,77 +3840,10 @@ export type { ModalProps } from './Modal';
 ```
 
 #### 2.5 Select Component
-**Archivo `src/shared/components/ui/Select/Select.module.css`:**
-```css
-.wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  width: 100%;
-}
-
-.label {
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-.required::after {
-  content: ' *';
-  color: var(--color-error);
-}
-
-.select {
-  width: 100%;
-  padding: var(--space-12) var(--space-16);
-  background-color: var(--color-surface);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-base);
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-  cursor: pointer;
-  transition: all var(--transition-normal) var(--ease);
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right var(--space-12) center;
-  padding-right: var(--space-32);
-}
-
-.select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.select:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.select option {
-  background-color: var(--color-surface);
-  color: var(--color-text);
-}
-
-.error {
-  border-color: var(--color-error);
-}
-
-.error:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
-
-.errorMessage {
-  font-size: var(--font-size-xs);
-  color: var(--color-error);
-}
-```
-
 **Archivo `src/shared/components/ui/Select/Select.tsx`:**
 ```typescript
 import { FC, SelectHTMLAttributes } from 'react';
-import styles from './Select.module.css';
+import { cn } from '@shared/utils/cn';
 
 export interface SelectOption {
   value: string;
@@ -3989,7 +3858,7 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 /**
- * Componente Select reutilizable
+ * Componente Select reutilizable con Tailwind CSS
  */
 export const Select: FC<SelectProps> = ({
   label,
@@ -3997,36 +3866,30 @@ export const Select: FC<SelectProps> = ({
   options,
   placeholder,
   required,
-  className = '',
+  className,
   ...props
 }) => {
-  const selectClasses = [styles.select, error && styles.error, className]
-    .filter(Boolean)
-    .join(' ');
-
   return (
-    <div className={styles.wrapper}>
+    <div className="flex flex-col gap-1 w-full">
       {label && (
-        <label className={`${styles.label} ${required ? styles.required : ''}`}>
+        <label className="text-sm font-medium text-text">
           {label}
+          {required && <span className="text-error"> *</span>}
         </label>
       )}
-      <select className={selectClasses} {...props}>
-        {placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
+      <select
+        className={cn(
+          'w-full px-16 py-12 bg-surface border border-white/10 rounded-base',
+          'text-text text-base cursor-pointer transition-all duration-normal',
+          'appearance-none bg-[url(\"data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'16\\' height=\\'16\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%236B7280\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E\")]',
+          'bg-no-repeat bg-[right_12px_center] pr-32',
+          'focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20',
+          'disabled:opacity-50 disabled:cursor-not-allowed',
+          error && 'border-error focus:border-error focus:ring-error/20',
+          className
         )}
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      {error && <span className={styles.errorMessage}>{error}</span>}
-    </div>
-  );
-};
+        {...props}
+      >\n        {placeholder && (\n          <option value=\"\" disabled>\n            {placeholder}\n          </option>\n        )}\n        {options.map((option) => (\n          <option key={option.value} value={option.value}>\n            {option.label}\n          </option>\n        ))}\n      </select>\n      {error && <span className=\"text-xs text-error\">{error}</span>}\n    </div>\n  );\n};
 ```
 
 **Archivo `src/shared/components/ui/Select/index.ts`:**
@@ -4036,53 +3899,10 @@ export type { SelectProps, SelectOption } from './Select';
 ```
 
 #### 2.6 Badge Component
-**Archivo `src/shared/components/ui/Badge/Badge.module.css`:**
-```css
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-4) var(--space-12);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: 550;
-  white-space: nowrap;
-}
-
-.success {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: var(--color-success);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.error {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--color-error);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.warning {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
-  border: 1px solid rgba(245, 158, 11, 0.2);
-}
-
-.info {
-  background-color: rgba(107, 114, 128, 0.1);
-  color: var(--color-info);
-  border: 1px solid rgba(107, 114, 128, 0.2);
-}
-
-.primary {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: var(--color-primary);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-```
-
 **Archivo `src/shared/components/ui/Badge/Badge.tsx`:**
 ```typescript
 import { FC, ReactNode } from 'react';
-import styles from './Badge.module.css';
+import { cn } from '@shared/utils/cn';
 
 export interface BadgeProps {
   variant?: 'success' | 'error' | 'warning' | 'info' | 'primary';
@@ -4091,18 +3911,28 @@ export interface BadgeProps {
 }
 
 /**
- * Componente Badge para estados y etiquetas
+ * Componente Badge para estados y etiquetas con Tailwind CSS
  */
 export const Badge: FC<BadgeProps> = ({
   variant = 'primary',
   children,
-  className = '',
+  className,
 }) => {
-  const classNames = [styles.badge, styles[variant], className]
-    .filter(Boolean)
-    .join(' ');
-
-  return <span className={classNames}>{children}</span>;
+  return (
+    <span
+      className={cn(
+        'status-badge',
+        variant === 'success' && 'status-success',
+        variant === 'error' && 'status-error',
+        variant === 'warning' && 'status-warning',
+        variant === 'info' && 'status-info',
+        variant === 'primary' && 'bg-primary/10 text-primary border border-primary/20',
+        className
+      )}
+    >
+      {children}
+    </span>
+  );
 };
 ```
 
@@ -4139,66 +3969,24 @@ export type { BadgeProps } from './Badge';
 ### 3. Componentes de Feedback
 
 #### 3.1 Loading Component
-**Archivo `src/shared/components/feedback/Loading/Loading.module.css`:**
-```css
-.overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-16);
-}
-
-.text {
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-}
-```
-
 **Archivo `src/shared/components/feedback/Loading/Loading.tsx`:**
 ```typescript
 import { FC } from 'react';
 import { createPortal } from 'react-dom';
-import styles from './Loading.module.css';
 
 export interface LoadingProps {
   text?: string;
 }
 
 /**
- * Componente Loading overlay
+ * Componente Loading overlay con Tailwind CSS
  */
 export const Loading: FC<LoadingProps> = ({ text = 'Cargando...' }) => {
   const content = (
-    <div className={styles.overlay}>
-      <div className={styles.content}>
-        <div className={styles.spinner} />
-        {text && <p className={styles.text}>{text}</p>}
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-white/10 border-t-primary rounded-full animate-spin" />
+        {text && <p className="text-text text-base">{text}</p>}
       </div>
     </div>
   );
@@ -4214,47 +4002,9 @@ export type { LoadingProps } from './Loading';
 ```
 
 #### 3.2 EmptyState Component
-**Archivo `src/shared/components/feedback/EmptyState/EmptyState.module.css`:**
-```css
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-32);
-  text-align: center;
-  color: var(--color-info);
-}
-
-.icon {
-  margin-bottom: var(--space-16);
-  color: var(--color-info);
-  opacity: 0.5;
-}
-
-.title {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: var(--space-8);
-}
-
-.description {
-  font-size: var(--font-size-base);
-  color: var(--color-info);
-  margin-bottom: var(--space-24);
-  max-width: 400px;
-}
-
-.action {
-  margin-top: var(--space-16);
-}
-```
-
 **Archivo `src/shared/components/feedback/EmptyState/EmptyState.tsx`:**
 ```typescript
 import { FC, ReactNode } from 'react';
-import styles from './EmptyState.module.css';
 
 export interface EmptyStateProps {
   icon?: ReactNode;
@@ -4264,7 +4014,7 @@ export interface EmptyStateProps {
 }
 
 /**
- * Componente para mostrar estado vacío
+ * Componente para mostrar estado vacío con Tailwind CSS
  */
 export const EmptyState: FC<EmptyStateProps> = ({
   icon,
@@ -4273,11 +4023,11 @@ export const EmptyState: FC<EmptyStateProps> = ({
   action,
 }) => {
   return (
-    <div className={styles.container}>
-      {icon && <div className={styles.icon}>{icon}</div>}
-      <h3 className={styles.title}>{title}</h3>
-      {description && <p className={styles.description}>{description}</p>}
-      {action && <div className={styles.action}>{action}</div>}
+    <div className="flex flex-col items-center justify-center p-32 text-center text-info">
+      {icon && <div className="mb-4 text-info opacity-50">{icon}</div>}
+      <h3 className="text-lg font-semibold text-text mb-2">{title}</h3>
+      {description && <p className="text-base text-info mb-6 max-w-[400px]">{description}</p>}
+      {action && <div className="mt-4">{action}</div>}
     </div>
   );
 };
@@ -4466,34 +4216,10 @@ export type { HeaderProps } from './Header';
 ```
 
 #### 4.2 Container Component
-**Archivo `src/shared/components/layout/Container/Container.module.css`:**
-```css
-.container {
-  width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 var(--space-24);
-}
-
-.narrow {
-  max-width: 960px;
-}
-
-.wide {
-  max-width: 1920px;
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 0 var(--space-16);
-  }
-}
-```
-
 **Archivo `src/shared/components/layout/Container/Container.tsx`:**
 ```typescript
 import { FC, ReactNode } from 'react';
-import styles from './Container.module.css';
+import { cn } from '@shared/utils/cn';
 
 export interface ContainerProps {
   children: ReactNode;
@@ -4502,22 +4228,26 @@ export interface ContainerProps {
 }
 
 /**
- * Componente Container para limitar ancho de contenido
+ * Componente Container para limitar ancho de contenido con Tailwind CSS
  */
 export const Container: FC<ContainerProps> = ({
   children,
   size = 'default',
   className = '',
 }) => {
-  const classNames = [
-    styles.container,
-    size !== 'default' && styles[size],
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
-  return <div className={classNames}>{children}</div>;
+  return (
+    <div
+      className={cn(
+        'w-full mx-auto px-6 md:px-4',
+        size === 'narrow' && 'max-w-[960px]',
+        size === 'default' && 'max-w-[1440px]',
+        size === 'wide' && 'max-w-[1920px]',
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
 };
 ```
 
@@ -5406,71 +5136,6 @@ export { useAuth } from './useAuth';
 
 ### 5. Login Form Component
 
-**Archivo `src/features/auth/components/LoginForm/LoginForm.module.css`:**
-```css
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-  width: 100%;
-  max-width: 400px;
-}
-
-.title {
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: var(--space-8);
-  text-align: center;
-}
-
-.error {
-  padding: var(--space-12);
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius-base);
-  color: var(--color-error);
-  font-size: var(--font-size-sm);
-  text-align: center;
-}
-
-.forgotPassword {
-  text-align: right;
-  margin-top: calc(var(--space-8) * -1);
-}
-
-.forgotPasswordLink {
-  color: var(--color-primary);
-  font-size: var(--font-size-sm);
-  text-decoration: none;
-  transition: color var(--transition-fast) var(--ease);
-}
-
-.forgotPasswordLink:hover {
-  color: #2563EB;
-  text-decoration: underline;
-}
-
-.footer {
-  text-align: center;
-  margin-top: var(--space-16);
-  font-size: var(--font-size-sm);
-  color: var(--color-info);
-}
-
-.signupLink {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color var(--transition-fast) var(--ease);
-}
-
-.signupLink:hover {
-  color: #2563EB;
-  text-decoration: underline;
-}
-```
-
 **Archivo `src/features/auth/components/LoginForm/LoginForm.tsx`:**
 ```typescript
 import { FC, FormEvent, useState } from 'react';
@@ -5478,7 +5143,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks';
 import { Button, Input } from '@shared/components';
 import { Mail, Lock } from 'lucide-react';
-import styles from './LoginForm.module.css';
 
 export const LoginForm: FC = () => {
   const navigate = useNavigate();
@@ -5500,10 +5164,16 @@ export const LoginForm: FC = () => {
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <h2 className={styles.title}>Iniciar Sesión</h2>
+    <form className="flex flex-col gap-4 w-full max-w-[400px]" onSubmit={handleSubmit}>
+      <h2 className="text-2xl font-semibold text-text mb-2 text-center">
+        Iniciar Sesión
+      </h2>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {error && (
+        <div className="p-3 bg-error/10 border border-error rounded-lg text-error text-sm text-center">
+          {error}
+        </div>
+      )}
 
       <Input
         type="email"
@@ -5527,8 +5197,11 @@ export const LoginForm: FC = () => {
         autoComplete="current-password"
       />
 
-      <div className={styles.forgotPassword}>
-        <Link to="/forgot-password" className={styles.forgotPasswordLink}>
+      <div className="text-right -mt-2">
+        <Link
+          to="/forgot-password"
+          className="text-primary text-sm no-underline transition-colors duration-150 ease-out hover:text-blue-600 hover:underline"
+        >
           ¿Olvidaste tu contraseña?
         </Link>
       </div>
@@ -5537,9 +5210,12 @@ export const LoginForm: FC = () => {
         {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
       </Button>
 
-      <p className={styles.footer}>
+      <p className="text-center mt-4 text-sm text-info">
         ¿No tienes cuenta?{' '}
-        <Link to="/signup" className={styles.signupLink}>
+        <Link
+          to="/signup"
+          className="text-primary no-underline font-medium transition-colors duration-150 ease-out hover:text-blue-600 hover:underline"
+        >
           Regístrate
         </Link>
       </p>
@@ -5557,68 +5233,6 @@ export { LoginForm } from './LoginForm';
 
 ### 6. Signup Form Component
 
-**Archivo `src/features/auth/components/SignupForm/SignupForm.module.css`:**
-```css
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-  width: 100%;
-  max-width: 400px;
-}
-
-.title {
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: var(--space-8);
-  text-align: center;
-}
-
-.error {
-  padding: var(--space-12);
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius-base);
-  color: var(--color-error);
-  font-size: var(--font-size-sm);
-  text-align: center;
-}
-
-.passwordRequirements {
-  padding: var(--space-12);
-  background-color: rgba(59, 130, 246, 0.05);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: var(--radius-base);
-  font-size: var(--font-size-xs);
-  color: var(--color-info);
-}
-
-.passwordRequirements ul {
-  margin: var(--space-4) 0 0 var(--space-16);
-  padding: 0;
-}
-
-.footer {
-  text-align: center;
-  margin-top: var(--space-16);
-  font-size: var(--font-size-sm);
-  color: var(--color-info);
-}
-
-.loginLink {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color var(--transition-fast) var(--ease);
-}
-
-.loginLink:hover {
-  color: #2563EB;
-  text-decoration: underline;
-}
-```
-
 **Archivo `src/features/auth/components/SignupForm/SignupForm.tsx`:**
 ```typescript
 import { FC, FormEvent, useState } from 'react';
@@ -5627,7 +5241,6 @@ import { useAuth } from '../../hooks';
 import { Button, Input } from '@shared/components';
 import { Mail, Lock } from 'lucide-react';
 import { isValidEmail, isValidPassword } from '@shared/utils/validation.utils';
-import styles from './SignupForm.module.css';
 
 export const SignupForm: FC = () => {
   const navigate = useNavigate();
@@ -5676,10 +5289,16 @@ export const SignupForm: FC = () => {
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <h2 className={styles.title}>Crear Cuenta</h2>
+    <form className="flex flex-col gap-4 w-full max-w-[400px]" onSubmit={handleSubmit}>
+      <h2 className="text-2xl font-semibold text-text mb-2 text-center">
+        Crear Cuenta
+      </h2>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {error && (
+        <div className="p-3 bg-error/10 border border-error rounded-lg text-error text-sm text-center">
+          {error}
+        </div>
+      )}
 
       <Input
         type="email"
@@ -5726,9 +5345,9 @@ export const SignupForm: FC = () => {
         autoComplete="new-password"
       />
 
-      <div className={styles.passwordRequirements}>
+      <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-xs text-info">
         <strong>Requisitos de contraseña:</strong>
-        <ul>
+        <ul className="mt-1 ml-4 p-0">
           <li>Mínimo 6 caracteres</li>
           <li>Recomendado: incluir números y símbolos</li>
         </ul>
@@ -5738,9 +5357,12 @@ export const SignupForm: FC = () => {
         {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
       </Button>
 
-      <p className={styles.footer}>
+      <p className="text-center mt-4 text-sm text-info">
         ¿Ya tienes cuenta?{' '}
-        <Link to="/login" className={styles.loginLink}>
+        <Link
+          to="/login"
+          className="text-primary no-underline font-medium transition-colors duration-150 ease-out hover:text-blue-600 hover:underline"
+        >
           Iniciar Sesión
         </Link>
       </p>
@@ -5956,64 +5578,21 @@ export { PrivateRoute } from './PrivateRoute';
 
 ### 9. Auth Pages
 
-**Archivo `src/features/auth/pages/LoginPage/LoginPage.module.css`:**
-```css
-.page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: var(--space-24);
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-}
-
-.container {
-  width: 100%;
-  max-width: 480px;
-}
-
-.logoContainer {
-  text-align: center;
-  margin-bottom: var(--space-32);
-}
-
-.logo {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto var(--space-16);
-  color: var(--color-primary);
-}
-
-.appName {
-  font-size: var(--font-size-3xl);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.card {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: var(--space-32);
-  box-shadow: var(--shadow-lg);
-}
-```
-
 **Archivo `src/features/auth/pages/LoginPage/LoginPage.tsx`:**
 ```typescript
 import { FC } from 'react';
 import { LoginForm } from '../../components/LoginForm';
 import { TrendingUp } from 'lucide-react';
-import styles from './LoginPage.module.css';
 
 export const LoginPage: FC = () => {
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.logoContainer}>
-          <TrendingUp size={80} className={styles.logo} />
-          <h1 className={styles.appName}>Tipster Tracker</h1>
+    <div className="flex items-center justify-center min-h-screen p-6 bg-gradient-to-br from-background to-surface">
+      <div className="w-full max-w-[480px]">
+        <div className="text-center mb-8">
+          <TrendingUp size={80} className="w-20 h-20 mx-auto mb-4 text-primary" />
+          <h1 className="text-3xl font-semibold text-text">Tipster Tracker</h1>
         </div>
-        <div className={styles.card}>
+        <div className="bg-surface rounded-xl p-8 shadow-lg">
           <LoginForm />
         </div>
       </div>
@@ -6032,17 +5611,16 @@ export { LoginPage } from './LoginPage';
 import { FC } from 'react';
 import { SignupForm } from '../../components/SignupForm';
 import { TrendingUp } from 'lucide-react';
-import styles from '../LoginPage/LoginPage.module.css'; // Reutilizar estilos
 
 export const SignupPage: FC = () => {
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.logoContainer}>
-          <TrendingUp size={80} className={styles.logo} />
-          <h1 className={styles.appName}>Tipster Tracker</h1>
+    <div className="flex items-center justify-center min-h-screen p-6 bg-gradient-to-br from-background to-surface">
+      <div className="w-full max-w-[480px]">
+        <div className="text-center mb-8">
+          <TrendingUp size={80} className="w-20 h-20 mx-auto mb-4 text-primary" />
+          <h1 className="text-3xl font-semibold text-text">Tipster Tracker</h1>
         </div>
-        <div className={styles.card}>
+        <div className="bg-surface rounded-xl p-8 shadow-lg">
           <SignupForm />
         </div>
       </div>
@@ -6624,15 +6202,525 @@ export { useTipsterModal } from './useTipsterModal';
 
 ### 3. TipsterCard Component
 
-**El código completo de TipsterCard, TipsterList, TipsterForm, TipsterModal, TipstersPage y App.tsx actualizado está disponible en el documento.** Por brevedad, aquí se muestra la estructura principal.
+**Archivo `src/features/tipsters/components/TipsterCard/TipsterCard.tsx`:**
+```typescript
+import { FC } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { TipsterEntity } from '@shared/types/entities.types';
+import { Card, CardBody, Badge } from '@shared/components';
+import { Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { cn } from '@shared/utils/cn';
 
-#### Componentes Principales:
+interface TipsterCardProps {
+  tipster: TipsterEntity;
+  stats?: {
+    totalPicks: number;
+    winrate: number;
+    yield: number;
+    totalProfit: number;
+  } | null;
+  onEdit: (tipster: TipsterEntity) => void;
+  onDelete: (tipsterId: string) => void;
+}
 
-1. **TipsterCard** - Tarjeta con nombre, canal, stats y acciones (editar/eliminar)
-2. **TipsterList** - Grid de cards con búsqueda y EmptyState
-3. **TipsterForm** - Formulario validado para crear/editar
-4. **TipsterModal** - Modal que envuelve TipsterForm
-5. **TipstersPage** - Página completa con lista y modal integrado
+/**
+ * Tarjeta de tipster con estadísticas y acciones
+ */
+export const TipsterCard: FC<TipsterCardProps> = ({
+  tipster,
+  stats,
+  onEdit,
+  onDelete,
+}) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/tipsters/${tipster.id}`);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(tipster);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(tipster.id);
+  };
+
+  return (
+    <Card
+      className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+      onClick={handleClick}
+    >
+      <CardBody>
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-text mb-1">{tipster.name}</h3>
+            <Badge variant="info">{tipster.channel}</Badge>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleEdit}
+              className="p-2 rounded-lg text-info hover:text-text hover:bg-white/5 transition-colors"
+              aria-label="Editar tipster"
+            >
+              <Edit size={16} />
+            </button>
+            <button
+              onClick={handleDelete}
+              className="p-2 rounded-lg text-error hover:text-red-600 hover:bg-error/10 transition-colors"
+              aria-label="Eliminar tipster"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        </div>
+
+        {stats && (
+          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5">
+            <div className="text-center">
+              <p className="text-xs text-info mb-1">Total Picks</p>
+              <p className="text-base font-semibold text-text">{stats.totalPicks}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-info mb-1">Winrate</p>
+              <p className="text-base font-semibold text-text">
+                {stats.winrate.toFixed(1)}%
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-info mb-1">Yield</p>
+              <p
+                className={cn(
+                  'text-base font-semibold flex items-center justify-center gap-1',
+                  stats.yield >= 0 ? 'text-success' : 'text-error'
+                )}
+              >
+                {stats.yield >= 0 ? (
+                  <TrendingUp size={14} />
+                ) : (
+                  <TrendingDown size={14} />
+                )}
+                {stats.yield.toFixed(2)}%
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-info mb-1">Profit</p>
+              <p
+                className={cn(
+                  'text-base font-semibold',
+                  stats.totalProfit >= 0 ? 'text-success' : 'text-error'
+                )}
+              >
+                {stats.totalProfit >= 0 ? '+' : ''}
+                {stats.totalProfit.toFixed(2)}u
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!stats && (
+          <div className="pt-3 border-t border-white/5">
+            <p className="text-sm text-info text-center">Sin picks registradas</p>
+          </div>
+        )}
+      </CardBody>
+    </Card>
+  );
+};
+```
+
+**Archivo `src/features/tipsters/components/TipsterCard/index.ts`:**
+```typescript
+export { TipsterCard } from './TipsterCard';
+export type { TipsterCardProps } from './TipsterCard';
+```
+
+---
+
+### 4. TipsterList Component
+
+**Archivo `src/features/tipsters/components/TipsterList/TipsterList.tsx`:**
+```typescript
+import { FC } from 'react';
+import { TipsterEntity } from '@shared/types/entities.types';
+import { TipsterCard } from '../TipsterCard';
+import { EmptyState, Input } from '@shared/components';
+import { Search, Package } from 'lucide-react';
+
+interface TipsterListProps {
+  tipsters: TipsterEntity[];
+  statsMap?: Map<string, any>;
+  onEdit: (tipster: TipsterEntity) => void;
+  onDelete: (tipsterId: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+}
+
+/**
+ * Lista de tipsters con búsqueda
+ */
+export const TipsterList: FC<TipsterListProps> = ({
+  tipsters,
+  statsMap,
+  onEdit,
+  onDelete,
+  searchQuery,
+  onSearchChange,
+}) => {
+  const filteredTipsters = tipsters.filter((tipster) =>
+    tipster.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="max-w-md">
+        <Input
+          type="search"
+          placeholder="Buscar tipsters..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          icon={<Search size={16} />}
+        />
+      </div>
+
+      {filteredTipsters.length === 0 ? (
+        <EmptyState
+          icon={<Package size={48} />}
+          title="No se encontraron tipsters"
+          description={
+            searchQuery
+              ? 'Intenta con otro término de búsqueda'
+              : 'Comienza añadiendo tu primer tipster'
+          }
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredTipsters.map((tipster) => (
+            <TipsterCard
+              key={tipster.id}
+              tipster={tipster}
+              stats={statsMap?.get(tipster.id) || null}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+**Archivo `src/features/tipsters/components/TipsterList/index.ts`:**
+```typescript
+export { TipsterList } from './TipsterList';
+export type { TipsterListProps } from './TipsterList';
+```
+
+---
+
+### 5. TipsterForm Component
+
+**Archivo `src/features/tipsters/components/TipsterForm/TipsterForm.tsx`:**
+```typescript
+import { FC, FormEvent, useState, useEffect } from 'react';
+import { CreateTipsterDTO, TipsterEntity } from '@shared/types/entities.types';
+import { Button, Input, Select } from '@shared/components';
+import { ALL_CHANNELS } from '@shared/constants/domain.constants';
+import { isNotEmpty } from '@shared/utils/validation.utils';
+
+interface TipsterFormProps {
+  tipster?: TipsterEntity | null;
+  onSubmit: (data: CreateTipsterDTO) => Promise<void>;
+  onCancel: () => void;
+  loading?: boolean;
+  error?: string | null;
+}
+
+/**
+ * Formulario para crear/editar tipster
+ */
+export const TipsterForm: FC<TipsterFormProps> = ({
+  tipster,
+  onSubmit,
+  onCancel,
+  loading = false,
+  error = null,
+}) => {
+  const [name, setName] = useState('');
+  const [channel, setChannel] = useState('');
+  const [validationErrors, setValidationErrors] = useState<{
+    name?: string;
+    channel?: string;
+  }>({});
+
+  useEffect(() => {
+    if (tipster) {
+      setName(tipster.name);
+      setChannel(tipster.channel);
+    }
+  }, [tipster]);
+
+  const validate = () => {
+    const errors: { name?: string; channel?: string } = {};
+
+    if (!isNotEmpty(name)) {
+      errors.name = 'El nombre es requerido';
+    }
+
+    if (!isNotEmpty(channel)) {
+      errors.channel = 'El canal es requerido';
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!validate()) {
+      return;
+    }
+
+    await onSubmit({
+      name: name.trim(),
+      channel,
+    });
+  };
+
+  const channelOptions = ALL_CHANNELS.map((c) => ({ value: c, label: c }));
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {error && (
+        <div className="p-3 bg-error/10 border border-error rounded-lg text-error text-sm text-center">
+          {error}
+        </div>
+      )}
+
+      <Input
+        label="Nombre del Tipster"
+        type="text"
+        placeholder="Ej: John Doe"
+        value={name}
+        onChange={(e) => {
+          setName(e.target.value);
+          setValidationErrors((prev) => ({ ...prev, name: undefined }));
+        }}
+        error={validationErrors.name}
+        required
+        autoFocus
+      />
+
+      <Select
+        label="Canal"
+        options={channelOptions}
+        value={channel}
+        onChange={(e) => {
+          setChannel(e.target.value);
+          setValidationErrors((prev) => ({ ...prev, channel: undefined }));
+        }}
+        placeholder="Selecciona un canal"
+        error={validationErrors.channel}
+        required
+      />
+
+      <div className="flex gap-3 justify-end mt-2">
+        <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? 'Guardando...' : tipster ? 'Actualizar' : 'Crear Tipster'}
+        </Button>
+      </div>
+    </form>
+  );
+};
+```
+
+**Archivo `src/features/tipsters/components/TipsterForm/index.ts`:**
+```typescript
+export { TipsterForm } from './TipsterForm';
+export type { TipsterFormProps } from './TipsterForm';
+```
+
+---
+
+### 6. TipsterModal Component
+
+**Archivo `src/features/tipsters/components/TipsterModal/TipsterModal.tsx`:**
+```typescript
+import { FC } from 'react';
+import { Modal } from '@shared/components';
+import { TipsterForm } from '../TipsterForm';
+import { TipsterEntity, CreateTipsterDTO } from '@shared/types/entities.types';
+
+interface TipsterModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  tipster?: TipsterEntity | null;
+  onSubmit: (data: CreateTipsterDTO) => Promise<void>;
+  loading?: boolean;
+  error?: string | null;
+}
+
+/**
+ * Modal para crear/editar tipster
+ */
+export const TipsterModal: FC<TipsterModalProps> = ({
+  isOpen,
+  onClose,
+  tipster,
+  onSubmit,
+  loading,
+  error,
+}) => {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={tipster ? 'Editar Tipster' : 'Nuevo Tipster'}
+    >
+      <TipsterForm
+        tipster={tipster}
+        onSubmit={onSubmit}
+        onCancel={onClose}
+        loading={loading}
+        error={error}
+      />
+    </Modal>
+  );
+};
+```
+
+**Archivo `src/features/tipsters/components/TipsterModal/index.ts`:**
+```typescript
+export { TipsterModal } from './TipsterModal';
+export type { TipsterModalProps } from './TipsterModal';
+```
+
+---
+
+### 7. TipstersPage Component
+
+**Archivo `src/features/tipsters/pages/TipstersPage/TipstersPage.tsx`:**
+```typescript
+import { FC, useState } from 'react';
+import { Container, Header, Button, Loading } from '@shared/components';
+import { TipsterList } from '../../components/TipsterList';
+import { TipsterModal } from '../../components/TipsterModal';
+import { useTipsters, useTipsterModal } from '../../hooks';
+import { Plus } from 'lucide-react';
+import { useAuth } from '@features/auth';
+
+/**
+ * Página principal de Tipsters
+ */
+export const TipstersPage: FC = () => {
+  const { user } = useAuth();
+  const { tipsters, loading } = useTipsters();
+  const {
+    isOpen,
+    editingTipster,
+    openCreateModal,
+    openEditModal,
+    closeModal,
+    createTipster,
+    updateTipster,
+    deleteTipster,
+    loading: modalLoading,
+    error: modalError,
+  } = useTipsterModal();
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSubmit = async (data: any) => {
+    if (editingTipster) {
+      await updateTipster(editingTipster.id, data);
+    } else {
+      await createTipster(data);
+    }
+  };
+
+  if (loading) {
+    return <Loading text="Cargando tipsters..." />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header
+        logo={<span className="text-xl font-semibold text-primary">TT</span>}
+        userEmail={user?.email || undefined}
+      />
+
+      <Container className="py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-text mb-2">Tipsters</h1>
+            <p className="text-info">
+              Gestiona tus tipsters y visualiza sus estadísticas
+            </p>
+          </div>
+          <Button onClick={openCreateModal}>
+            <Plus size={20} className="mr-2" />
+            Nuevo Tipster
+          </Button>
+        </div>
+
+        <TipsterList
+          tipsters={tipsters}
+          onEdit={openEditModal}
+          onDelete={deleteTipster}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+      </Container>
+
+      <TipsterModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        tipster={editingTipster}
+        onSubmit={handleSubmit}
+        loading={modalLoading}
+        error={modalError}
+      />
+    </div>
+  );
+};
+```
+
+**Archivo `src/features/tipsters/pages/TipstersPage/index.ts`:**
+```typescript
+export { TipstersPage } from './TipstersPage';
+```
+
+---
+
+### 8. Feature Exports
+
+**Archivo `src/features/tipsters/index.ts`:**
+```typescript
+// Components
+export { TipsterCard } from './components/TipsterCard';
+export { TipsterList } from './components/TipsterList';
+export { TipsterForm } from './components/TipsterForm';
+export { TipsterModal } from './components/TipsterModal';
+
+// Pages
+export { TipstersPage } from './pages/TipstersPage';
+
+// Hooks
+export { useTipsters, useTipster, useTipsterStats, useTipsterModal } from './hooks';
+
+// Types
+export type { TipsterCardProps } from './components/TipsterCard';
+export type { TipsterListProps } from './components/TipsterList';
+export type { TipsterFormProps } from './components/TipsterForm';
+export type { TipsterModalProps } from './components/TipsterModal';
+```
 
 ---
 
@@ -7260,91 +7348,6 @@ export type { PickFiltersState } from './usePickFilters';
 
 ### 4. PickForm Component (Complejo)
 
-**Archivo `src/features/picks/components/PickForm/PickForm.module.css`:**
-```css
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-20);
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-}
-
-.sectionTitle {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--color-text);
-  padding-bottom: var(--space-8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-16);
-}
-
-.fullWidth {
-  grid-column: 1 / -1;
-}
-
-.error {
-  padding: var(--space-12);
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius-base);
-  color: var(--color-error);
-  font-size: var(--font-size-sm);
-  text-align: center;
-}
-
-.resultSection {
-  padding: var(--space-16);
-  background-color: rgba(59, 130, 246, 0.05);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: var(--radius-base);
-}
-
-.checkboxGroup {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  padding: var(--space-12);
-  background-color: rgba(255, 255, 255, 0.02);
-  border-radius: var(--radius-base);
-}
-
-.checkbox {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-}
-
-.checkboxLabel {
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
-  cursor: pointer;
-  user-select: none;
-}
-
-.actions {
-  display: flex;
-  gap: var(--space-12);
-  justify-content: flex-end;
-  margin-top: var(--space-8);
-}
-
-@media (max-width: 768px) {
-  .row {
-    grid-template-columns: 1fr;
-  }
-}
-```
-
 **Archivo `src/features/picks/components/PickForm/PickForm.tsx`:**
 ```typescript
 import { FC, FormEvent, useState, useEffect } from 'react';
@@ -7359,7 +7362,6 @@ import {
 import { getTodayDate, getCurrentTime, formatDateTime } from '@shared/utils/date.utils';
 import { validatePick, hasValidationErrors } from '../../utils';
 import type { PickValidationErrors } from '../../utils';
-import styles from './PickForm.module.css';
 
 interface PickFormProps {
   pick?: PickEntity | null;
@@ -7465,12 +7467,18 @@ export const PickForm: FC<PickFormProps> = ({
   const resultOptions = PICK_RESULTS.map((r) => ({ value: r, label: r }));
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      {error && <div className={styles.error}>{error}</div>}
+    <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+      {error && (
+        <div className="p-3 bg-error/10 border border-error rounded-lg text-error text-sm text-center">
+          {error}
+        </div>
+      )}
 
       {/* Sección: Información Básica */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Información Básica</h3>
+      <div className="flex flex-col gap-4">
+        <h3 className="text-base font-semibold text-text pb-2 border-b border-white/5">
+          Información Básica
+        </h3>
 
         <Select
           label="Tipster"
@@ -7526,10 +7534,12 @@ export const PickForm: FC<PickFormProps> = ({
       </div>
 
       {/* Sección: Detalles de Apuesta */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Detalles de Apuesta</h3>
+      <div className="flex flex-col gap-4">
+        <h3 className="text-base font-semibold text-text pb-2 border-b border-white/5">
+          Detalles de Apuesta
+        </h3>
 
-        <div className={styles.row}>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-1">
           <Input
             label="Cuota"
             type="number"
@@ -7562,7 +7572,7 @@ export const PickForm: FC<PickFormProps> = ({
           />
         </div>
 
-        <div className={styles.row}>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-1">
           <Select
             label="Tipo de Pick"
             options={pickTypeOptions}
@@ -7590,7 +7600,7 @@ export const PickForm: FC<PickFormProps> = ({
           />
         </div>
 
-        <div className={styles.row}>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-1">
           <Input
             label="Fecha"
             type="date"
@@ -7618,25 +7628,27 @@ export const PickForm: FC<PickFormProps> = ({
       </div>
 
       {/* Sección: Resultado */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Resultado</h3>
+      <div className="flex flex-col gap-4">
+        <h3 className="text-base font-semibold text-text pb-2 border-b border-white/5">
+          Resultado
+        </h3>
 
-        <div className={styles.resultSection}>
-          <div className={styles.checkboxGroup}>
+        <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+          <div className="flex items-center gap-2 p-3 bg-white/[0.02] rounded-lg">
             <input
               type="checkbox"
               id="isResolved"
               checked={isResolved}
               onChange={(e) => setIsResolved(e.target.checked)}
-              className={styles.checkbox}
+              className="w-5 h-5 cursor-pointer"
             />
-            <label htmlFor="isResolved" className={styles.checkboxLabel}>
+            <label htmlFor="isResolved" className="text-sm text-text cursor-pointer select-none">
               Marcar como resuelta
             </label>
           </div>
 
           {isResolved && (
-            <div style={{ marginTop: 'var(--space-12)' }}>
+            <div className="mt-3">
               <Select
                 label="Resultado"
                 options={resultOptions}
@@ -7651,7 +7663,7 @@ export const PickForm: FC<PickFormProps> = ({
       </div>
 
       {/* Sección: Comentarios */}
-      <div className={styles.section}>
+      <div className="flex flex-col gap-4">
         <Input
           label="Comentarios (Opcional)"
           type="text"
@@ -7662,7 +7674,7 @@ export const PickForm: FC<PickFormProps> = ({
       </div>
 
       {/* Acciones */}
-      <div className={styles.actions}>
+      <div className="flex gap-3 justify-end mt-2">
         <Button variant="outline" onClick={onCancel} type="button">
           Cancelar
         </Button>
@@ -7684,62 +7696,6 @@ export { PickForm } from './PickForm';
 
 ### 5. PickFilters Component
 
-**Archivo `src/features/picks/components/PickFilters/PickFilters.module.css`:**
-```css
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-  padding: var(--space-20);
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-12);
-}
-
-.title {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 var(--space-8);
-  background-color: var(--color-primary);
-  color: white;
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-}
-
-.filtersGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-12);
-}
-
-.searchBar {
-  grid-column: 1 / -1;
-}
-
-@media (max-width: 768px) {
-  .filtersGrid {
-    grid-template-columns: 1fr;
-  }
-}
-```
-
 **Archivo `src/features/picks/components/PickFilters/PickFilters.tsx`:**
 ```typescript
 import { FC } from 'react';
@@ -7751,7 +7707,6 @@ import {
   PICK_RESULTS,
 } from '@shared/constants/domain.constants';
 import type { PickFiltersState } from '../../hooks/usePickFilters';
-import styles from './PickFilters.module.css';
 
 interface PickFiltersProps {
   filters: PickFiltersState;
@@ -7801,12 +7756,14 @@ export const PickFilters: FC<PickFiltersProps> = ({
   ];
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-8)' }}>
-          <h3 className={styles.title}>Filtros</h3>
+    <div className="flex flex-col gap-4 p-5 bg-surface rounded-xl border border-white/5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-semibold text-text">Filtros</h3>
           {activeFiltersCount > 0 && (
-            <span className={styles.badge}>{activeFiltersCount}</span>
+            <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 bg-primary text-white rounded-full text-xs font-semibold">
+              {activeFiltersCount}
+            </span>
           )}
         </div>
         {activeFiltersCount > 0 && (
@@ -7817,8 +7774,8 @@ export const PickFilters: FC<PickFiltersProps> = ({
         )}
       </div>
 
-      <div className={styles.filtersGrid}>
-        <div className={styles.searchBar}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3 md:grid-cols-1">
+        <div className="col-span-full">
           <Input
             type="text"
             placeholder="Buscar por partido o tipo de apuesta..."
@@ -7872,77 +7829,6 @@ export { PickFilters } from './PickFilters';
 
 ### 6. PickRow Component
 
-**Archivo `src/features/picks/components/PickRow/PickRow.module.css`:**
-```css
-.row {
-  transition: background-color var(--transition-fast) var(--ease);
-}
-
-.row:hover {
-  background-color: rgba(255, 255, 255, 0.02);
-}
-
-.cell {
-  padding: var(--space-12) var(--space-8);
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
-  vertical-align: middle;
-}
-
-.cellSmall {
-  font-size: var(--font-size-xs);
-  color: var(--color-info);
-}
-
-.tipsterName {
-  font-weight: 500;
-}
-
-.match {
-  font-weight: 500;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.actions {
-  display: flex;
-  gap: var(--space-4);
-  justify-content: flex-end;
-}
-
-.iconButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  color: var(--color-info);
-  border-radius: var(--radius-base);
-  cursor: pointer;
-  transition: all var(--transition-fast) var(--ease);
-}
-
-.iconButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--color-text);
-}
-
-@media (max-width: 768px) {
-  .cell {
-    padding: var(--space-8) var(--space-4);
-    font-size: var(--font-size-xs);
-  }
-
-  .match {
-    max-width: 150px;
-  }
-}
-```
-
 **Archivo `src/features/picks/components/PickRow/PickRow.tsx`:**
 ```typescript
 import { FC } from 'react';
@@ -7951,7 +7837,7 @@ import { Badge } from '@shared/components';
 import { Edit2, Trash2 } from 'lucide-react';
 import { formatDate, formatTime } from '@shared/utils/date.utils';
 import { calculatePickProfit } from '@shared/utils/calculation.utils';
-import styles from './PickRow.module.css';
+import { cn } from '@shared/utils/cn';
 
 interface PickRowProps {
   pick: PickEntity;
@@ -7993,37 +7879,37 @@ export const PickRow: FC<PickRowProps> = ({
       : 'info';
 
   return (
-    <tr className={styles.row}>
-      <td className={styles.cell}>
-        <div className={styles.cellSmall}>{formatDate(pick.date)}</div>
-        <div className={styles.cellSmall}>{formatTime(pick.time)}</div>
+    <tr className="transition-colors hover:bg-white/[0.02]">
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">
+        <div className="text-xs text-info">{formatDate(pick.date)}</div>
+        <div className="text-xs text-info">{formatTime(pick.time)}</div>
       </td>
-      <td className={`${styles.cell} ${styles.tipsterName}`}>{tipsterName}</td>
-      <td className={styles.cell}>{pick.sport}</td>
-      <td className={`${styles.cell} ${styles.match}`} title={pick.match}>
+      <td className="px-3 py-3 text-sm text-text align-middle font-medium md:px-2 md:py-2 md:text-xs">{tipsterName}</td>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">{pick.sport}</td>
+      <td className="px-3 py-3 text-sm text-text align-middle font-medium max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap md:px-2 md:py-2 md:text-xs md:max-w-[150px]" title={pick.match}>
         {pick.match}
       </td>
-      <td className={styles.cell}>{pick.betType}</td>
-      <td className={styles.cell}>{pick.odds.toFixed(2)}</td>
-      <td className={styles.cell}>{pick.stake}</td>
-      <td className={styles.cell}>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">{pick.betType}</td>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">{pick.odds.toFixed(2)}</td>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">{pick.stake}</td>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">
         <Badge variant={resultVariant}>{pick.result}</Badge>
       </td>
       {profit !== null && (
-        <td className={styles.cell}>
+        <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">
           <span className={profit >= 0 ? 'positive' : 'negative'}>
             {profit >= 0 ? '+' : ''}
             {profit.toFixed(2)}u
           </span>
         </td>
       )}
-      <td className={styles.cell}>{pick.pickType}</td>
-      <td className={styles.cell}>{pick.bookmaker}</td>
-      <td className={styles.cell}>
-        <div className={styles.actions}>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">{pick.pickType}</td>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">{pick.bookmaker}</td>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">
+        <div className="flex gap-1 justify-end">
           {onEdit && (
             <button
-              className={styles.iconButton}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-info hover:bg-white/10 hover:text-text transition-all"
               onClick={handleEdit}
               title="Editar pick"
               aria-label="Editar pick"
@@ -8033,7 +7919,7 @@ export const PickRow: FC<PickRowProps> = ({
           )}
           {onDelete && (
             <button
-              className={styles.iconButton}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-info hover:bg-white/10 hover:text-text transition-all"
               onClick={handleDelete}
               title="Eliminar pick"
               aria-label="Eliminar pick"
@@ -8121,7 +8007,6 @@ import { FC } from 'react';
 import { PickEntity } from '@shared/types/entities.types';
 import { EmptyState } from '@shared/components';
 import { PickRow } from '../PickRow';
-import styles from './PickTable.module.css';
 
 interface PickTableProps {
   picks: PickEntity[];
@@ -8147,8 +8032,8 @@ export const PickTable: FC<PickTableProps> = ({
 
   if (picks.length === 0) {
     return (
-      <div className={styles.container}>
-        <div className={styles.emptyState}>
+      <div className="w-full overflow-x-auto bg-surface rounded-lg border border-white/5">
+        <div className="py-8 px-4 text-center text-info">
           <EmptyState message="No hay picks registradas" />
         </div>
       </div>
@@ -8156,25 +8041,25 @@ export const PickTable: FC<PickTableProps> = ({
   }
 
   return (
-    <div className={styles.container}>
-      <table className={styles.table}>
-        <thead className={styles.thead}>
+    <div className="w-full overflow-x-auto bg-surface rounded-lg border border-white/5">
+      <table className="w-full border-collapse text-sm md:text-xs">
+        <thead className="bg-primary/10 border-b-2 border-primary/30">
           <tr>
-            <th className={styles.th}>Fecha/Hora</th>
-            <th className={styles.th}>Tipster</th>
-            <th className={styles.th}>Deporte</th>
-            <th className={styles.th}>Partido</th>
-            <th className={styles.th}>Tipo Apuesta</th>
-            <th className={styles.th}>Cuota</th>
-            <th className={styles.th}>Stake</th>
-            <th className={styles.th}>Resultado</th>
-            <th className={styles.th}>Profit</th>
-            <th className={styles.th}>Tipo</th>
-            <th className={styles.th}>Bookmaker</th>
-            <th className={`${styles.th} ${styles.thRight}`}>Acciones</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Fecha/Hora</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Tipster</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Deporte</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Partido</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Tipo Apuesta</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Cuota</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Stake</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Resultado</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Profit</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Tipo</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Bookmaker</th>
+            <th className="px-3 py-3 text-right font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Acciones</th>
           </tr>
         </thead>
-        <tbody className={styles.tbody}>
+        <tbody>
           {picks.map((pick) => (
             <PickRow
               key={pick.id}
@@ -8267,83 +8152,6 @@ export { PickFilters } from './PickFilters';
 
 ### 9. AllPicksPage
 
-**Archivo `src/features/picks/pages/AllPicksPage/AllPicksPage.module.css`:**
-```css
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-24);
-  padding: var(--space-24);
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-16);
-}
-
-.title {
-  font-size: var(--font-size-3xl);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.stats {
-  display: flex;
-  gap: var(--space-16);
-  font-size: var(--font-size-sm);
-  color: var(--color-info);
-}
-
-.statItem {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-}
-
-.statValue {
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-}
-
-.error {
-  padding: var(--space-16);
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius-base);
-  color: var(--color-error);
-  text-align: center;
-}
-
-@media (max-width: 768px) {
-  .page {
-    padding: var(--space-16);
-    gap: var(--space-16);
-  }
-
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .title {
-    font-size: var(--font-size-2xl);
-  }
-
-  .stats {
-    flex-direction: column;
-    gap: var(--space-8);
-  }
-}
-```
-
 **Archivo `src/features/picks/pages/AllPicksPage/AllPicksPage.tsx`:**
 ```typescript
 import { FC, useMemo } from 'react';
@@ -8352,7 +8160,6 @@ import { Button, Loading } from '@shared/components';
 import { usePicks, usePickModal, usePickFilters } from '../../hooks';
 import { PickTable, PickFilters, PickModal } from '../../components';
 import { useTipsters } from '@features/tipsters';
-import styles from './AllPicksPage.module.css';
 
 /**
  * Página principal de picks (All Picks)
@@ -8423,27 +8230,27 @@ export const AllPicksPage: FC = () => {
   }
 
   return (
-    <div className={styles.page}>
+    <div className="flex flex-col gap-6 p-6 md:p-4 md:gap-4">
       {/* Header */}
-      <div className={styles.header}>
+      <div className="flex items-center justify-between gap-4 md:flex-col md:items-start">
         <div>
-          <h1 className={styles.title}>Todas las Picks</h1>
-          <div className={styles.stats}>
-            <div className={styles.statItem}>
+          <h1 className="text-3xl font-semibold text-text mb-2 md:text-2xl">Todas las Picks</h1>
+          <div className="flex gap-4 text-sm text-info md:flex-col md:gap-2">
+            <div className="flex items-center gap-2">
               <span>Total:</span>
-              <span className={styles.statValue}>{stats.total}</span>
+              <span className="font-semibold text-text">{stats.total}</span>
             </div>
-            <div className={styles.statItem}>
+            <div className="flex items-center gap-2">
               <span>Resueltas:</span>
-              <span className={styles.statValue}>{stats.resolved}</span>
+              <span className="font-semibold text-text">{stats.resolved}</span>
             </div>
-            <div className={styles.statItem}>
+            <div className="flex items-center gap-2">
               <span>Pendientes:</span>
-              <span className={styles.statValue}>{stats.pending}</span>
+              <span className="font-semibold text-text">{stats.pending}</span>
             </div>
-            <div className={styles.statItem}>
+            <div className="flex items-center gap-2">
               <span>Winrate:</span>
-              <span className={styles.statValue}>{stats.winrate}%</span>
+              <span className="font-semibold text-text">{stats.winrate}%</span>
             </div>
           </div>
         </div>
@@ -8454,10 +8261,14 @@ export const AllPicksPage: FC = () => {
       </div>
 
       {/* Errores */}
-      {picksError && <div className={styles.error}>{picksError}</div>}
+      {picksError && (
+        <div className="p-4 bg-error/10 border border-error rounded-lg text-error text-center">
+          {picksError}
+        </div>
+      )}
 
       {/* Contenido */}
-      <div className={styles.content}>
+      <div className="flex flex-col gap-4">
         {/* Filtros */}
         <PickFilters
           filters={filters}
@@ -9585,110 +9396,6 @@ export type { FollowStats } from './useFollowStats';
 
 ### 4. FollowForm Component
 
-**Archivo `src/features/follows/components/FollowForm/FollowForm.module.css`:**
-```css
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-20);
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-}
-
-.sectionTitle {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--color-text);
-  padding-bottom: var(--space-8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.pickInfo {
-  padding: var(--space-16);
-  background-color: rgba(251, 191, 36, 0.1);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  border-radius: var(--radius-base);
-}
-
-.infoRow {
-  display: flex;
-  justify-content: space-between;
-  padding: var(--space-8) 0;
-  font-size: var(--font-size-sm);
-}
-
-.infoLabel {
-  color: var(--color-info);
-}
-
-.infoValue {
-  color: var(--color-text);
-  font-weight: 500;
-}
-
-.row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-16);
-}
-
-.error {
-  padding: var(--space-12);
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius-base);
-  color: var(--color-error);
-  font-size: var(--font-size-sm);
-  text-align: center;
-}
-
-.resultSection {
-  padding: var(--space-16);
-  background-color: rgba(59, 130, 246, 0.05);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: var(--radius-base);
-}
-
-.checkboxGroup {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  padding: var(--space-12);
-  background-color: rgba(255, 255, 255, 0.02);
-  border-radius: var(--radius-base);
-}
-
-.checkbox {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-}
-
-.checkboxLabel {
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
-  cursor: pointer;
-  user-select: none;
-}
-
-.actions {
-  display: flex;
-  gap: var(--space-12);
-  justify-content: flex-end;
-  margin-top: var(--space-8);
-}
-
-@media (max-width: 768px) {
-  .row {
-    grid-template-columns: 1fr;
-  }
-}
-```
-
 **Archivo `src/features/follows/components/FollowForm/FollowForm.tsx`:**
 ```typescript
 import { FC, FormEvent, useState, useEffect } from 'react';
@@ -9697,7 +9404,6 @@ import { Button, Input, Select } from '@shared/components';
 import { PICK_RESULTS } from '@shared/constants/domain.constants';
 import { validateFollow, hasValidationErrors } from '../../utils';
 import type { FollowValidationErrors } from '../../utils';
-import styles from './FollowForm.module.css';
 
 interface FollowFormProps {
   follow?: FollowEntity | null;
@@ -9775,45 +9481,53 @@ export const FollowForm: FC<FollowFormProps> = ({
   const resultOptions = PICK_RESULTS.map((r) => ({ value: r, label: r }));
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      {error && <div className={styles.error}>{error}</div>}
+    <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+      {error && (
+        <div className="p-3 bg-error/10 border border-error rounded-lg text-error text-sm text-center">
+          {error}
+        </div>
+      )}
 
       {/* Información de la pick original */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Pick del Tipster</h3>
-        <div className={styles.pickInfo}>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Tipster:</span>
-            <span className={styles.infoValue}>{tipsterName}</span>
+      <div className="flex flex-col gap-4">
+        <h3 className="text-base font-semibold text-text pb-2 border-b border-white/5">
+          Pick del Tipster
+        </h3>
+        <div className="p-4 bg-warning/10 border border-warning/30 rounded-lg">
+          <div className="flex justify-between py-2 text-sm">
+            <span className="text-info">Tipster:</span>
+            <span className="text-text font-medium">{tipsterName}</span>
           </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Partido:</span>
-            <span className={styles.infoValue}>{pick.match}</span>
+          <div className="flex justify-between py-2 text-sm">
+            <span className="text-info">Partido:</span>
+            <span className="text-text font-medium">{pick.match}</span>
           </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Tipo de Apuesta:</span>
-            <span className={styles.infoValue}>{pick.betType}</span>
+          <div className="flex justify-between py-2 text-sm">
+            <span className="text-info">Tipo de Apuesta:</span>
+            <span className="text-text font-medium">{pick.betType}</span>
           </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Cuota Tipster:</span>
-            <span className={styles.infoValue}>{pick.odds.toFixed(2)}</span>
+          <div className="flex justify-between py-2 text-sm">
+            <span className="text-info">Cuota Tipster:</span>
+            <span className="text-text font-medium">{pick.odds.toFixed(2)}</span>
           </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Stake Tipster:</span>
-            <span className={styles.infoValue}>{pick.stake}u</span>
+          <div className="flex justify-between py-2 text-sm">
+            <span className="text-info">Stake Tipster:</span>
+            <span className="text-text font-medium">{pick.stake}u</span>
           </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Resultado Tipster:</span>
-            <span className={styles.infoValue}>{pick.result}</span>
+          <div className="flex justify-between py-2 text-sm">
+            <span className="text-info">Resultado Tipster:</span>
+            <span className="text-text font-medium">{pick.result}</span>
           </div>
         </div>
       </div>
 
       {/* Datos del usuario */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Tus Datos</h3>
+      <div className="flex flex-col gap-4">
+        <h3 className="text-base font-semibold text-text pb-2 border-b border-white/5">
+          Tus Datos
+        </h3>
 
-        <div className={styles.row}>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-1">
           <Input
             label="Tu Cuota"
             type="number"
@@ -9848,25 +9562,27 @@ export const FollowForm: FC<FollowFormProps> = ({
       </div>
 
       {/* Resultado del usuario */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Tu Resultado</h3>
+      <div className="flex flex-col gap-4">
+        <h3 className="text-base font-semibold text-text pb-2 border-b border-white/5">
+          Tu Resultado
+        </h3>
 
-        <div className={styles.resultSection}>
-          <div className={styles.checkboxGroup}>
+        <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+          <div className="flex items-center gap-2 p-3 bg-white/[0.02] rounded-lg">
             <input
               type="checkbox"
               id="userIsResolved"
               checked={userIsResolved}
               onChange={(e) => setUserIsResolved(e.target.checked)}
-              className={styles.checkbox}
+              className="w-5 h-5 cursor-pointer"
             />
-            <label htmlFor="userIsResolved" className={styles.checkboxLabel}>
+            <label htmlFor="userIsResolved" className="text-sm text-text cursor-pointer select-none">
               Marcar como resuelta
             </label>
           </div>
 
           {userIsResolved && (
-            <div style={{ marginTop: 'var(--space-12)' }}>
+            <div className="mt-3">
               <Select
                 label="Tu Resultado"
                 options={resultOptions}
@@ -9885,7 +9601,7 @@ export const FollowForm: FC<FollowFormProps> = ({
       </div>
 
       {/* Acciones */}
-      <div className={styles.actions}>
+      <div className="flex gap-3 justify-end mt-2">
         <Button variant="outline" onClick={onCancel} type="button">
           Cancelar
         </Button>
@@ -9907,86 +9623,10 @@ export { FollowForm } from './FollowForm';
 
 ### 5. ComparisonStats Component
 
-**Archivo `src/features/follows/components/ComparisonStats/ComparisonStats.module.css`:**
-```css
-.container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-16);
-}
-
-.card {
-  padding: var(--space-20);
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.cardTitle {
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-info);
-  margin-bottom: var(--space-12);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.statsGrid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-}
-
-.statRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-8);
-  background-color: rgba(255, 255, 255, 0.02);
-  border-radius: var(--radius-base);
-}
-
-.statLabel {
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
-}
-
-.statValue {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.positive {
-  color: var(--color-success);
-}
-
-.negative {
-  color: var(--color-error);
-}
-
-.match {
-  background-color: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.diverge {
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-@media (max-width: 768px) {
-  .container {
-    grid-template-columns: 1fr;
-  }
-}
-```
-
 **Archivo `src/features/follows/components/ComparisonStats/ComparisonStats.tsx`:**
 ```typescript
 import { FC } from 'react';
 import type { FollowStats } from '../../hooks/useFollowStats';
-import styles from './ComparisonStats.module.css';
 
 interface ComparisonStatsProps {
   stats: FollowStats;
@@ -9997,43 +9637,46 @@ interface ComparisonStatsProps {
  */
 export const ComparisonStats: FC<ComparisonStatsProps> = ({ stats }) => {
   return (
-    <div className={styles.container}>
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 md:grid-cols-1">
       {/* Card: General */}
-      <div className={styles.card}>
-        <h3 className={styles.cardTitle}>General</h3>
-        <div className={styles.statsGrid}>
-          <div className={styles.statRow}>
-            <span className={styles.statLabel}>Total Follows:</span>
-            <span className={styles.statValue}>{stats.totalFollows}</span>
+      <div className="p-5 bg-surface rounded-lg border border-white/5">
+        <h3 className="text-sm font-medium text-info mb-3 uppercase tracking-wide">
+          General
+        </h3>
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between items-center p-2 bg-white/[0.02] rounded-lg">
+            <span className="text-sm text-text">Total Follows:</span>
+            <span className="text-lg font-semibold text-text">{stats.totalFollows}</span>
           </div>
-          <div className={styles.statRow}>
-            <span className={styles.statLabel}>Resueltos:</span>
-            <span className={styles.statValue}>{stats.resolvedFollows}</span>
+          <div className="flex justify-between items-center p-2 bg-white/[0.02] rounded-lg">
+            <span className="text-sm text-text">Resueltos:</span>
+            <span className="text-lg font-semibold text-text">{stats.resolvedFollows}</span>
           </div>
-          <div className={styles.statRow}>
-            <span className={styles.statLabel}>Ganados:</span>
-            <span className={styles.statValue}>{stats.wonFollows}</span>
+          <div className="flex justify-between items-center p-2 bg-white/[0.02] rounded-lg">
+            <span className="text-sm text-text">Ganados:</span>
+            <span className="text-lg font-semibold text-text">{stats.wonFollows}</span>
           </div>
-          <div className={styles.statRow}>
-            <span className={styles.statLabel}>Perdidos:</span>
-            <span className={styles.statValue}>{stats.lostFollows}</span>
+          <div className="flex justify-between items-center p-2 bg-white/[0.02] rounded-lg">
+            <span className="text-sm text-text">Perdidos:</span>
+            <span className="text-lg font-semibold text-text">{stats.lostFollows}</span>
           </div>
         </div>
       </div>
 
       {/* Card: Rendimiento */}
-      <div className={styles.card}>
-        <h3 className={styles.cardTitle}>Rendimiento</h3>
-        <div className={styles.statsGrid}>
-          <div className={styles.statRow}>
-            <span className={styles.statLabel}>Winrate:</span>
-            <span className={styles.statValue}>{stats.winrate.toFixed(1)}%</span>
+      <div className="p-5 bg-surface rounded-lg border border-white/5">
+        <h3 className="text-sm font-medium text-info mb-3 uppercase tracking-wide">
+          Rendimiento
+        </h3>
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between items-center p-2 bg-white/[0.02] rounded-lg">
+            <span className="text-sm text-text">Winrate:</span>
+            <span className="text-lg font-semibold text-text">{stats.winrate.toFixed(1)}%</span>
           </div>
-          <div className={styles.statRow}>
-            <span className={styles.statLabel}>Yield:</span>
-            <span
-              className={`${styles.statValue} ${
-                stats.yield >= 0 ? styles.positive : styles.negative
+          <div className="flex justify-between items-center p-2 bg-white/[0.02] rounded-lg">
+            <span className="text-sm text-text">Yield:</span>
+            <span className={`text-lg font-semibold ${
+                stats.yield >= 0 ? 'text-success' : 'text-error'
               }`}
             >
               {stats.yield >= 0 ? '+' : ''}
@@ -10107,124 +9750,6 @@ export { ComparisonStats } from './ComparisonStats';
 
 ### 6. FollowRow Component
 
-**Archivo `src/features/follows/components/FollowRow/FollowRow.module.css`:**
-```css
-.row {
-  transition: background-color var(--transition-fast) var(--ease);
-}
-
-.row:hover {
-  background-color: rgba(255, 255, 255, 0.02);
-}
-
-.cell {
-  padding: var(--space-12) var(--space-8);
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
-  vertical-align: middle;
-}
-
-.cellSmall {
-  font-size: var(--font-size-xs);
-  color: var(--color-info);
-}
-
-.match {
-  font-weight: 500;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.comparisonCell {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.comparisonRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  font-size: var(--font-size-xs);
-}
-
-.comparisonLabel {
-  color: var(--color-info);
-  min-width: 60px;
-}
-
-.comparisonValue {
-  font-weight: 500;
-}
-
-.matchBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-4) var(--space-8);
-  border-radius: var(--radius-base);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.matchBadge.match {
-  background-color: rgba(16, 185, 129, 0.2);
-  color: var(--color-success);
-}
-
-.matchBadge.diverge {
-  background-color: rgba(239, 68, 68, 0.2);
-  color: var(--color-error);
-}
-
-.matchBadge.pending {
-  background-color: rgba(107, 114, 128, 0.2);
-  color: var(--color-info);
-}
-
-.actions {
-  display: flex;
-  gap: var(--space-4);
-  justify-content: flex-end;
-}
-
-.iconButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  color: var(--color-info);
-  border-radius: var(--radius-base);
-  cursor: pointer;
-  transition: all var(--transition-fast) var(--ease);
-}
-
-.iconButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--color-text);
-}
-
-@media (max-width: 768px) {
-  .cell {
-    padding: var(--space-8) var(--space-4);
-    font-size: var(--font-size-xs);
-  }
-
-  .match {
-    max-width: 120px;
-  }
-
-  .comparisonCell {
-    gap: var(--space-2);
-  }
-}
-```
-
 **Archivo `src/features/follows/components/FollowRow/FollowRow.tsx`:**
 ```typescript
 import { FC } from 'react';
@@ -10234,7 +9759,6 @@ import { Edit2, Trash2 } from 'lucide-react';
 import { formatDate, formatTime } from '@shared/utils/date.utils';
 import { calculatePickProfit } from '@shared/utils/calculation.utils';
 import { compareResults } from '../../utils/comparison.utils';
-import styles from './FollowRow.module.css';
 
 interface FollowRowProps {
   follow: FollowEntity;
@@ -10294,84 +9818,76 @@ export const FollowRow: FC<FollowRowProps> = ({
       : 'info';
 
   return (
-    <tr className={styles.row}>
-      <td className={styles.cell}>
-        <div className={styles.cellSmall}>{formatDate(pick.date)}</div>
-        <div className={styles.cellSmall}>{formatTime(pick.time)}</div>
+    <tr className="transition-colors hover:bg-white/[0.02]">
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">
+        <div className="text-xs text-info">{formatDate(pick.date)}</div>
+        <div className="text-xs text-info">{formatTime(pick.time)}</div>
       </td>
-      <td className={styles.cell}>{tipsterName}</td>
-      <td className={styles.cell}>{pick.sport}</td>
-      <td className={`${styles.cell} ${styles.match}`} title={pick.match}>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">{tipsterName}</td>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">{pick.sport}</td>
+      <td className="px-3 py-3 text-sm text-text align-middle font-medium max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap md:px-2 md:py-2 md:text-xs md:max-w-[120px]" title={pick.match}>
         {pick.match}
       </td>
-      <td className={styles.cell}>{pick.betType}</td>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">{pick.betType}</td>
 
       {/* Comparación Odds */}
-      <td className={styles.cell}>
-        <div className={styles.comparisonCell}>
-          <div className={styles.comparisonRow}>
-            <span className={styles.comparisonLabel}>Tipster:</span>
-            <span className={styles.comparisonValue}>{pick.odds.toFixed(2)}</span>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">
+        <div className="flex flex-col gap-1 md:gap-0.5">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-info min-w-[60px]">Tipster:</span>
+            <span className="font-medium">{pick.odds.toFixed(2)}</span>
           </div>
-          <div className={styles.comparisonRow}>
-            <span className={styles.comparisonLabel}>Usuario:</span>
-            <span className={styles.comparisonValue}>{follow.userOdds.toFixed(2)}</span>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-info min-w-[60px]">Usuario:</span>
+            <span className="font-medium">{follow.userOdds.toFixed(2)}</span>
           </div>
         </div>
       </td>
 
       {/* Comparación Stake */}
-      <td className={styles.cell}>
-        <div className={styles.comparisonCell}>
-          <div className={styles.comparisonRow}>
-            <span className={styles.comparisonLabel}>Tipster:</span>
-            <span className={styles.comparisonValue}>{pick.stake}</span>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">
+        <div className="flex flex-col gap-1 md:gap-0.5">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-info min-w-[60px]">Tipster:</span>
+            <span className="font-medium">{pick.stake}</span>
           </div>
-          <div className={styles.comparisonRow}>
-            <span className={styles.comparisonLabel}>Usuario:</span>
-            <span className={styles.comparisonValue}>{follow.userStake}</span>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-info min-w-[60px]">Usuario:</span>
+            <span className="font-medium">{follow.userStake}</span>
           </div>
         </div>
       </td>
 
       {/* Comparación Resultado */}
-      <td className={styles.cell}>
-        <div className={styles.comparisonCell}>
-          <div className={styles.comparisonRow}>
-            <span className={styles.comparisonLabel}>Tipster:</span>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">
+        <div className="flex flex-col gap-1 md:gap-0.5">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-info min-w-[60px]">Tipster:</span>
             <Badge variant={tipsterResultVariant}>{pick.result}</Badge>
           </div>
-          <div className={styles.comparisonRow}>
-            <span className={styles.comparisonLabel}>Usuario:</span>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-info min-w-[60px]">Usuario:</span>
             <Badge variant={userResultVariant}>{follow.userResult}</Badge>
           </div>
         </div>
       </td>
 
       {/* Comparación Profit */}
-      <td className={styles.cell}>
-        <div className={styles.comparisonCell}>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">
+        <div className="flex flex-col gap-1 md:gap-0.5">
           {tipsterProfit !== null && (
-            <div className={styles.comparisonRow}>
-              <span className={styles.comparisonLabel}>Tipster:</span>
-              <span
-                className={`${styles.comparisonValue} ${
-                  tipsterProfit >= 0 ? 'positive' : 'negative'
-                }`}
-              >
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-info min-w-[60px]">Tipster:</span>
+              <span className={`font-medium ${tipsterProfit >= 0 ? 'positive' : 'negative'}`}>
                 {tipsterProfit >= 0 ? '+' : ''}
                 {tipsterProfit.toFixed(2)}u
               </span>
             </div>
           )}
           {userProfit !== null && (
-            <div className={styles.comparisonRow}>
-              <span className={styles.comparisonLabel}>Usuario:</span>
-              <span
-                className={`${styles.comparisonValue} ${
-                  userProfit >= 0 ? 'positive' : 'negative'
-                }`}
-              >
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-info min-w-[60px]">Usuario:</span>
+              <span className={`font-medium ${userProfit >= 0 ? 'positive' : 'negative'}`}>
                 {userProfit >= 0 ? '+' : ''}
                 {userProfit.toFixed(2)}u
               </span>
@@ -10381,18 +9897,24 @@ export const FollowRow: FC<FollowRowProps> = ({
       </td>
 
       {/* Match/Diverge */}
-      <td className={styles.cell}>
-        <span className={`${styles.matchBadge} ${styles[comparison]}`}>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">
+        <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold uppercase ${
+          comparison === 'match' 
+            ? 'bg-success/20 text-success' 
+            : comparison === 'diverge' 
+            ? 'bg-error/20 text-error' 
+            : 'bg-info/20 text-info'
+        }`}>
           {comparison === 'match' ? 'Match' : comparison === 'diverge' ? 'Diverge' : 'Pendiente'}
         </span>
       </td>
 
       {/* Acciones */}
-      <td className={styles.cell}>
-        <div className={styles.actions}>
+      <td className="px-3 py-3 text-sm text-text align-middle md:px-2 md:py-2 md:text-xs">
+        <div className="flex gap-1 justify-end">
           {onEdit && (
             <button
-              className={styles.iconButton}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-info hover:bg-white/10 hover:text-text transition-all"
               onClick={handleEdit}
               title="Editar follow"
               aria-label="Editar follow"
@@ -10402,7 +9924,7 @@ export const FollowRow: FC<FollowRowProps> = ({
           )}
           {onDelete && (
             <button
-              className={styles.iconButton}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-info hover:bg-white/10 hover:text-text transition-all"
               onClick={handleDelete}
               title="Eliminar follow"
               aria-label="Eliminar follow"
@@ -10426,71 +9948,12 @@ export { FollowRow } from './FollowRow';
 
 ### 7. FollowTable Component
 
-**Archivo `src/features/follows/components/FollowTable/FollowTable.module.css`:**
-```css
-.container {
-  width: 100%;
-  overflow-x: auto;
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--font-size-sm);
-}
-
-.thead {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-bottom: 2px solid rgba(59, 130, 246, 0.3);
-}
-
-.th {
-  padding: var(--space-12);
-  text-align: left;
-  font-weight: 600;
-  font-size: var(--font-size-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--color-text);
-  white-space: nowrap;
-}
-
-.thRight {
-  text-align: right;
-}
-
-.tbody tr:not(:last-child) {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.emptyState {
-  padding: var(--space-32) var(--space-16);
-  text-align: center;
-  color: var(--color-info);
-}
-
-@media (max-width: 768px) {
-  .table {
-    font-size: var(--font-size-xs);
-  }
-
-  .th {
-    padding: var(--space-8);
-    font-size: 10px;
-  }
-}
-```
-
 **Archivo `src/features/follows/components/FollowTable/FollowTable.tsx`:**
 ```typescript
 import { FC } from 'react';
 import { FollowEntity, PickEntity } from '@shared/types/entities.types';
 import { EmptyState } from '@shared/components';
 import { FollowRow } from '../FollowRow';
-import styles from './FollowTable.module.css';
 
 interface FollowTableProps {
   follows: FollowEntity[];
@@ -10523,8 +9986,8 @@ export const FollowTable: FC<FollowTableProps> = ({
 
   if (follows.length === 0) {
     return (
-      <div className={styles.container}>
-        <div className={styles.emptyState}>
+      <div className="w-full overflow-x-auto bg-surface rounded-lg border border-white/5">
+        <div className="py-8 px-4 text-center text-info">
           <EmptyState message="No has seguido ninguna pick todavía" />
         </div>
       </div>
@@ -10532,24 +9995,24 @@ export const FollowTable: FC<FollowTableProps> = ({
   }
 
   return (
-    <div className={styles.container}>
-      <table className={styles.table}>
-        <thead className={styles.thead}>
+    <div className="w-full overflow-x-auto bg-surface rounded-lg border border-white/5">
+      <table className="w-full border-collapse text-sm md:text-xs">
+        <thead className="bg-primary/10 border-b-2 border-primary/30">
           <tr>
-            <th className={styles.th}>Fecha/Hora</th>
-            <th className={styles.th}>Tipster</th>
-            <th className={styles.th}>Deporte</th>
-            <th className={styles.th}>Partido</th>
-            <th className={styles.th}>Tipo Apuesta</th>
-            <th className={styles.th}>Cuota</th>
-            <th className={styles.th}>Stake</th>
-            <th className={styles.th}>Resultado</th>
-            <th className={styles.th}>Profit</th>
-            <th className={styles.th}>Match/Diverge</th>
-            <th className={`${styles.th} ${styles.thRight}`}>Acciones</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Fecha/Hora</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Tipster</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Deporte</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Partido</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Tipo Apuesta</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Cuota</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Stake</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Resultado</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Profit</th>
+            <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Match/Diverge</th>
+            <th className="px-3 py-3 text-right font-semibold text-xs uppercase tracking-wide text-text whitespace-nowrap md:px-2 md:py-2 md:text-[10px]">Acciones</th>
           </tr>
         </thead>
-        <tbody className={styles.tbody}>
+        <tbody>
           {follows.map((follow) => {
             const pick = picksMap[follow.pickId];
             if (!pick) return null; // Skip si la pick fue eliminada
@@ -10653,78 +10116,6 @@ export { ComparisonStats } from './ComparisonStats';
 
 ### 9. MyPicksPage
 
-**Archivo `src/features/follows/pages/MyPicksPage/MyPicksPage.module.css`:**
-```css
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-24);
-  padding: var(--space-24);
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-16);
-}
-
-.title {
-  font-size: var(--font-size-3xl);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.subtitle {
-  font-size: var(--font-size-sm);
-  color: var(--color-info);
-  margin-top: var(--space-4);
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-20);
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-}
-
-.sectionTitle {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.error {
-  padding: var(--space-16);
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius-base);
-  color: var(--color-error);
-  text-align: center;
-}
-
-@media (max-width: 768px) {
-  .page {
-    padding: var(--space-16);
-    gap: var(--space-16);
-  }
-
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .title {
-    font-size: var(--font-size-2xl);
-  }
-}
-```
-
 **Archivo `src/features/follows/pages/MyPicksPage/MyPicksPage.tsx`:**
 ```typescript
 import { FC, useMemo } from 'react';
@@ -10733,7 +10124,6 @@ import { useFollows, useFollowModal, useFollowStats } from '../../hooks';
 import { FollowTable, ComparisonStats, FollowModal } from '../../components';
 import { useTipsters } from '@features/tipsters';
 import { usePicks } from '@features/picks';
-import styles from './MyPicksPage.module.css';
 
 /**
  * Página de Mis Picks (follows del usuario)
@@ -10798,31 +10188,35 @@ export const MyPicksPage: FC = () => {
   }
 
   return (
-    <div className={styles.page}>
+    <div className="flex flex-col gap-6 p-6 md:p-4 md:gap-4">
       {/* Header */}
-      <div className={styles.header}>
+      <div className="flex items-center justify-between gap-4 md:flex-col md:items-start">
         <div>
-          <h1 className={styles.title}>Mis Picks</h1>
-          <p className={styles.subtitle}>
+          <h1 className="text-3xl font-semibold text-text md:text-2xl">Mis Picks</h1>
+          <p className="text-sm text-info mt-1">
             Picks que has seguido y comparación con los resultados de los tipsters
           </p>
         </div>
       </div>
 
       {/* Errores */}
-      {followsError && <div className={styles.error}>{followsError}</div>}
+      {followsError && (
+        <div className="p-4 bg-error/10 border border-error rounded-lg text-error text-center">
+          {followsError}
+        </div>
+      )}
 
       {/* Contenido */}
-      <div className={styles.content}>
+      <div className="flex flex-col gap-5">
         {/* Estadísticas Comparativas */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Estadísticas</h2>
+        <div className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-text">Estadísticas</h2>
           <ComparisonStats stats={stats} />
         </div>
 
         {/* Tabla de Follows */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Historial de Seguimientos</h2>
+        <div className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-text">Historial de Seguimientos</h2>
           <FollowTable
             follows={sortedFollows}
             picks={picks}
@@ -12211,78 +11605,10 @@ export type { PersonalStats } from './useDashboardStats';
 
 ### 4. PersonalStatsGrid Component
 
-**Archivo `src/features/dashboard/components/PersonalStatsGrid/PersonalStatsGrid.module.css`:**
-```css
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-16);
-}
-
-.statCard {
-  padding: var(--space-20);
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all var(--transition-fast) var(--ease);
-}
-
-.statCard:hover {
-  border-color: rgba(59, 130, 246, 0.3);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.statLabel {
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  color: var(--color-info);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: var(--space-8);
-}
-
-.statValue {
-  font-size: var(--font-size-3xl);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.statSubtext {
-  font-size: var(--font-size-xs);
-  color: var(--color-info);
-  margin-top: var(--space-4);
-}
-
-.positive {
-  color: var(--color-success);
-}
-
-.negative {
-  color: var(--color-error);
-}
-
-@media (max-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-12);
-  }
-
-  .statCard {
-    padding: var(--space-16);
-  }
-
-  .statValue {
-    font-size: var(--font-size-2xl);
-  }
-}
-```
-
 **Archivo `src/features/dashboard/components/PersonalStatsGrid/PersonalStatsGrid.tsx`:**
 ```typescript
 import { FC } from 'react';
 import type { PersonalStats } from '../../hooks/useDashboardStats';
-import styles from './PersonalStatsGrid.module.css';
 
 interface PersonalStatsGridProps {
   stats: PersonalStats;
@@ -12293,19 +11619,19 @@ interface PersonalStatsGridProps {
  */
 export const PersonalStatsGrid: FC<PersonalStatsGridProps> = ({ stats }) => {
   return (
-    <div className={styles.grid}>
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4 md:grid-cols-2 md:gap-3">
       {/* Total Picks */}
-      <div className={styles.statCard}>
-        <div className={styles.statLabel}>Total Picks</div>
-        <div className={styles.statValue}>{stats.totalPicks}</div>
-        <div className={styles.statSubtext}>Registradas</div>
+      <div className="p-5 bg-surface rounded-lg border border-white/5 transition-all hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md md:p-4">
+        <div className="text-xs font-medium text-info uppercase tracking-wide mb-2">Total Picks</div>
+        <div className="text-3xl font-semibold text-text md:text-2xl">{stats.totalPicks}</div>
+        <div className="text-xs text-info mt-1">Registradas</div>
       </div>
 
       {/* Picks Resueltas */}
-      <div className={styles.statCard}>
-        <div className={styles.statLabel}>Resueltas</div>
-        <div className={styles.statValue}>{stats.resolvedPicks}</div>
-        <div className={styles.statSubtext}>
+      <div className="p-5 bg-surface rounded-lg border border-white/5 transition-all hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md md:p-4">
+        <div className="text-xs font-medium text-info uppercase tracking-wide mb-2">Resueltas</div>
+        <div className="text-3xl font-semibold text-text md:text-2xl">{stats.resolvedPicks}</div>
+        <div className="text-xs text-info mt-1">
           {stats.totalPicks > 0
             ? `${((stats.resolvedPicks / stats.totalPicks) * 100).toFixed(0)}%`
             : '0%'}
@@ -12313,68 +11639,65 @@ export const PersonalStatsGrid: FC<PersonalStatsGridProps> = ({ stats }) => {
       </div>
 
       {/* Winrate */}
-      <div className={styles.statCard}>
-        <div className={styles.statLabel}>Winrate</div>
-        <div className={styles.statValue}>{stats.winrate.toFixed(1)}%</div>
-        <div className={styles.statSubtext}>{stats.wonPicks} ganadas</div>
+      <div className="p-5 bg-surface rounded-lg border border-white/5 transition-all hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md md:p-4">
+        <div className="text-xs font-medium text-info uppercase tracking-wide mb-2">Winrate</div>
+        <div className="text-3xl font-semibold text-text md:text-2xl">{stats.winrate.toFixed(1)}%</div>
+        <div className="text-xs text-info mt-1">{stats.wonPicks} ganadas</div>
       </div>
 
       {/* Yield */}
-      <div className={styles.statCard}>
-        <div className={styles.statLabel}>Yield</div>
-        <div
-          className={`${styles.statValue} ${
-            stats.yield >= 0 ? styles.positive : styles.negative
+      <div className="p-5 bg-surface rounded-lg border border-white/5 transition-all hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md md:p-4">
+        <div className="text-xs font-medium text-info uppercase tracking-wide mb-2">Yield</div>
+        <div className={`text-3xl font-semibold md:text-2xl ${
+            stats.yield >= 0 ? 'text-success' : 'text-error'
           }`}
         >
           {stats.yield >= 0 ? '+' : ''}
           {stats.yield.toFixed(2)}%
         </div>
-        <div className={styles.statSubtext}>Rentabilidad</div>
+        <div className="text-xs text-info mt-1">Rentabilidad</div>
       </div>
 
       {/* Total Profit */}
-      <div className={styles.statCard}>
-        <div className={styles.statLabel}>Profit</div>
-        <div
-          className={`${styles.statValue} ${
-            stats.totalProfit >= 0 ? styles.positive : styles.negative
+      <div className="p-5 bg-surface rounded-lg border border-white/5 transition-all hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md md:p-4">
+        <div className="text-xs font-medium text-info uppercase tracking-wide mb-2">Profit</div>
+        <div className={`text-3xl font-semibold md:text-2xl ${
+            stats.totalProfit >= 0 ? 'text-success' : 'text-error'
           }`}
         >
           {stats.totalProfit >= 0 ? '+' : ''}
           {stats.totalProfit.toFixed(2)}u
         </div>
-        <div className={styles.statSubtext}>
+        <div className="text-xs text-info mt-1">
           {stats.totalStaked.toFixed(2)}u apostadas
         </div>
       </div>
 
       {/* Avg Odds */}
-      <div className={styles.statCard}>
-        <div className={styles.statLabel}>Cuota Media</div>
-        <div className={styles.statValue}>{stats.avgOdds.toFixed(2)}</div>
-        <div className={styles.statSubtext}>Promedio</div>
+      <div className="p-5 bg-surface rounded-lg border border-white/5 transition-all hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md md:p-4">
+        <div className="text-xs font-medium text-info uppercase tracking-wide mb-2">Cuota Media</div>
+        <div className="text-3xl font-semibold text-text md:text-2xl">{stats.avgOdds.toFixed(2)}</div>
+        <div className="text-xs text-info mt-1">Promedio</div>
       </div>
 
       {/* Total Follows */}
-      <div className={styles.statCard}>
-        <div className={styles.statLabel}>Follows</div>
-        <div className={styles.statValue}>{stats.totalFollows}</div>
-        <div className={styles.statSubtext}>{stats.resolvedFollows} resueltos</div>
+      <div className="p-5 bg-surface rounded-lg border border-white/5 transition-all hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md md:p-4">
+        <div className="text-xs font-medium text-info uppercase tracking-wide mb-2">Follows</div>
+        <div className="text-3xl font-semibold text-text md:text-2xl">{stats.totalFollows}</div>
+        <div className="text-xs text-info mt-1">{stats.resolvedFollows} resueltos</div>
       </div>
 
       {/* Follows Yield */}
-      <div className={styles.statCard}>
-        <div className={styles.statLabel}>Yield Follows</div>
-        <div
-          className={`${styles.statValue} ${
-            stats.followsYield >= 0 ? styles.positive : styles.negative
+      <div className="p-5 bg-surface rounded-lg border border-white/5 transition-all hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md md:p-4">
+        <div className="text-xs font-medium text-info uppercase tracking-wide mb-2">Yield Follows</div>
+        <div className={`text-3xl font-semibold md:text-2xl ${
+            stats.followsYield >= 0 ? 'text-success' : 'text-error'
           }`}
         >
           {stats.followsYield >= 0 ? '+' : ''}
           {stats.followsYield.toFixed(2)}%
         </div>
-        <div className={styles.statSubtext}>
+        <div className="text-xs text-info mt-1">
           {stats.followsProfit >= 0 ? '+' : ''}
           {stats.followsProfit.toFixed(2)}u
         </div>
@@ -12393,140 +11716,12 @@ export { PersonalStatsGrid } from './PersonalStatsGrid';
 
 ### 5. TipsterCard Component
 
-**Archivo `src/features/dashboard/components/TipsterCard/TipsterCard.module.css`:**
-```css
-.card {
-  padding: var(--space-20);
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  cursor: pointer;
-  transition: all var(--transition-fast) var(--ease);
-}
-
-.card:hover {
-  border-color: rgba(59, 130, 246, 0.5);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-12);
-  margin-bottom: var(--space-16);
-}
-
-.info {
-  flex: 1;
-  min-width: 0;
-}
-
-.name {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: var(--space-4);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.channel {
-  font-size: var(--font-size-sm);
-  color: var(--color-info);
-}
-
-.traceability {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-8);
-  background-color: rgba(59, 130, 246, 0.1);
-  border-radius: var(--radius-base);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--color-primary);
-  white-space: nowrap;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-12);
-}
-
-.statItem {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.statLabel {
-  font-size: var(--font-size-xs);
-  color: var(--color-info);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.statValue {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.positive {
-  color: var(--color-success);
-}
-
-.negative {
-  color: var(--color-error);
-}
-
-.footer {
-  margin-top: var(--space-16);
-  padding-top: var(--space-16);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: var(--font-size-xs);
-  color: var(--color-info);
-}
-
-.lastPick {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-@media (max-width: 768px) {
-  .card {
-    padding: var(--space-16);
-  }
-
-  .name {
-    font-size: var(--font-size-base);
-  }
-
-  .stats {
-    gap: var(--space-8);
-  }
-
-  .statValue {
-    font-size: var(--font-size-lg);
-  }
-}
-```
-
 **Archivo `src/features/dashboard/components/TipsterCard/TipsterCard.tsx`:**
 ```typescript
 import { FC } from 'react';
 import { Calendar, TrendingUp } from 'lucide-react';
 import { formatDate } from '@shared/utils/date.utils';
 import type { TipsterWithStats } from '../../utils';
-import styles from './TipsterCard.module.css';
 
 interface TipsterCardProps {
   tipster: TipsterWithStats;
@@ -12542,41 +11737,45 @@ export const TipsterCard: FC<TipsterCardProps> = ({ tipster, onClick }) => {
   };
 
   return (
-    <div className={styles.card} onClick={handleClick}>
+    <div 
+      className="p-5 bg-surface rounded-lg border border-white/5 cursor-pointer transition-all hover:border-primary/50 hover:-translate-y-1 hover:shadow-lg md:p-4"
+      onClick={handleClick}
+    >
       {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.info}>
-          <h3 className={styles.name}>{tipster.name}</h3>
-          <p className={styles.channel}>{tipster.channel}</p>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-text mb-1 overflow-hidden text-ellipsis whitespace-nowrap md:text-base">
+            {tipster.name}
+          </h3>
+          <p className="text-sm text-info">{tipster.channel}</p>
         </div>
-        <div className={styles.traceability}>
+        <div className="flex items-center gap-1 px-2 py-1 bg-primary/10 rounded-lg text-xs font-semibold text-primary whitespace-nowrap">
           <TrendingUp size={12} />
           {tipster.stats.traceability.toFixed(0)}%
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className={styles.stats}>
+      <div className="grid grid-cols-2 gap-3 md:gap-2">
         {/* Total Picks */}
-        <div className={styles.statItem}>
-          <span className={styles.statLabel}>Picks</span>
-          <span className={styles.statValue}>{tipster.stats.totalPicks}</span>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-info uppercase tracking-wide">Picks</span>
+          <span className="text-xl font-semibold text-text md:text-lg">{tipster.stats.totalPicks}</span>
         </div>
 
         {/* Winrate */}
-        <div className={styles.statItem}>
-          <span className={styles.statLabel}>Winrate</span>
-          <span className={styles.statValue}>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-info uppercase tracking-wide">Winrate</span>
+          <span className="text-xl font-semibold text-text md:text-lg">
             {tipster.stats.winrate.toFixed(1)}%
           </span>
         </div>
 
         {/* Yield */}
-        <div className={styles.statItem}>
-          <span className={styles.statLabel}>Yield</span>
-          <span
-            className={`${styles.statValue} ${
-              tipster.stats.yield >= 0 ? styles.positive : styles.negative
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-info uppercase tracking-wide">Yield</span>
+          <span className={`text-xl font-semibold md:text-lg ${
+              tipster.stats.yield >= 0 ? 'text-success' : 'text-error'
             }`}
           >
             {tipster.stats.yield >= 0 ? '+' : ''}
@@ -12585,11 +11784,10 @@ export const TipsterCard: FC<TipsterCardProps> = ({ tipster, onClick }) => {
         </div>
 
         {/* Profit */}
-        <div className={styles.statItem}>
-          <span className={styles.statLabel}>Profit</span>
-          <span
-            className={`${styles.statValue} ${
-              tipster.stats.totalProfit >= 0 ? styles.positive : styles.negative
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-info uppercase tracking-wide">Profit</span>
+          <span className={`text-xl font-semibold md:text-lg ${
+              tipster.stats.totalProfit >= 0 ? 'text-success' : 'text-error'
             }`}
           >
             {tipster.stats.totalProfit >= 0 ? '+' : ''}
@@ -12599,8 +11797,8 @@ export const TipsterCard: FC<TipsterCardProps> = ({ tipster, onClick }) => {
       </div>
 
       {/* Footer */}
-      <div className={styles.footer}>
-        <div className={styles.lastPick}>
+      <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center text-xs text-info">
+        <div className="flex items-center gap-1">
           <Calendar size={12} />
           <span>
             {tipster.stats.lastPickDate
@@ -12624,35 +11822,12 @@ export { TipsterCard } from './TipsterCard';
 
 ### 6. TipsterGrid Component
 
-**Archivo `src/features/dashboard/components/TipsterGrid/TipsterGrid.module.css`:**
-```css
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--space-20);
-}
-
-.empty {
-  grid-column: 1 / -1;
-  padding: var(--space-32);
-  text-align: center;
-}
-
-@media (max-width: 768px) {
-  .grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-16);
-  }
-}
-```
-
 **Archivo `src/features/dashboard/components/TipsterGrid/TipsterGrid.tsx`:**
 ```typescript
 import { FC } from 'react';
 import { EmptyState } from '@shared/components';
 import { TipsterCard } from '../TipsterCard';
 import type { TipsterWithStats } from '../../utils';
-import styles from './TipsterGrid.module.css';
 
 interface TipsterGridProps {
   tipsters: TipsterWithStats[];
@@ -12665,14 +11840,14 @@ interface TipsterGridProps {
 export const TipsterGrid: FC<TipsterGridProps> = ({ tipsters, onTipsterClick }) => {
   if (tipsters.length === 0) {
     return (
-      <div className={styles.empty}>
+      <div className="col-span-full py-8 text-center">
         <EmptyState message="No se encontraron tipsters con estos filtros" />
       </div>
     );
   }
 
   return (
-    <div className={styles.grid}>
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-5 md:grid-cols-1 md:gap-4">
       {tipsters.map((tipster) => (
         <TipsterCard key={tipster.id} tipster={tipster} onClick={onTipsterClick} />
       ))}
@@ -12846,12 +12021,14 @@ export const DashboardFilters: FC<DashboardFiltersProps> = ({
   ];
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-8)' }}>
-          <h3 className={styles.title}>Filtros</h3>
+    <div className="flex flex-col gap-4 p-5 bg-surface rounded-lg border border-white/5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-text">Filtros</h3>
           {activeFiltersCount > 0 && (
-            <span className={styles.badge}>{activeFiltersCount}</span>
+            <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 bg-primary text-white rounded-full text-xs font-semibold">
+              {activeFiltersCount}
+            </span>
           )}
         </div>
         {activeFiltersCount > 0 && (
@@ -12862,9 +12039,9 @@ export const DashboardFilters: FC<DashboardFiltersProps> = ({
         )}
       </div>
 
-      <div className={styles.filtersGrid}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3 md:grid-cols-1">
         {/* Búsqueda */}
-        <div className={styles.searchBar}>
+        <div className="col-span-full">
           <Input
             type="text"
             placeholder="Buscar tipster por nombre..."
@@ -12875,19 +12052,19 @@ export const DashboardFilters: FC<DashboardFiltersProps> = ({
         </div>
 
         {/* Deportes */}
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Deportes</label>
-          <div className={styles.checkboxGroup}>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-text">Deportes</label>
+          <div className="flex flex-col gap-1 max-h-[200px] overflow-y-auto p-2 bg-white/[0.02] rounded-lg">
             {ALL_SPORTS.map((sport) => (
-              <div key={sport} className={styles.checkboxItem}>
+              <div key={sport} className="flex items-center gap-2 p-1 rounded-sm transition-colors hover:bg-white/5">
                 <input
                   type="checkbox"
                   id={`sport-${sport}`}
                   checked={filters.sports.includes(sport)}
                   onChange={() => onToggleSport(sport)}
-                  className={styles.checkbox}
+                  className="w-[18px] h-[18px] cursor-pointer accent-primary"
                 />
-                <label htmlFor={`sport-${sport}`} className={styles.checkboxLabel}>
+                <label htmlFor={`sport-${sport}`} className="text-sm text-text cursor-pointer select-none">
                   {sport}
                 </label>
               </div>
@@ -12896,19 +12073,19 @@ export const DashboardFilters: FC<DashboardFiltersProps> = ({
         </div>
 
         {/* Canales */}
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Canales</label>
-          <div className={styles.checkboxGroup}>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-text">Canales</label>
+          <div className="flex flex-col gap-1 max-h-[200px] overflow-y-auto p-2 bg-white/[0.02] rounded-lg">
             {availableChannels.map((channel) => (
-              <div key={channel} className={styles.checkboxItem}>
+              <div key={channel} className="flex items-center gap-2 p-1 rounded-sm transition-colors hover:bg-white/5">
                 <input
                   type="checkbox"
                   id={`channel-${channel}`}
                   checked={filters.channels.includes(channel)}
                   onChange={() => onToggleChannel(channel)}
-                  className={styles.checkbox}
+                  className="w-[18px] h-[18px] cursor-pointer accent-primary"
                 />
-                <label htmlFor={`channel-${channel}`} className={styles.checkboxLabel}>
+                <label htmlFor={`channel-${channel}`} className="text-sm text-text cursor-pointer select-none">
                   {channel}
                 </label>
               </div>
@@ -12917,7 +12094,7 @@ export const DashboardFilters: FC<DashboardFiltersProps> = ({
         </div>
 
         {/* Yield Mínimo */}
-        <div className={styles.filterGroup}>
+        <div className="flex flex-col gap-2">
           <Input
             label="Yield Mínimo (%)"
             type="number"
@@ -12932,7 +12109,7 @@ export const DashboardFilters: FC<DashboardFiltersProps> = ({
         </div>
 
         {/* Última Pick */}
-        <div className={styles.filterGroup}>
+        <div className="flex flex-col gap-2">
           <Select
             label="Última Pick"
             options={lastPickOptions}
@@ -12944,7 +12121,7 @@ export const DashboardFilters: FC<DashboardFiltersProps> = ({
         </div>
 
         {/* Ordenar Por */}
-        <div className={styles.filterGroup}>
+        <div className="flex flex-col gap-2">
           <Select
             label="Ordenar Por"
             options={sortOptions}
@@ -12977,83 +12154,6 @@ export { DashboardFilters } from './DashboardFilters';
 
 ### 8. DashboardPage
 
-**Archivo `src/features/dashboard/pages/DashboardPage/DashboardPage.module.css`:**
-```css
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-24);
-  padding: var(--space-24);
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-16);
-}
-
-.headerLeft {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-}
-
-.title {
-  font-size: var(--font-size-3xl);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.subtitle {
-  font-size: var(--font-size-sm);
-  color: var(--color-info);
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-24);
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-}
-
-.sectionTitle {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.error {
-  padding: var(--space-16);
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius-base);
-  color: var(--color-error);
-  text-align: center;
-}
-
-@media (max-width: 768px) {
-  .page {
-    padding: var(--space-16);
-    gap: var(--space-16);
-  }
-
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .title {
-    font-size: var(--font-size-2xl);
-  }
-}
-```
-
 **Archivo `src/features/dashboard/pages/DashboardPage/DashboardPage.tsx`:**
 ```typescript
 import { FC, useMemo } from 'react';
@@ -13072,7 +12172,6 @@ import {
 } from '../../components';
 import { useTipsterModal } from '@features/tipsters';
 import { TipsterModal } from '@features/tipsters/components';
-import styles from './DashboardPage.module.css';
 
 /**
  * Página principal del dashboard
@@ -13118,12 +12217,12 @@ export const DashboardPage: FC = () => {
   }
 
   return (
-    <div className={styles.page}>
+    <div className="flex flex-col gap-6 p-6 md:p-4 md:gap-4">
       {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h1 className={styles.title}>Dashboard</h1>
-          <p className={styles.subtitle}>
+      <div className="flex items-center justify-between gap-4 md:flex-col md:items-start">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-semibold text-text md:text-2xl">Dashboard</h1>
+          <p className="text-sm text-info">
             Vista general de tus tipsters y estadísticas
           </p>
         </div>
@@ -13134,18 +12233,22 @@ export const DashboardPage: FC = () => {
       </div>
 
       {/* Errores */}
-      {error && <div className={styles.error}>{error}</div>}
+      {error && (
+        <div className="p-4 bg-error/10 border border-error rounded-lg text-error text-center">
+          {error}
+        </div>
+      )}
 
       {/* Contenido */}
-      <div className={styles.content}>
+      <div className="flex flex-col gap-6 md:gap-4">
         {/* Estadísticas Personales */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Estadísticas Generales</h2>
+        <div className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-text">Estadísticas Generales</h2>
           <PersonalStatsGrid stats={personalStats} />
         </div>
 
         {/* Filtros */}
-        <div className={styles.section}>
+        <div className="flex flex-col gap-4">
           <DashboardFilters
             filters={filters}
             availableChannels={availableChannels}
@@ -13158,8 +12261,8 @@ export const DashboardPage: FC = () => {
         </div>
 
         {/* Grid de Tipsters */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>
+        <div className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-text">
             Tipsters ({filteredTipsters.length})
           </h2>
           <TipsterGrid
@@ -14358,89 +13461,6 @@ export { useTipsterCharts } from './useTipsterCharts';
 
 ### 5. TipsterDetailHeader Component
 
-**Archivo `src/features/tipster-detail/components/TipsterDetailHeader/TipsterDetailHeader.module.css`:**
-```css
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-16);
-  padding: var(--space-20);
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.left {
-  display: flex;
-  align-items: center;
-  gap: var(--space-16);
-}
-
-.backButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-base);
-  cursor: pointer;
-  transition: all var(--transition-fast) var(--ease);
-}
-
-.backButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateX(-2px);
-}
-
-.info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.title {
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-  color: var(--color-text);
-  margin: 0;
-}
-
-.channel {
-  font-size: var(--font-size-sm);
-  color: var(--color-info);
-}
-
-.actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-}
-
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-12);
-  }
-
-  .left {
-    width: 100%;
-  }
-
-  .actions {
-    width: 100%;
-    flex-wrap: wrap;
-  }
-
-  .title {
-    font-size: var(--font-size-xl);
-  }
-}
-```
-
 **Archivo `src/features/tipster-detail/components/TipsterDetailHeader/TipsterDetailHeader.tsx`:**
 ```typescript
 import { FC } from 'react';
@@ -14448,7 +13468,6 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Plus, RotateCcw } from 'lucide-react';
 import { Button } from '@shared/components';
 import type { TipsterEntity } from '@features/tipsters';
-import styles from './TipsterDetailHeader.module.css';
 
 interface TipsterDetailHeaderProps {
   tipster: TipsterEntity;
@@ -14469,18 +13488,21 @@ export const TipsterDetailHeader: FC<TipsterDetailHeaderProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className={styles.header}>
-      <div className={styles.left}>
-        <button className={styles.backButton} onClick={() => navigate('/')}>
+    <div className="flex items-center justify-between gap-4 p-5 bg-surface rounded-lg border border-white/5 md:flex-col md:items-start md:gap-3">
+      <div className="flex items-center gap-4 md:w-full">
+        <button 
+          className="flex items-center justify-center w-10 h-10 bg-white/5 border border-white/10 rounded-lg cursor-pointer transition-all hover:bg-white/10 hover:-translate-x-0.5"
+          onClick={() => navigate('/')}
+        >
           <ArrowLeft size={20} color="#E0E0E0" />
         </button>
-        <div className={styles.info}>
-          <h1 className={styles.title}>{tipster.name}</h1>
-          <p className={styles.channel}>{tipster.channel}</p>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-semibold text-text m-0 md:text-xl">{tipster.name}</h1>
+          <p className="text-sm text-info">{tipster.channel}</p>
         </div>
       </div>
 
-      <div className={styles.actions}>
+      <div className="flex items-center gap-2 md:w-full md:flex-wrap">
         <Button variant="outline" size="sm" onClick={onEdit}>
           <Edit size={16} />
           Editar
@@ -14508,65 +13530,11 @@ export { TipsterDetailHeader } from './TipsterDetailHeader';
 
 ### 6. TipsterDetailTabs Component
 
-**Archivo `src/features/tipster-detail/components/TipsterDetailTabs/TipsterDetailTabs.module.css`:**
-```css
-.tabs {
-  display: flex;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  overflow-x: auto;
-}
-
-.tab {
-  flex: 1;
-  min-width: max-content;
-  padding: var(--space-12) var(--space-20);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-info);
-  background-color: transparent;
-  border: none;
-  border-radius: var(--radius-base);
-  cursor: pointer;
-  transition: all var(--transition-fast) var(--ease);
-  white-space: nowrap;
-}
-
-.tab:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--color-text);
-}
-
-.tabActive {
-  color: white;
-  background-color: var(--color-primary);
-}
-
-.tabActive:hover {
-  background-color: var(--color-primary);
-}
-
-@media (max-width: 768px) {
-  .tabs {
-    justify-content: flex-start;
-  }
-
-  .tab {
-    flex: 0 0 auto;
-    font-size: var(--font-size-xs);
-    padding: var(--space-8) var(--space-16);
-  }
-}
-```
-
 **Archivo `src/features/tipster-detail/components/TipsterDetailTabs/TipsterDetailTabs.tsx`:**
 ```typescript
 import { FC } from 'react';
+import { cn } from '@shared/utils';
 import type { TipsterDetailTab } from '../../types';
-import styles from './TipsterDetailTabs.module.css';
 
 interface TipsterDetailTabsProps {
   activeTab: TipsterDetailTab;
@@ -14585,11 +13553,18 @@ const TABS: { id: TipsterDetailTab; label: string }[] = [
  */
 export const TipsterDetailTabs: FC<TipsterDetailTabsProps> = ({ activeTab, onTabChange }) => {
   return (
-    <div className={styles.tabs}>
+    <div className="flex gap-1 p-1 bg-surface rounded-lg border border-white/5 overflow-x-auto md:justify-start">
       {TABS.map((tab) => (
         <button
           key={tab.id}
-          className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ''}`}
+          className={cn(
+            "flex-1 min-w-max px-5 py-3 text-sm font-medium rounded-lg border-none cursor-pointer transition-all whitespace-nowrap",
+            "hover:bg-white/5 hover:text-text",
+            "md:flex-none md:text-xs md:px-4 md:py-2",
+            activeTab === tab.id
+              ? "text-white bg-primary hover:bg-primary"
+              : "text-info bg-transparent"
+          )}
           onClick={() => onTabChange(tab.id)}
         >
           {tab.label}
@@ -14609,69 +13584,12 @@ export { TipsterDetailTabs } from './TipsterDetailTabs';
 
 ### 7. TipsterStatsGrid Component
 
-**Archivo `src/features/tipster-detail/components/TipsterStatsGrid/TipsterStatsGrid.module.css`:**
-```css
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--space-16);
-}
-
-.statCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-  padding: var(--space-16);
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-base);
-  transition: all var(--transition-fast) var(--ease);
-}
-
-.statCard:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  transform: translateY(-2px);
-}
-
-.label {
-  font-size: var(--font-size-xs);
-  color: var(--color-info);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.value {
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.positive {
-  color: var(--color-success);
-}
-
-.negative {
-  color: var(--color-error);
-}
-
-@media (max-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: var(--space-12);
-  }
-
-  .value {
-    font-size: var(--font-size-xl);
-  }
-}
-```
-
 **Archivo `src/features/tipster-detail/components/TipsterStatsGrid/TipsterStatsGrid.tsx`:**
 ```typescript
 import { FC } from 'react';
+import { cn } from '@shared/utils';
 import type { TipsterDetailStats } from '../../types';
 import { formatNumber } from '@shared/utils/format.utils';
-import styles from './TipsterStatsGrid.module.css';
 
 interface TipsterStatsGridProps {
   stats: TipsterDetailStats;
@@ -14703,11 +13621,20 @@ export const TipsterStatsGrid: FC<TipsterStatsGridProps> = ({ stats }) => {
   ];
 
   return (
-    <div className={styles.grid}>
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4 md:grid-cols-[repeat(auto-fit,minmax(120px,1fr))] md:gap-3">
       {statsData.map((stat) => (
-        <div key={stat.label} className={styles.statCard}>
-          <span className={styles.label}>{stat.label}</span>
-          <span className={`${styles.value} ${stat.className || ''}`}>{stat.value}</span>
+        <div 
+          key={stat.label} 
+          className="flex flex-col gap-2 p-4 bg-white/[0.02] border border-white/5 rounded-lg transition-all hover:bg-white/5 hover:-translate-y-0.5"
+        >
+          <span className="text-xs text-info uppercase tracking-wide">{stat.label}</span>
+          <span className={cn(
+            "text-2xl font-semibold text-text md:text-xl",
+            stat.className === 'positive' && "text-success",
+            stat.className === 'negative' && "text-error"
+          )}>
+            {stat.value}
+          </span>
         </div>
       ))}
     </div>
@@ -14724,54 +13651,12 @@ export { TipsterStatsGrid } from './TipsterStatsGrid';
 
 ### 8. TipsterCharts Component
 
-**Archivo `src/features/tipster-detail/components/TipsterCharts/TipsterCharts.module.css`:**
-```css
-.chartsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--space-20);
-}
-
-.chartCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
-  padding: var(--space-20);
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-base);
-}
-
-.chartTitle {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.chartCanvas {
-  width: 100%;
-  height: 250px;
-}
-
-@media (max-width: 768px) {
-  .chartsGrid {
-    grid-template-columns: 1fr;
-    gap: var(--space-16);
-  }
-
-  .chartCanvas {
-    height: 200px;
-  }
-}
-```
-
 **Archivo `src/features/tipster-detail/components/TipsterCharts/TipsterCharts.tsx`:**
 ```typescript
 import { FC, useMemo } from 'react';
 import type { PickEntity } from '@features/picks';
 import { useTipsterCharts } from '../../hooks';
 import { generateChartsData } from '../../utils';
-import styles from './TipsterCharts.module.css';
 
 interface TipsterChartsProps {
   picks: PickEntity[];
@@ -14787,32 +13672,32 @@ export const TipsterCharts: FC<TipsterChartsProps> = ({ picks }) => {
 
   if (picks.length === 0) {
     return (
-      <div style={{ padding: 'var(--space-20)', textAlign: 'center', color: 'var(--color-info)' }}>
+      <div className="p-5 text-center text-info">
         No hay datos suficientes para mostrar gráficos
       </div>
     );
   }
 
   return (
-    <div className={styles.chartsGrid}>
-      <div className={styles.chartCard}>
-        <h3 className={styles.chartTitle}>Distribución de Cuotas</h3>
-        <canvas ref={oddsChartRef} className={styles.chartCanvas} />
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5 md:grid-cols-1 md:gap-4">
+      <div className="flex flex-col gap-3 p-5 bg-white/[0.02] border border-white/5 rounded-lg">
+        <h3 className="text-base font-semibold text-text">Distribución de Cuotas</h3>
+        <canvas ref={oddsChartRef} className="w-full h-[250px] md:h-[200px]" />
       </div>
 
-      <div className={styles.chartCard}>
-        <h3 className={styles.chartTitle}>Distribución de Stakes</h3>
-        <canvas ref={stakeChartRef} className={styles.chartCanvas} />
+      <div className="flex flex-col gap-3 p-5 bg-white/[0.02] border border-white/5 rounded-lg">
+        <h3 className="text-base font-semibold text-text">Distribución de Stakes</h3>
+        <canvas ref={stakeChartRef} className="w-full h-[250px] md:h-[200px]" />
       </div>
 
-      <div className={styles.chartCard}>
-        <h3 className={styles.chartTitle}>Picks por Deporte</h3>
-        <canvas ref={sportChartRef} className={styles.chartCanvas} />
+      <div className="flex flex-col gap-3 p-5 bg-white/[0.02] border border-white/5 rounded-lg">
+        <h3 className="text-base font-semibold text-text">Picks por Deporte</h3>
+        <canvas ref={sportChartRef} className="w-full h-[250px] md:h-[200px]" />
       </div>
 
-      <div className={styles.chartCard}>
-        <h3 className={styles.chartTitle}>Picks por Tipo</h3>
-        <canvas ref={pickTypeChartRef} className={styles.chartCanvas} />
+      <div className="flex flex-col gap-3 p-5 bg-white/[0.02] border border-white/5 rounded-lg">
+        <h3 className="text-base font-semibold text-text">Picks por Tipo</h3>
+        <canvas ref={pickTypeChartRef} className="w-full h-[250px] md:h-[200px]" />
       </div>
     </div>
   );
@@ -14828,27 +13713,6 @@ export { TipsterCharts } from './TipsterCharts';
 
 ### 9. StatsTab Component
 
-**Archivo `src/features/tipster-detail/components/StatsTab/StatsTab.module.css`:**
-```css
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-24);
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-}
-
-.sectionTitle {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--color-text);
-}
-```
-
 **Archivo `src/features/tipster-detail/components/StatsTab/StatsTab.tsx`:**
 ```typescript
 import { FC } from 'react';
@@ -14856,7 +13720,6 @@ import type { TipsterDetailStats } from '../../types';
 import type { PickEntity } from '@features/picks';
 import { TipsterStatsGrid } from '../TipsterStatsGrid';
 import { TipsterCharts } from '../TipsterCharts';
-import styles from './StatsTab.module.css';
 
 interface StatsTabProps {
   stats: TipsterDetailStats;
@@ -14868,14 +13731,14 @@ interface StatsTabProps {
  */
 export const StatsTab: FC<StatsTabProps> = ({ stats, picks }) => {
   return (
-    <div className={styles.container}>
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>Resumen de Estadísticas</h2>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
+        <h2 className="text-lg font-semibold text-text">Resumen de Estadísticas</h2>
         <TipsterStatsGrid stats={stats} />
       </div>
 
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>Análisis Visual</h2>
+      <div className="flex flex-col gap-4">
+        <h2 className="text-lg font-semibold text-text">Análisis Visual</h2>
         <TipsterCharts picks={picks} />
       </div>
     </div>
@@ -14892,102 +13755,12 @@ export { StatsTab } from './StatsTab';
 
 ### 10. MyStatsTab Component
 
-**Archivo `src/features/tipster-detail/components/MyStatsTab/MyStatsTab.module.css`:**
-```css
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-20);
-}
-
-.comparisonGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-20);
-}
-
-.comparisonCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-  padding: var(--space-20);
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-lg);
-}
-
-.cardTitle {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--color-text);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.statsGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
-}
-
-.statRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-8) 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.statRow:last-child {
-  border-bottom: none;
-}
-
-.statLabel {
-  font-size: var(--font-size-sm);
-  color: var(--color-info);
-}
-
-.statValue {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.positive {
-  color: var(--color-success);
-}
-
-.negative {
-  color: var(--color-error);
-}
-
-.differenceCard {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-color: var(--color-primary);
-}
-
-.emptyState {
-  padding: var(--space-32);
-  text-align: center;
-  color: var(--color-info);
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-lg);
-}
-
-@media (max-width: 768px) {
-  .comparisonGrid {
-    grid-template-columns: 1fr;
-  }
-}
-```
-
 **Archivo `src/features/tipster-detail/components/MyStatsTab/MyStatsTab.tsx`:**
 ```typescript
 import { FC } from 'react';
+import { cn } from '@shared/utils';
 import type { TipsterMyStats } from '../../types';
 import { formatNumber } from '@shared/utils/format.utils';
-import styles from './MyStatsTab.module.css';
 
 interface MyStatsTabProps {
   myStats: TipsterMyStats | null;
@@ -14999,7 +13772,7 @@ interface MyStatsTabProps {
 export const MyStatsTab: FC<MyStatsTabProps> = ({ myStats }) => {
   if (!myStats) {
     return (
-      <div className={styles.emptyState}>
+      <div className="p-8 text-center text-info bg-white/[0.02] border border-white/5 rounded-lg">
         <p>No has seguido ninguna pick de este tipster todavía</p>
       </div>
     );
@@ -15008,125 +13781,80 @@ export const MyStatsTab: FC<MyStatsTabProps> = ({ myStats }) => {
   const { tipsterStats, userStats, difference } = myStats;
 
   return (
-    <div className={styles.container}>
-      <div className={styles.comparisonGrid}>
+    <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5 md:grid-cols-1">
         {/* Estadísticas del Tipster */}
-        <div className={styles.comparisonCard}>
-          <h3 className={styles.cardTitle}>Tipster</h3>
-          <div className={styles.statsGroup}>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Picks Resueltas</span>
-              <span className={styles.statValue}>{tipsterStats.resolvedPicks}</span>
+        <div className="flex flex-col gap-4 p-5 bg-white/[0.02] border border-white/5 rounded-lg">
+          <h3 className="text-base font-semibold text-text uppercase tracking-wide">Tipster</h3>
+          <div className="flex flex-col gap-3">
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Picks Resueltas</span>
+              <span className="text-base font-semibold text-text">{tipsterStats.resolvedPicks}</span>
             </div>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Picks Ganadas</span>
-              <span className={styles.statValue}>{tipsterStats.wonPicks}</span>
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Picks Ganadas</span>
+              <span className="text-base font-semibold text-text">{tipsterStats.wonPicks}</span>
             </div>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Winrate</span>
-              <span className={styles.statValue}>{formatNumber(tipsterStats.winrate, 1)}%</span>
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Winrate</span>
+              <span className="text-base font-semibold text-text">{formatNumber(tipsterStats.winrate, 1)}%</span>
             </div>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Yield</span>
-              <span
-                className={`${styles.statValue} ${
-                  tipsterStats.yield >= 0 ? styles.positive : styles.negative
-                }`}
-              >
-                {formatNumber(tipsterStats.yield, 2)}%
-              </span>
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Yield</span>
+              <span className={cn(\n                \"text-base font-semibold\",\n                tipsterStats.yield >= 0 ? \"text-success\" : \"text-error\"\n              )}>\n                {formatNumber(tipsterStats.yield, 2)}%\n              </span>
             </div>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Profit</span>
-              <span
-                className={`${styles.statValue} ${
-                  tipsterStats.totalProfit >= 0 ? styles.positive : styles.negative
-                }`}
-              >
-                {formatNumber(tipsterStats.totalProfit, 2)}u
-              </span>
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Profit</span>
+              <span className={cn(\n                \"text-base font-semibold\",\n                tipsterStats.totalProfit >= 0 ? \"text-success\" : \"text-error\"\n              )}>\n                {formatNumber(tipsterStats.totalProfit, 2)}u\n              </span>
             </div>
           </div>
         </div>
 
         {/* Estadísticas del Usuario */}
-        <div className={styles.comparisonCard}>
-          <h3 className={styles.cardTitle}>Tus Resultados</h3>
-          <div className={styles.statsGroup}>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Follows Resueltos</span>
-              <span className={styles.statValue}>{userStats.resolvedFollows}</span>
+        <div className="flex flex-col gap-4 p-5 bg-white/[0.02] border border-white/5 rounded-lg">
+          <h3 className="text-base font-semibold text-text uppercase tracking-wide">Tus Resultados</h3>
+          <div className="flex flex-col gap-3">
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Follows Resueltos</span>
+              <span className="text-base font-semibold text-text">{userStats.resolvedFollows}</span>
             </div>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Follows Ganados</span>
-              <span className={styles.statValue}>{userStats.wonFollows}</span>
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Follows Ganados</span>
+              <span className="text-base font-semibold text-text">{userStats.wonFollows}</span>
             </div>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Winrate</span>
-              <span className={styles.statValue}>{formatNumber(userStats.winrate, 1)}%</span>
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Winrate</span>
+              <span className="text-base font-semibold text-text">{formatNumber(userStats.winrate, 1)}%</span>
             </div>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Yield</span>
-              <span
-                className={`${styles.statValue} ${
-                  userStats.yield >= 0 ? styles.positive : styles.negative
-                }`}
-              >
-                {formatNumber(userStats.yield, 2)}%
-              </span>
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Yield</span>
+              <span className={cn(\n                \"text-base font-semibold\",\n                userStats.yield >= 0 ? \"text-success\" : \"text-error\"\n              )}>\n                {formatNumber(userStats.yield, 2)}%\n              </span>
             </div>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Profit</span>
-              <span
-                className={`${styles.statValue} ${
-                  userStats.totalProfit >= 0 ? styles.positive : styles.negative
-                }`}
-              >
-                {formatNumber(userStats.totalProfit, 2)}u
-              </span>
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Profit</span>
+              <span className={cn(\n                \"text-base font-semibold\",\n                userStats.totalProfit >= 0 ? \"text-success\" : \"text-error\"\n              )}>\n                {formatNumber(userStats.totalProfit, 2)}u\n              </span>
             </div>
           </div>
         </div>
 
         {/* Diferencias */}
-        <div className={`${styles.comparisonCard} ${styles.differenceCard}`}>
-          <h3 className={styles.cardTitle}>Diferencia</h3>
-          <div className={styles.statsGroup}>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Winrate</span>
-              <span
-                className={`${styles.statValue} ${
-                  difference.winrate >= 0 ? styles.positive : styles.negative
-                }`}
-              >
-                {difference.winrate >= 0 ? '+' : ''}
-                {formatNumber(difference.winrate, 1)} pp
-              </span>
+        <div className="flex flex-col gap-4 p-5 bg-primary/10 border border-primary rounded-lg">
+          <h3 className="text-base font-semibold text-text uppercase tracking-wide">Diferencia</h3>
+          <div className="flex flex-col gap-3">
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Winrate</span>
+              <span className={cn(\n                \"text-base font-semibold\",\n                difference.winrate >= 0 ? \"text-success\" : \"text-error\"\n              )}>\n                {difference.winrate >= 0 ? '+' : ''}\n                {formatNumber(difference.winrate, 1)} pp\n              </span>
             </div>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Yield</span>
-              <span
-                className={`${styles.statValue} ${
-                  difference.yield >= 0 ? styles.positive : styles.negative
-                }`}
-              >
-                {difference.yield >= 0 ? '+' : ''}
-                {formatNumber(difference.yield, 2)} pp
-              </span>
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Yield</span>
+              <span className={cn(\n                \"text-base font-semibold\",\n                difference.yield >= 0 ? \"text-success\" : \"text-error\"\n              )}>\n                {difference.yield >= 0 ? '+' : ''}\n                {formatNumber(difference.yield, 2)} pp\n              </span>
             </div>
-            <div className={styles.statRow}>
-              <span className={styles.statLabel}>Profit</span>
-              <span
-                className={`${styles.statValue} ${
-                  difference.profit >= 0 ? styles.positive : styles.negative
-                }`}
-              >
-                {difference.profit >= 0 ? '+' : ''}
-                {formatNumber(difference.profit, 2)}u
-              </span>
+            <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-b-0">
+              <span className="text-sm text-info">Profit</span>
+              <span className={cn(\n                \"text-base font-semibold\",\n                difference.profit >= 0 ? \"text-success\" : \"text-error\"\n              )}>\n                {difference.profit >= 0 ? '+' : ''}\n                {formatNumber(difference.profit, 2)}u\n              </span>
             </div>
           </div>
-          <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-info)', marginTop: 'var(--space-8)' }}>
+          <p className="text-xs text-info mt-2">
             Valores positivos indican que tu rendimiento es mejor que el del tipster
           </p>
         </div>
@@ -15145,28 +13873,12 @@ export { MyStatsTab } from './MyStatsTab';
 
 ### 11. PicksHistoryTab Component
 
-**Archivo `src/features/tipster-detail/components/PicksHistoryTab/PicksHistoryTab.module.css`:**
-```css
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-}
-
-.emptyState {
-  padding: var(--space-32);
-  text-align: center;
-  color: var(--color-info);
-}
-```
-
 **Archivo `src/features/tipster-detail/components/PicksHistoryTab/PicksHistoryTab.tsx`:**
 ```typescript
 import { FC } from 'react';
 import type { PickEntity } from '@features/picks';
 import { PicksTable } from '@features/picks/components';
 import { EmptyState } from '@shared/components';
-import styles from './PicksHistoryTab.module.css';
 
 interface PicksHistoryTabProps {
   picks: PickEntity[];
@@ -15186,7 +13898,7 @@ export const PicksHistoryTab: FC<PicksHistoryTabProps> = ({
 }) => {
   if (picks.length === 0) {
     return (
-      <div className={styles.emptyState}>
+      <div className="p-8 text-center text-info">
         <EmptyState message="Este tipster no tiene picks registradas" />
       </div>
     );
@@ -15198,7 +13910,7 @@ export const PicksHistoryTab: FC<PicksHistoryTabProps> = ({
   });
 
   return (
-    <div className={styles.container}>
+    <div className="flex flex-col gap-4">
       <PicksTable
         picks={sortedPicks}
         onEdit={onEditPick}
@@ -15220,21 +13932,6 @@ export { PicksHistoryTab } from './PicksHistoryTab';
 
 ### 12. FollowsHistoryTab Component
 
-**Archivo `src/features/tipster-detail/components/FollowsHistoryTab/FollowsHistoryTab.module.css`:**
-```css
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-}
-
-.emptyState {
-  padding: var(--space-32);
-  text-align: center;
-  color: var(--color-info);
-}
-```
-
 **Archivo `src/features/tipster-detail/components/FollowsHistoryTab/FollowsHistoryTab.tsx`:**
 ```typescript
 import { FC, useMemo } from 'react';
@@ -15242,7 +13939,6 @@ import type { FollowEntity } from '@features/follows';
 import type { PickEntity } from '@features/picks';
 import { FollowsTable } from '@features/follows/components';
 import { EmptyState } from '@shared/components';
-import styles from './FollowsHistoryTab.module.css';
 
 interface FollowsHistoryTabProps {
   follows: FollowEntity[];
@@ -15270,7 +13966,7 @@ export const FollowsHistoryTab: FC<FollowsHistoryTabProps> = ({
 
   if (follows.length === 0) {
     return (
-      <div className={styles.emptyState}>
+      <div className="p-8 text-center text-info">
         <EmptyState message="No has seguido ninguna pick de este tipster" />
       </div>
     );
@@ -15284,7 +13980,7 @@ export const FollowsHistoryTab: FC<FollowsHistoryTabProps> = ({
   });
 
   return (
-    <div className={styles.container}>
+    <div className="flex flex-col gap-4">
       <FollowsTable
         follows={sortedFollows.map((f) => f.follow)}
         picks={picks}
@@ -15317,38 +14013,6 @@ export { FollowsHistoryTab } from './FollowsHistoryTab';
 
 ### 13. TipsterDetailPage
 
-**Archivo `src/features/tipster-detail/pages/TipsterDetailPage/TipsterDetailPage.module.css`:**
-```css
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-24);
-  padding: var(--space-24);
-}
-
-.tabContent {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-20);
-}
-
-.error {
-  padding: var(--space-16);
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius-base);
-  color: var(--color-error);
-  text-align: center;
-}
-
-@media (max-width: 768px) {
-  .page {
-    padding: var(--space-16);
-    gap: var(--space-16);
-  }
-}
-```
-
 **Archivo `src/features/tipster-detail/pages/TipsterDetailPage/TipsterDetailPage.tsx`:**
 ```typescript
 import { FC, useState } from 'react';
@@ -15371,7 +14035,6 @@ import { useFollowModal } from '@features/follows';
 import { FollowModal } from '@features/follows/components';
 import { tipsterRepository } from '@core/repositories';
 import type { TipsterDetailTab } from '../../types';
-import styles from './TipsterDetailPage.module.css';
 
 /**
  * Página de detalle completo de un tipster
@@ -15381,7 +14044,7 @@ export const TipsterDetailPage: FC = () => {
   const [activeTab, setActiveTab] = useState<TipsterDetailTab>('stats');
 
   if (!tipsterId) {
-    return <div className={styles.error}>ID de tipster no válido</div>;
+    return <div className="p-4 bg-error/10 border border-error rounded-lg text-error text-center">ID de tipster no válido</div>;
   }
 
   const { tipster, picks, follows, stats, myStats, loading, error } =
@@ -15433,11 +14096,11 @@ export const TipsterDetailPage: FC = () => {
   }
 
   if (error || !tipster || !stats) {
-    return <div className={styles.error}>{error || 'Tipster no encontrado'}</div>;
+    return <div className="p-4 bg-error/10 border border-error rounded-lg text-error text-center">{error || 'Tipster no encontrado'}</div>;
   }
 
   return (
-    <div className={styles.page}>
+    <div className="flex flex-col gap-6 p-6 md:p-4 md:gap-4">
       {/* Header */}
       <TipsterDetailHeader
         tipster={tipster}
@@ -15450,7 +14113,7 @@ export const TipsterDetailPage: FC = () => {
       <TipsterDetailTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Tab Content */}
-      <div className={styles.tabContent}>
+      <div className="flex flex-col gap-5">
         {activeTab === 'stats' && <StatsTab stats={stats} picks={picks} />}
 
         {activeTab === 'myStats' && <MyStatsTab myStats={myStats} />}
