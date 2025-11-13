@@ -1,76 +1,1541 @@
-# AGENTS.md
+# AGENTS.md - Documentación del Proyecto Tipster Tracker
 
-## Resumen del proyecto
-Aplicación web con Firebase para seguibilidad de tipsters
+## 📋 Índice
+1. [Resumen Ejecutivo](#resumen-ejecutivo)
+2. [Arquitectura General](#arquitectura-general)
+3. [Estructura de Archivos](#estructura-de-archivos)
+4. [Modelo de Datos](#modelo-de-datos)
+5. [Módulos y Responsabilidades](#módulos-y-responsabilidades)
+6. [Flujo de Datos](#flujo-de-datos)
+7. [Interfaz de Usuario](#interfaz-de-usuario)
+8. [Sistema de Estilos](#sistema-de-estilos)
+9. [Convenciones de Código](#convenciones-de-código)
+10. [Comandos y Desarrollo](#comandos-y-desarrollo)
+11. [Problemas Conocidos y Mejoras](#problemas-conocidos-y-mejoras)
 
-**Stack principal:**
-- Frontend: HTML5, CSS3, JavaScript vanilla
-- Backend/BaaS: Firebase (Firestore, Hosting, Authentication)
-- Iconos: SVG personalizados + Lucide
-- Deploy: Firebase Hosting
-- Control de versiones: GitHub con GitHub Actions
+---
 
-## Estructura de archivos
+## Resumen Ejecutivo
 
-```python
-├── .firebase/ # Configuración local de Firebase
-├── .github/
-│ └── workflows/
-│ └── firebase-hosting-main.yml # CI/CD automático
-├── emulator-data/ # Datos del emulador de Firebase
-├── firebase/ # Archivos de configuración Firebase
-├── public/ # Directorio servido por Firebase Hosting
-│ ├── assets/
-│ │ ├── css/
-│ │ │ └── style.css # Estilos principales
-│ │ └── img/
-│ │ ├── icon.svg # Icono de la app
-│ │ ├── logo-filled-text.svg
-│ │ └── logo-filled.svg
-│ ├── js/
-│ │ ├── config/
-│ │ │ ├── firebase.config.js # Config real (en .gitignore)
-│ │ │ └── firebase.config.example.js # Template de configuración
-│ │ ├── core/
-│ │ │ ├── init.js # Inicialización Firebase y variables globales
-│ │ │ ├── auth.js # Auth listeners y funciones de autenticación
-│ │ │ └── state.js # Estado global de la app
-│ │ ├── data/
-│ │ │ ├── constants.js # Arrays: allSports, allBookmakers, sportIcons, chartColors
-│ │ │ └── listeners.js # onSnapshot listeners (tipsters, picks, follows)
-│ │ ├── services/
-│ │ │ ├── tipster.service.js # CRUD Firestore de tipsters
-│ │ │ ├── pick.service.js # CRUD Firestore de picks
-│ │ │ └── follow.service.js # CRUD Firestore de follows
-│ │ ├── utils/
-│ │ │ ├── calculations.js # Yield, winrate, profit, seguibilidad
-│ │ │ ├── filters.js # Lógica de filtrado (dashboard, picks)
-│ │ │ ├── ui-helpers.js # showLoading, confirm, closeModal
-│ │ │ └── date-utils.js # Formateo de fechas ISO
-│ │ ├── views/
-│ │ │ ├── dashboard.js # renderDashboard + filtros dashboard
-│ │ │ ├── all-picks.js # renderAllPicks + filtros all picks
-│ │ │ ├── my-picks.js # renderMyPicks + filtros mis picks
-│ │ │ └── tipster-detail.js # renderTipsterDetail + tabs + charts
-│ │ ├── modals/
-│ │ │ ├── tipster-modal.js # showAddTipsterModal, handleAddTipster
-│ │ │ ├── pick-modal.js # showAddPickModal, handleAddPick, showEditPickModal
-│ │ │ └── follow-modal.js # showFollowPickModal, handleFollow
-│ │ └── app.js # Punto de entrada (imports + init)
-│ ├── index.html # Punto de entrada principal
-│ ├── .firebaserc # Alias de proyectos Firebase
-│ └── firebase.json # Configuración de hosting
-├── .gitignore # Excluye firebase.config.js y otros
-├── firebase-debug.log # Logs de desarrollo
-├── firestore-debug.log # Logs de Firestore
-├── firestore.indexes.json # Índices de Firestore
-├── firestore.rules # Reglas de seguridad de Firestore
-├── package.json # Dependencias del proyecto
-└── AGENTS.md # Este archivo (documentación para IA)
+**Tipster Tracker** es una aplicación web SPA (Single Page Application) para seguimiento y análisis de pronósticos deportivos (picks) de tipsters. Permite a los usuarios registrar tipsters, gestionar sus picks, hacer seguimiento de sus propias apuestas y analizar estadísticas detalladas.
+
+### Stack Tecnológico
+- **Frontend**: HTML5, CSS3, JavaScript vanilla (ES6+ modules)
+- **Backend/BaaS**: Firebase (Firestore, Authentication, Hosting)
+- **Librerías**: Chart.js (gráficos), Lucide Icons (iconografía)
+- **Deploy**: Firebase Hosting con CI/CD automático via GitHub Actions
+- **Control de versiones**: Git/GitHub
+
+### Características Principales
+- ✅ Autenticación de usuarios (login/signup/password reset)
+- ✅ Gestión CRUD de tipsters
+- ✅ Gestión CRUD de picks (pronósticos)
+- ✅ Sistema de seguimiento de picks (follows)
+- ✅ Dashboards con estadísticas en tiempo real
+- ✅ Filtrado avanzado multi-criterio
+- ✅ Visualización de datos con gráficos interactivos
+- ✅ Comparación de resultados (tipster vs usuario)
+- ✅ Cálculo de métricas: yield, winrate, profit, seguibilidad
+
+---
+
+## Arquitectura General
+
+### Arquitectura Frontend
+```
+┌─────────────────────────────────────────────────────────┐
+│                      index.html                         │
+│                    (SPA Container)                      │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+                       ↓
+┌─────────────────────────────────────────────────────────┐
+│                      app.js                             │
+│              (Orquestador principal)                    │
+│  • Inicializa Firebase                                  │
+│  • Setup listeners de autenticación                     │
+│  • Importa y coordina todos los módulos                 │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+        ┌──────────────┼──────────────┐
+        ↓              ↓              ↓
+   ┌────────┐    ┌─────────┐    ┌──────────┐
+   │  Core  │    │  Data   │    │ Services │
+   └────────┘    └─────────┘    └──────────┘
+   │ init.js     │ constants   │ tipster   │
+   │ auth.js     │ listeners   │ pick      │
+   │ state.js    └─────────┘   │ follow    │
+   └────────┘                  └──────────┘
+        ↓              ↓              ↓
+   ┌────────┐    ┌─────────┐    ┌──────────┐
+   │ Utils  │    │  Views  │    │  Modals  │
+   └────────┘    └─────────┘    └──────────┘
+   │ calculations│ dashboard   │ tipster   │
+   │ filters     │ all-picks   │ pick      │
+   │ ui-helpers  │ my-picks    │ follow    │
+   │ date-utils  │ tipster-det │           │
+   └────────┘    │ charts      │           │
+                 └─────────┘   └──────────┘
 ```
 
+### Arquitectura de Datos (Firebase)
+```
+Firebase Project
+├── Authentication (uid basado)
+├── Firestore Database
+│   ├── tipsters (collection)
+│   │   └── {tipsterId} (document)
+│   │       ├── uid: string
+│   │       ├── name: string
+│   │       ├── channel: string
+│   │       ├── createdDate: string (ISO)
+│   │       └── lastPickDate: string (ISO)
+│   │
+│   ├── picks (collection)
+│   │   └── {pickId} (document)
+│   │       ├── uid: string
+│   │       ├── tipsterId: string
+│   │       ├── sport: string
+│   │       ├── odds: number
+│   │       ├── stake: number (1-10)
+│   │       ├── pickType: string (Pre/Live/Combinado)
+│   │       ├── betType: string
+│   │       ├── date: string (YYYY-MM-DD)
+│   │       ├── time: string (HH:MM)
+│   │       ├── dateTime: string (ISO full)
+│   │       ├── result: string (Ganada/Perdida/Void)
+│   │       ├── isResolved: boolean
+│   │       ├── match: string
+│   │       ├── bookmaker: string
+│   │       └── comments: string
+│   │
+│   └── userFollows (collection)
+│       └── {followId} (document)
+│           ├── uid: string
+│           ├── pickId: string
+│           ├── tipsterId: string
+│           ├── userOdds: number
+│           ├── userStake: number
+│           ├── userResult: string
+│           ├── userIsResolved: boolean
+│           └── followDate: string (ISO)
+│
+└── Hosting (public/)
+```
 
-## Archivos clave
+---
+
+## Estructura de Archivos
+
+```
+tipster-tracker/
+├── .firebase/                    # Configuración local de Firebase
+├── .github/
+│   └── workflows/
+│       └── firebase-hosting-main.yml  # CI/CD automático
+├── emulator-data/                # Datos del emulador de Firebase
+├── public/                       # Directorio servido por Firebase Hosting
+│   ├── assets/
+│   │   ├── css/
+│   │   │   └── style.css        # Sistema de diseño completo
+│   │   └── img/
+│   │       ├── icon.svg
+│   │       ├── logo-filled-text.svg
+│   │       └── logo-filled.svg
+│   ├── js/
+│   │   ├── config/
+│   │   │   ├── firebase.config.js        # Credenciales (en .gitignore)
+│   │   │   └── firebase.config.example.js # Template
+│   │   ├── core/
+│   │   │   ├── init.js          # Inicialización Firebase
+│   │   │   ├── auth.js          # Autenticación
+│   │   │   └── state.js         # Estado global
+│   │   ├── data/
+│   │   │   ├── constants.js     # Constantes de la app
+│   │   │   └── listeners-init.js # Listeners Firestore
+│   │   ├── services/
+│   │   │   ├── tipster.service.js # CRUD tipsters
+│   │   │   ├── pick.service.js    # CRUD picks
+│   │   │   └── follow.service.js  # CRUD follows
+│   │   ├── utils/
+│   │   │   ├── calculations.js   # Cálculos estadísticos
+│   │   │   ├── filters.js        # Lógica de filtrado
+│   │   │   ├── ui-helpers.js     # Helpers de UI
+│   │   │   └── date-utils.js     # Utilidades de fechas
+│   │   ├── views/
+│   │   │   ├── dashboard.js      # Vista dashboard
+│   │   │   ├── all-picks.js      # Vista todas las picks
+│   │   │   ├── my-picks.js       # Vista mis picks
+│   │   │   ├── tipster-detail.js # Vista detalle tipster
+│   │   │   └── charts.js         # Gráficos Chart.js
+│   │   ├── modals/
+│   │   │   ├── tipster-modal.js  # Modal añadir tipster
+│   │   │   ├── pick-modal.js     # Modal añadir/editar pick
+│   │   │   └── follow-modal.js   # Modal seguir pick
+│   │   └── app.js                # Punto de entrada principal
+│   └── index.html                # HTML principal (SPA)
+├── .firebaserc                   # Alias proyectos Firebase
+├── firebase.json                 # Configuración hosting/emulators
+├── firestore.rules               # Reglas de seguridad
+├── firestore.indexes.json        # Índices compuestos
+├── package.json                  # Dependencias npm
+└── AGENTS.md                     # Este archivo
+```
+
+---
+
+## Modelo de Datos
+
+### Colección: `tipsters`
+```typescript
+{
+  id: string,              // Auto-generado por Firestore
+  uid: string,             // ID del usuario propietario (Firebase Auth)
+  name: string,            // Nombre del tipster
+  channel: string,         // Canal origen (Telegram, BlogaBet, etc.)
+  createdDate: string,     // Fecha creación (YYYY-MM-DD)
+  lastPickDate: string     // Última pick registrada (YYYY-MM-DD) - calculado
+}
+```
+
+### Colección: `picks`
+```typescript
+{
+  id: string,              // Auto-generado por Firestore
+  uid: string,             // ID del usuario propietario
+  tipsterId: string,       // Referencia al tipster
+  sport: string,           // Deporte (Fútbol, Baloncesto, Tenis, etc.)
+  odds: number,            // Cuota de la apuesta (ej: 1.85)
+  stake: number,           // Unidades apostadas (1-10)
+  pickType: string,        // Tipo: Pre, Live, Combinado
+  betType: string,         // Descripción de la apuesta
+  date: string,            // Fecha (YYYY-MM-DD)
+  time: string,            // Hora (HH:MM)
+  dateTime: string,        // Combinación ISO completa para ordenación
+  result: string,          // Resultado: Ganada, Perdida, Void
+  isResolved: boolean,     // Si está resuelta la pick
+  match: string,           // Partido/evento
+  bookmaker: string,       // Casa de apuestas
+  comments: string         // Comentarios adicionales
+}
+```
+
+### Colección: `userFollows`
+```typescript
+{
+  id: string,              // Auto-generado por Firestore
+  uid: string,             // ID del usuario propietario
+  pickId: string,          // Referencia a la pick original
+  tipsterId: string,       // Referencia al tipster
+  userOdds: number,        // Cuota que consiguió el usuario
+  userStake: number,       // Stake del usuario
+  userResult: string,      // Resultado usuario: Ganada, Perdida, Void
+  userIsResolved: boolean, // Si el usuario resolvió su apuesta
+  followDate: string       // Fecha del seguimiento (ISO)
+}
+```
+
+### Estado Global (state.js)
+```typescript
+state = {
+  // Usuario y sesión
+  currentUser: object | null,           // Usuario autenticado Firebase
+  
+  // Listeners de Firestore (funciones unsubscribe)
+  unsubscribeTipsters: function | null,
+  unsubscribePicks: function | null,
+  unsubscribeFollows: function | null,
+  
+  // Datos en memoria
+  tipsters: array,                      // Array de tipsters
+  picks: array,                         // Array de picks
+  userFollows: array,                   // Array de follows
+  
+  // Navegación
+  currentView: string,                  // Vista activa: 'dashboard', 'allPicks', 'myPicks', 'tipsterDetail'
+  currentTipsterId: string | null,      // ID del tipster en vista detalle
+  
+  // IDs incrementales (obsoletos - Firestore genera IDs)
+  nextTipsterId: number,
+  nextPickId: number,
+  nextFollowId: number,
+  
+  // Gráficos
+  charts: object,                       // Instancias de Chart.js
+  
+  // Filtros del dashboard
+  dashboardFilters: {
+    sports: array,                      // Deportes seleccionados
+    channels: array,                    // Canales seleccionados
+    yieldMin: number,                   // Yield mínimo (-1000 = sin filtro)
+    lastPickDays: string,               // 'all', '7', '30', '90'
+    sortBy: string,                     // 'yield', 'winrate', 'totalPicks', 'name'
+    searchQuery: string                 // Búsqueda por nombre
+  },
+  
+  // Timer para debounce
+  yieldDebounceTimer: object | null
+}
+```
+
+---
+
+## Módulos y Responsabilidades
+
+### 📁 core/ - Núcleo de la aplicación
+
+#### **init.js** - Inicialización de Firebase
+```javascript
+// Responsabilidades:
+// - Inicializar Firebase con firebaseConfig
+// - Configurar emuladores para desarrollo local
+// - Exportar instancias: auth, db
+
+// Exports principales:
+export { auth, db }
+
+// Detalles importantes:
+// - Detecta localhost y activa emuladores automáticamente
+// - Auth emulator: localhost:9099
+// - Firestore emulator: localhost:8080
+// - Maneja errores de configuración
+```
+
+#### **auth.js** - Sistema de autenticación
+```javascript
+// Responsabilidades:
+// - Gestionar autenticación de usuarios
+// - Controlar visibilidad de pantallas (auth/main)
+// - Listeners de estado de autenticación
+
+// Funciones principales:
+setupAuthListeners()      // Configura onAuthStateChanged
+handleLogin(e)            // Login con email/password
+handleSignup(e)           // Registro de nuevo usuario
+handleLogout()            // Cerrar sesión
+sendPasswordReset(email)  // Recuperación de contraseña
+
+// Flujo:
+// 1. onAuthStateChanged detecta cambios
+// 2. Si hay usuario → muestra mainApp, oculta authScreen
+// 3. Si no hay usuario → muestra authScreen, oculta mainApp
+// 4. Inicializa app cuando usuario está autenticado
+```
+
+#### **state.js** - Estado global
+```javascript
+// Responsabilidades:
+// - Almacenar estado global de la aplicación
+// - Único objeto state exportado
+// - Modificable por todos los módulos
+
+// Export principal:
+export { state }
+
+// Uso en otros módulos:
+import { state } from './core/state.js';
+state.tipsters.push(newTipster);
+```
+
+---
+
+### 📁 data/ - Datos y constantes
+
+#### **constants.js** - Constantes de la aplicación
+```javascript
+// Exports principales:
+export const allSports        // Array de deportes disponibles
+export const allBookmakers    // Array de casas de apuestas
+export const allChannels      // Array de canales de tipsters
+export const sportIcons       // Objeto con emojis por deporte
+export const chartColors      // Array de colores hexadecimales para gráficos
+
+// Ejemplo de uso:
+// allSports = ['Fútbol', 'Baloncesto', 'Tenis', ...]
+// sportIcons = { 'Fútbol': '⚽', 'Baloncesto': '🏀', ... }
+// chartColors = ['#3B82F6', '#10B981', '#F59E0B', ...]
+```
+
+#### **listeners-init.js** - Listeners de Firestore
+```javascript
+// Responsabilidades:
+// - Configurar listeners en tiempo real de Firestore
+// - Sincronizar datos con estado global
+// - Actualizar vistas cuando cambian los datos
+
+// Funciones principales:
+setupTipstersListener()   // Listener de tipsters collection
+setupPicksListener()      // Listener de picks collection
+setupFollowsListener()    // Listener de userFollows collection
+
+// Patrón de uso:
+// 1. db.collection('tipsters').where('uid', '==', uid).onSnapshot()
+// 2. Actualiza state.tipsters, state.picks, state.userFollows
+// 3. Llama a funciones render según vista activa
+// 4. Maneja errores y muestra alerts
+
+// Variables unsubscribe almacenadas en state:
+// - state.unsubscribeTipsters
+// - state.unsubscribePicks
+// - state.unsubscribeFollows
+```
+
+---
+
+### 📁 services/ - Servicios de datos
+
+#### **tipster.service.js** - CRUD de tipsters
+```javascript
+// Funciones CRUD:
+addTipsterToFirestore(name, channel)       // Crear tipster
+updateTipsterInFirestore(id, updates)     // Actualizar tipster
+deleteTipsterFromFirestore(id)            // Eliminar tipster
+confirmResetTipster(tipsterId)             // Reset con confirmación
+
+// Detalles:
+// - Todas las operaciones incluyen uid del usuario
+// - Usa showLoading() para feedback visual
+// - Maneja errores con try/catch y alerts
+// - Los listeners actualizan la UI automáticamente
+```
+
+#### **pick.service.js** - CRUD de picks
+```javascript
+// Funciones CRUD:
+addPickToFirestore(pickData)               // Crear pick
+updatePickInFirestore(id, updates)         // Actualizar pick
+deletePickFromFirestore(id)                // Eliminar pick
+editPick(pickId)                           // Abre modal de edición
+
+// Campos calculados:
+// - dateTime: combinación de date + time en formato ISO
+// - Validación de campos obligatorios
+// - Relación con tipsterId
+```
+
+#### **follow.service.js** - CRUD de follows
+```javascript
+// Funciones CRUD:
+addFollowToFirestore(followData)           // Crear follow
+updateFollowInFirestore(id, updates)       // Actualizar follow
+deleteFollowFromFirestore(id)              // Eliminar follow
+
+// Características:
+// - Relaciona pickId con usuario
+// - Permite diferentes odds/stake que el tipster
+// - Permite resultado diferente (match/diverge)
+// - followDate en formato ISO
+```
+
+---
+
+### 📁 utils/ - Utilidades
+
+#### **calculations.js** - Cálculos estadísticos
+```javascript
+// Funciones principales:
+calculateTraceability(tipsterId)          // Porcentaje seguibilidad
+calculateStats(tipsterId)                 // Estadísticas completas del tipster
+calculatePersonalStats()                  // Estadísticas globales del usuario
+calculateFollowStats(tipsterId)           // Estadísticas de follows de un tipster
+
+// Fórmulas clave:
+// Yield: (profit / totalStaked) * 100
+// Winrate: (ganadas / totalResueltas) * 100
+// Profit: (odds - 1) * stake (ganada) | -stake (perdida)
+// Seguibilidad: (picksFollowed / totalPicksDesdeFirstFollow) * 100
+
+// Retorna objeto con:
+// - totalPicks, resolvedPicks, wonPicks
+// - winrate, yield, totalProfit, totalStaked
+// - avgOdds, avgStake
+// - oddsDistribution, stakeDistribution
+// - sportDistribution, pickTypeDistribution
+```
+
+#### **filters.js** - Sistema de filtrado
+```javascript
+// Funciones principales:
+initializeFilters()                        // Inicializa valores de filtros
+applyFilters()                             // Aplica filtros del dashboard
+filterPicks()                              // Filtra picks en All Picks view
+filterFollowedPicks()                      // Filtra picks seguidas
+filterTipsters()                           // Filtra tipsters por criterios
+resetFilters()                             // Resetea todos los filtros
+
+// Criterios de filtrado:
+// Dashboard: sports, channels, yieldMin, lastPickDays, sortBy, search
+// All Picks: tipster, sport, status, channel, bookmaker, result
+// My Picks: tipster, result, match/diverge
+
+// Lógica multi-criterio con AND
+```
+
+#### **ui-helpers.js** - Helpers de interfaz
+```javascript
+// Funciones principales:
+showLoading(show)                          // Muestra/oculta loading overlay
+closeModal(modalId)                        // Cierra modal específico
+confirm(message)                           // Diálogo de confirmación nativo
+switchViewUI(viewName)                     // Cambia vista activa
+switchDetailTabUI(tabName)                 // Cambia tab en tipster detail
+toggleDropdown(dropdownId)                 // Toggle dropdown custom
+updateDropdownText(dropdownId)             // Actualiza texto dropdown
+toggleFilterCheckboxUI(event)              // Toggle checkbox visual
+clearSearchUI()                            // Limpia input de búsqueda
+updateFilterSelects()                      // Actualiza selects de filtros
+updatePickTipsterSelect()                  // Actualiza select de tipsters
+
+// Lucide icons:
+// - Se inicializan con lucide.createIcons()
+// - Llamar después de modificar DOM
+```
+
+#### **date-utils.js** - Utilidades de fechas
+```javascript
+// Funciones principales:
+formatDate(dateString)                     // YYYY-MM-DD → DD/MM/YYYY
+formatTime(timeString)                     // HH:MM → HH:MM (validado)
+formatDateTime(dateString, timeString)     // Combina en ISO completo
+parseDate(dateString)                      // Parse seguro de fechas
+isValidDate(dateString)                    // Valida formato fecha
+
+// Uso en picks:
+// - date: YYYY-MM-DD (para input type="date")
+// - time: HH:MM (para input type="time")
+// - dateTime: ISO completo para ordenación
+```
+
+---
+
+### 📁 views/ - Vistas de la aplicación
+
+#### **dashboard.js** - Vista principal
+```javascript
+// Funciones principales:
+renderDashboard()                          // Renderiza grid de tipsters
+renderDashboardPersonalStats()             // Estadísticas personales
+setupDashboardListeners()                  // Event listeners del dashboard
+
+// Componentes:
+// 1. Personal Stats (8 stat-cards):
+//    - Total Picks, Picks Resueltas, Winrate, Yield
+//    - Total Ganancia, Total Apostado, Stake Medio, Cuota Media
+//
+// 2. Filtros:
+//    - Deportes (multi-select), Canales (multi-select)
+//    - Yield mínimo, Última pick, Ordenar por
+//    - Búsqueda por nombre
+//
+// 3. Grid de Tipster Cards:
+//    - Nombre, canal, estadísticas
+//    - Click → showTipsterDetail()
+
+// Lógica:
+// - Filtra state.tipsters según dashboardFilters
+// - Calcula stats con calculateStats()
+// - Ordena según sortBy
+// - Renderiza HTML dinámicamente
+```
+
+#### **all-picks.js** - Tabla de todas las picks
+```javascript
+// Funciones principales:
+renderAllPicks()                           // Renderiza tabla completa de picks
+
+// Componentes:
+// 1. Filtros:
+//    - Tipster, Deporte, Estado, Canal, Bookmaker, Resultado
+//
+// 2. Tabla:
+//    - Fecha, Tipster, Deporte, Match, Tipo Apuesta
+//    - Cuota, Stake, Resultado, Tipo Pick, Canal, Bookmaker
+//    - Acciones: Editar, Eliminar, Seguir
+//
+// 3. Empty state si no hay picks
+
+// Lógica:
+// - Filtra state.picks con filterPicks()
+// - Ordena por fecha descendente
+// - Muestra badge de resultado con colores
+// - Botón "Seguir" solo si no está seguida
+// - Botones de acción inline
+```
+
+#### **my-picks.js** - Picks seguidas por el usuario
+```javascript
+// Funciones principales:
+renderMyPicks()                            // Renderiza tabla de follows
+
+// Componentes:
+// 1. Stats de seguibilidad (4 stat-cards):
+//    - Total Follows, Follows Resueltos, Winrate Follows, Yield Follows
+//
+// 2. Filtros:
+//    - Tipster, Resultado, Match/Diverge
+//
+// 3. Tabla comparativa:
+//    - Datos tipster vs datos usuario
+//    - Indicador de match/diverge
+//    - Acciones: Editar follow, Eliminar follow
+
+// Lógica:
+// - Combina state.userFollows con state.picks
+// - Compara resultados tipster vs usuario
+// - Calcula estadísticas de seguimiento
+// - Permite editar odds/stake/resultado del usuario
+```
+
+#### **tipster-detail.js** - Detalle de tipster
+```javascript
+// Funciones principales:
+renderTipsterDetail(tipsterId)             // Vista completa del tipster
+renderMyStats(tipsterId)                   // Tab de estadísticas usuario
+renderFollowComparison(tipsterId)          // Comparación tipster vs follows
+renderTipsterFollows(tipsterId)            // Tabla de picks seguidas
+
+// Sistema de tabs:
+// 1. Stats: estadísticas generales del tipster
+// 2. My Stats: comparación tipster vs usuario
+// 3. Follows: historial de picks seguidas
+
+// Componentes tab Stats:
+// - 7 stat-cards con métricas clave
+// - 4 gráficos Chart.js:
+//   * Distribución de cuotas (bar chart)
+//   * Distribución de stakes (bar chart)
+//   * Distribución de deportes (doughnut chart)
+//   * Distribución de tipos de pick (doughnut chart)
+// - Tabla de historial de picks
+// - Botón "Resetear Tipster"
+
+// Componentes tab My Stats:
+// - Comparison grid (tipster vs usuario)
+// - Muestra diferencias en yield, winrate, profit
+
+// Componentes tab Follows:
+// - Tabla de picks seguidas
+// - Indicador de match/diverge
+```
+
+#### **charts.js** - Gráficos con Chart.js
+```javascript
+// Funciones principales:
+createOddsChart(tipsterId)                 // Gráfico distribución odds
+createStakeChart(tipsterId)                // Gráfico distribución stakes
+createSportChart(tipsterId)                // Gráfico distribución deportes
+createPickTypeChart(tipsterId)             // Gráfico distribución tipos
+
+// Configuración:
+// - Usa chartColors de constants.js
+// - Responsive: true
+// - maintainAspectRatio: true
+// - Tooltips personalizados
+// - Legends según tipo de gráfico
+
+// Gestión de instancias:
+// - state.charts almacena instancias
+// - Destruye charts anteriores antes de crear nuevos
+// - Evita memory leaks
+```
+
+---
+
+### 📁 modals/ - Modals de la aplicación
+
+#### **tipster-modal.js** - Modal de tipster
+```javascript
+// Funciones principales:
+showAddTipsterModal()                      // Abre modal vacío
+setupTipsterModalListeners()               // Configura event listeners
+addTipster(event)                          // Submit handler
+
+// Campos:
+// - Nombre (required)
+// - Canal (select)
+
+// Validación:
+// - Nombre no vacío
+// - Canal seleccionado
+
+// Flujo:
+// 1. Usuario completa form
+// 2. addTipster() previene default
+// 3. Valida campos
+// 4. Llama addTipsterToFirestore()
+// 5. Cierra modal
+// 6. Listener actualiza UI automáticamente
+```
+
+#### **pick-modal.js** - Modal de pick
+```javascript
+// Funciones principales:
+showAddPickModal()                         // Modal vacío para nueva pick
+showEditPickModal(pickId)                  // Modal pre-rellenado para editar
+setupPickModalListeners()                  // Event listeners
+addPickToFirestore(pickData)               // Submit para nueva pick
+editPick(pickId)                           // Submit para editar pick
+
+// Campos principales:
+// - Tipster (select)
+// - Deporte (select)
+// - Match
+// - Tipo de apuesta
+// - Cuota (number)
+// - Stake (number 1-10)
+// - Tipo de pick (Pre/Live/Combinado)
+// - Fecha y hora
+// - Bookmaker
+// - Resultado (Ganada/Perdida/Void)
+// - Checkbox "Resuelta"
+// - Comentarios
+
+// Sección follow (opcional):
+// - Checkbox "Marcar como seguida"
+// - Si activa: campos de follow (userOdds, userStake, userResult)
+
+// Validación:
+// - Campos required
+// - Stake entre 1-10
+// - Odds > 1.0
+// - Fecha válida
+
+// Modo edición:
+// - Pre-rellena todos los campos
+// - Muestra datos de follow si existe
+// - Actualiza pick y follow simultáneamente
+```
+
+#### **follow-modal.js** - Modal de seguimiento
+```javascript
+// Funciones principales:
+showFollowPickModal(pickId)                // Abre modal para seguir pick
+addFollow(event)                           // Submit handler
+
+// Campos:
+// - Muestra info de la pick original (read-only)
+// - Cuota usuario (editable)
+// - Stake usuario (editable)
+// - Resultado usuario (select)
+// - Checkbox "Resuelta"
+
+// Validación:
+// - Pick no seguida previamente
+// - userOdds > 1.0
+// - userStake entre 1-10
+
+// Flujo:
+// 1. Usuario edita datos de su apuesta
+// 2. addFollow() valida
+// 3. Crea documento en userFollows
+// 4. Listener actualiza vistas
+```
+
+---
+
+## Flujo de Datos
+
+### 1. Inicialización de la App
+```
+Usuario carga index.html
+    ↓
+Se cargan scripts Firebase (CDN)
+    ↓
+Se carga app.js (type="module")
+    ↓
+import init.js → Inicializa Firebase
+    ↓
+import auth.js → setupAuthListeners()
+    ↓
+onAuthStateChanged ejecuta:
+    - Si usuario → initApp()
+    - Si no → muestra authScreen
+```
+
+### 2. Flujo de Autenticación
+```
+Usuario envía login form
+    ↓
+handleLogin(event)
+    ↓
+firebase.auth().signInWithEmailAndPassword()
+    ↓
+onAuthStateChanged detecta cambio
+    ↓
+state.currentUser = user
+    ↓
+initApp() ejecuta:
+    - setupTipstersListener()
+    - setupPicksListener()
+    - setupFollowsListener()
+    - initializeFilters()
+    ↓
+Listeners onSnapshot activos
+    ↓
+Datos sincronizados en state
+    ↓
+renderDashboard()
+```
+
+### 3. Flujo CRUD de Picks
+```
+Usuario click "Añadir Pick"
+    ↓
+showAddPickModal()
+    ↓
+Usuario completa form
+    ↓
+addPickToFirestore(pickData)
+    ↓
+db.collection('picks').add({ uid, ...pickData })
+    ↓
+Firestore guarda documento
+    ↓
+onSnapshot detecta cambio
+    ↓
+setupPicksListener actualiza state.picks
+    ↓
+Renderiza vistas afectadas:
+    - renderAllPicks() si está en allPicks view
+    - renderTipsterDetail() si está en detalle
+    - renderDashboard() para stats globales
+```
+
+### 4. Flujo de Filtrado
+```
+Usuario cambia filtro (ej: selecciona deporte)
+    ↓
+toggleFilterOption(event, 'sport', 'Fútbol')
+    ↓
+toggleFilterCheckboxUI(event) - feedback visual
+    ↓
+state.dashboardFilters.sports.push('Fútbol')
+    ↓
+applyFilters()
+    ↓
+filterTipsters(state.tipsters, state.dashboardFilters)
+    ↓
+Retorna array filtrado
+    ↓
+renderDashboard() con tipsters filtrados
+```
+
+### 5. Flujo de Seguimiento de Pick
+```
+Usuario click "Seguir" en pick
+    ↓
+showFollowPickModal(pickId)
+    ↓
+Modal muestra info pick + campos usuario
+    ↓
+Usuario edita userOdds, userStake, userResult
+    ↓
+addFollow(event)
+    ↓
+addFollowToFirestore({ pickId, userOdds, userStake, ... })
+    ↓
+db.collection('userFollows').add(...)
+    ↓
+setupFollowsListener detecta cambio
+    ↓
+state.userFollows actualizado
+    ↓
+Renderiza:
+    - renderMyPicks() si está en myPicks view
+    - renderTipsterDetail() si está en detalle
+    - renderDashboardPersonalStats() para stats globales
+```
+
+---
+
+## Interfaz de Usuario
+
+### Estructura HTML (index.html)
+
+#### 🔐 Auth Screen
+```html
+<div id="authScreen" class="auth-screen">
+  <!-- Tabs: Login / Signup -->
+  <!-- Forms con validación HTML5 -->
+  <!-- Toggle password visibility -->
+  <!-- Link "Olvidaste contraseña" -->
+  <!-- Modal forgot password -->
+</div>
+```
+
+#### 🏠 Main App
+```html
+<div id="mainApp" class="main-app">
+  <!-- Navbar: logo, user email, botones añadir, logout -->
+  
+  <!-- Vista Dashboard -->
+  <div id="dashboardView" class="view active">
+    <!-- Personal stats grid (8 cards) -->
+    <!-- Filtros: sports, channels, yield, lastPick, sort, search -->
+    <!-- Grid de tipster cards -->
+  </div>
+  
+  <!-- Vista All Picks -->
+  <div id="allPicksView" class="view">
+    <!-- Filtros: tipster, sport, status, channel, bookmaker, result -->
+    <!-- Tabla de picks con acciones -->
+  </div>
+  
+  <!-- Vista My Picks -->
+  <div id="myPicksView" class="view">
+    <!-- Stats de seguibilidad (4 cards) -->
+    <!-- Filtros: tipster, result, match/diverge -->
+    <!-- Tabla comparativa tipster vs usuario -->
+  </div>
+  
+  <!-- Vista Tipster Detail -->
+  <div id="tipsterDetailView" class="view">
+    <!-- Header con nombre y botón volver -->
+    <!-- Tabs: Stats, My Stats, Follows -->
+    
+    <!-- Tab Stats -->
+    <div id="statsTab" class="tab-content active">
+      <!-- 7 stat-cards -->
+      <!-- 4 gráficos Chart.js -->
+      <!-- Tabla historial picks -->
+      <!-- Botón resetear -->
+    </div>
+    
+    <!-- Tab My Stats -->
+    <div id="myStatsTab" class="tab-content">
+      <!-- Comparison grid -->
+    </div>
+    
+    <!-- Tab Follows -->
+    <div id="followsTab" class="tab-content">
+      <!-- Tabla follows -->
+    </div>
+  </div>
+</div>
+```
+
+#### 🗂️ Modals
+```html
+<!-- Modal Añadir Tipster -->
+<div id="addTipsterModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Añadir Tipster</h2>
+      <button onclick="closeModal('addTipsterModal')">×</button>
+    </div>
+    <form id="addTipsterForm">
+      <!-- Campos: nombre, canal -->
+    </form>
+  </div>
+</div>
+
+<!-- Modal Añadir/Editar Pick -->
+<div id="addPickModal" class="modal">
+  <!-- Form completo con sección follow opcional -->
+</div>
+
+<!-- Modal Seguir Pick -->
+<div id="followPickModal" class="modal">
+  <!-- Info pick + campos usuario -->
+</div>
+
+<!-- Modal Forgot Password -->
+<div id="forgotPasswordModal" class="modal">
+  <!-- Input email + botón enviar -->
+</div>
+```
+
+### Elementos Interactivos
+
+#### Navegación
+- **Navbar tabs**: Click cambia vista activa (dashboard, allPicks, myPicks)
+- **Tipster card**: Click muestra detalle del tipster
+- **Botón volver**: Regresa al dashboard desde detalle
+
+#### Filtros
+- **Custom dropdowns**: Multi-select con checkboxes
+- **Input numérico**: Debounce de 500ms para yield mínimo
+- **Select simple**: Cambio inmediato
+- **Search bar**: Filtrado en tiempo real
+
+#### Tablas
+- **Botón Editar**: Abre modal pre-rellenado
+- **Botón Eliminar**: Confirmación → elimina de Firestore
+- **Botón Seguir**: Abre modal follow con info de pick
+- **Checkbox Resuelta**: Toggle estado resolved
+
+#### Modals
+- **Overlay oscuro**: Click fuera cierra modal
+- **Botón ×**: Cierra modal
+- **Submit form**: Guarda y cierra
+- **Cancel button**: Solo cierra sin guardar
+
+---
+
+## Sistema de Estilos
+
+### Variables CSS (Root)
+```css
+:root {
+  /* Colores */
+  --color-primary: #3B82F6;
+  --color-background: #0F172A;
+  --color-surface: #1E293B;
+  --color-text: #E0E0E0;
+  --color-success: #10B981;
+  --color-error: #EF4444;
+  --color-warning: #F59E0B;
+  --color-info: #6B7280;
+  
+  /* Tipografía */
+  --font-family: 'FKGroteskNeue', 'Geist', 'Inter', sans-serif;
+  --font-mono: 'Berkeley Mono', monospace;
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 30px;
+  
+  /* Spacing */
+  --space-1: 1px;
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-base: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  
+  /* Animaciones */
+  --transition-fast: 150ms;
+  --transition-normal: 250ms;
+  --transition-slow: 400ms;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+```
+
+### Componentes Principales
+
+#### Botones
+```css
+.btn {
+  /* Base styles */
+}
+
+.btn--primary    /* Azul - acciones principales */
+.btn--secondary  /* Gris - acciones secundarias */
+.btn--outline    /* Borde - acciones terciarias */
+.btn--danger     /* Rojo - acciones destructivas */
+
+.btn--sm         /* Pequeño */
+.btn--lg         /* Grande */
+.btn--full-width /* Ancho completo */
+.btn--icon-only  /* Solo icono, cuadrado */
+```
+
+#### Forms
+```css
+.form-control    /* Input, textarea, select estilizados */
+.form-group      /* Wrapper con spacing */
+.form-label      /* Label estilizado */
+```
+
+#### Cards
+```css
+.card            /* Contenedor con background surface */
+.card__header    /* Header del card */
+.card__body      /* Body principal */
+.card__footer    /* Footer del card */
+
+.tipster-card    /* Card específico para tipsters */
+.stat-card       /* Card para estadísticas */
+```
+
+#### Status Badges
+```css
+.status               /* Badge base */
+.status--success      /* Verde - Ganada */
+.status--error        /* Rojo - Perdida */
+.status--warning      /* Naranja - Void */
+.status--info         /* Gris - Pendiente */
+```
+
+#### Tables
+```css
+.picks-table     /* Tabla estilizada */
+thead            /* Header con background azul */
+tbody tr:hover   /* Hover effect */
+```
+
+#### Modals
+```css
+.modal           /* Overlay full screen */
+.modal.active    /* Modal visible */
+.modal-content   /* Contenedor centrado */
+.modal-header    /* Header con título y close */
+.modal-body      /* Body con contenido */
+.modal-footer    /* Footer con botones */
+```
+
+#### Custom Dropdowns
+```css
+.custom-dropdown     /* Wrapper */
+.dropdown-toggle     /* Botón toggle */
+.dropdown-menu       /* Menu desplegable */
+.dropdown-menu.active /* Menu visible */
+.dropdown-item       /* Item del menu */
+```
+
+### Responsive Design
+```css
+@media (max-width: 768px) {
+  /* Navbar: flex-direction column */
+  /* Grids: 1 columna */
+  /* Tables: font-size reducido */
+  /* Filters: full width stacked */
+  /* Tabs: scroll horizontal */
+}
+```
+
+### Utility Classes
+```css
+/* Display */
+.block, .hidden, .flex, .flex-col
+
+/* Alignment */
+.items-center, .justify-center, .justify-between
+
+/* Spacing */
+.m-0, .mt-8, .px-16, .gap-8
+
+/* Text */
+.text-center, .text-sm, .font-bold
+
+/* Colors */
+.positive, .negative
+
+/* States */
+.active, .visible
+```
+
+---
+
+## Convenciones de Código
+
+### Naming Conventions
+
+#### JavaScript
+```javascript
+// Variables y funciones: camelCase
+const currentUser = auth.currentUser;
+const tipsters = [];
+function renderDashboard() {}
+function calculateStats() {}
+
+// Constantes: camelCase (no UPPER_CASE)
+const allSports = ['Fútbol', 'Baloncesto'];
+const sportIcons = { 'Fútbol': '⚽' };
+
+// Event handlers: camelCase con prefijo handle
+function handleLogin(e) {}
+function handleSignup(e) {}
+
+// Classes (si se usan): PascalCase
+class TipsterManager {}
+```
+
+#### HTML/CSS
+```css
+/* IDs: camelCase */
+#dashboardView
+#allPicksBody
+#addTipsterModal
+
+/* Classes: kebab-case */
+.tipster-card
+.stat-item
+.form-control
+.custom-dropdown
+
+/* Archivos: kebab-case */
+tipster-modal.js
+all-picks.js
+style.css
+```
+
+### Arquitectura Modular
+
+#### Exports
+```javascript
+// Cada módulo exporta sus funciones y variables
+// state.js
+export { state }
+
+// calculations.js
+export { calculateYield, calculateWinrate, calculateStats }
+
+// dashboard.js
+export { renderDashboard, setupDashboardListeners }
+```
+
+#### Imports
+```javascript
+// app.js orquesta todos los módulos
+import { db, auth } from './core/init.js';
+import { state } from './core/state.js';
+import { setupAuthListeners } from './core/auth.js';
+import { allSports, sportIcons } from './data/constants.js';
+import { calculateStats } from './utils/calculations.js';
+import { renderDashboard } from './views/dashboard.js';
+import { showAddPickModal } from './modals/pick-modal.js';
+```
+
+### Patrones de Código
+
+#### Firestore Queries
+```javascript
+// Siempre filtrar por uid del usuario
+db.collection('tipsters')
+  .where('uid', '==', currentUser.uid)
+  .onSnapshot(snapshot => {
+    // Procesar docs
+  });
+```
+
+#### Error Handling
+```javascript
+try {
+  showLoading(true);
+  await db.collection('picks').add(pickData);
+  closeModal('addPickModal');
+} catch (error) {
+  console.error('Error:', error);
+  alert('Error al guardar: ' + error.message);
+} finally {
+  showLoading(false);
+}
+```
+
+#### Estado Visual
+```javascript
+// Loading overlay
+showLoading(true);
+// ... operación asíncrona
+showLoading(false);
+
+// Mostrar/ocultar elementos
+element.classList.add('active');
+element.classList.remove('active');
+element.classList.toggle('visible');
+
+// Confirmaciones
+if (confirm('¿Estás seguro?')) {
+  // Acción destructiva
+}
+```
+
+#### Renderizado Dinámico
+```javascript
+function renderTipsters(tipsters) {
+  const container = document.getElementById('tipstersGrid');
+  
+  if (tipsters.length === 0) {
+    container.innerHTML = '<div class="empty-state">Sin tipsters</div>';
+    return;
+  }
+  
+  container.innerHTML = tipsters.map(tipster => `
+    <div class="tipster-card" onclick="showTipsterDetail('${tipster.id}')">
+      <h3>${tipster.name}</h3>
+      <p>${tipster.channel}</p>
+    </div>
+  `).join('');
+  
+  // Reinicializar icons después de modificar DOM
+  lucide.createIcons();
+}
+```
+
+#### Filtrado con Debounce
+```javascript
+function onYieldFilterChange(value) {
+  clearTimeout(state.yieldDebounceTimer);
+  state.yieldDebounceTimer = setTimeout(() => {
+    state.dashboardFilters.yieldMin = parseFloat(value);
+    applyFilters();
+  }, 500);
+}
+```
+
+### Documentación en Código
+```javascript
+/**
+ * Calcula las estadísticas completas de un tipster
+ * @param {string} tipsterId - ID del tipster
+ * @returns {object} Objeto con todas las estadísticas
+ */
+function calculateStats(tipsterId) {
+  // ...
+}
+```
+
+---
+
+## Comandos y Desarrollo
+
+### Desarrollo Local
+
+#### Iniciar servidor de desarrollo
+```bash
+firebase serve
+# Sirve la app en http://localhost:5000
+# Solo hosting, no inicia emuladores
+```
+
+#### Iniciar emuladores completos
+```bash
+firebase emulators:start
+# Inicia:
+# - Firestore emulator: localhost:8080
+# - Auth emulator: localhost:9099
+# - Hosting: localhost:5000
+# - Emulator UI: localhost:4000
+```
+
+#### Importar datos de emulador
+```bash
+firebase emulators:start --import=./emulator-data
+# Carga datos guardados previamente
+```
+
+#### Exportar datos de emulador
+```bash
+firebase emulators:export ./emulator-data
+# Guarda estado actual del emulador
+```
+
+### Deploy
+
+#### Deploy completo
+```bash
+firebase deploy
+# Despliega:
+# - Hosting
+# - Firestore rules
+# - Firestore indexes
+```
+
+#### Deploy solo hosting
+```bash
+firebase deploy --only hosting
+# Solo actualiza archivos en public/
+```
+
+#### Deploy solo rules
+```bash
+firebase deploy --only firestore:rules
+# Solo actualiza firestore.rules
+```
+
+### Git y GitHub
+
+#### Flujo de trabajo
+```bash
+# Hacer cambios
+git add .
+git commit -m "descripción del cambio"
+git push origin main
+
+# GitHub Actions automáticamente:
+# 1. Detecta push a main
+# 2. Ejecuta workflow firebase-hosting-main.yml
+# 3. Hace build si es necesario
+# 4. Despliega a Firebase Hosting
+```
+
+### Firebase CLI
+
+#### Login
+```bash
+firebase login
+# Autentica con cuenta de Google
+```
+
+#### Seleccionar proyecto
+```bash
+firebase use <project-id>
+# Cambia proyecto activo
+```
+
+#### Ver proyectos
+```bash
+firebase projects:list
+# Lista todos tus proyectos
+```
+
+### NPM Scripts (si existen en package.json)
+```bash
+npm install          # Instala dependencias
+npm run dev          # Desarrollo local
+npm run build        # Build para producción
+npm run deploy       # Deploy a Firebase
+```
+
+---
+
+## Problemas Conocidos y Mejoras
+
+### 🐛 Bugs Conocidos
+
+1. **Charts - Tamaños y colores**
+   - Los gráficos pueden tener inconsistencias visuales
+   - Mejorar paleta de colores para mejor contraste
+   - Ajustar tamaños responsive
+
+2. **Follows - Especificidad de stakes**
+   - Stakes actuales son ranges genéricos (1-10)
+   - Considerar stakes específicos (ej: 0.5, 1.5, 2.3)
+
+3. **Historial unificado**
+   - Historial de follows y estadísticas están separados
+   - Unificar en una vista cronológica completa
+
+### ✨ Mejoras Planificadas
+
+#### Funcionalidades Faltantes
+- **Subida de imágenes**: 
+  - Upload de screenshots de picks
+  - OCR para extraer datos automáticamente
+  - Firebase Storage para almacenamiento
+
+- **Gestión de Bookmakers**:
+  - CRUD completo de bookmakers
+  - Añadir nuevos bookmakers desde la app
+
+- **Eliminación de entidades**:
+  - Funcionalidad "Remove Tipster" completa
+  - Eliminación en cascada de picks asociadas
+  - Funcionalidad "Remove Pick" con confirmación
+
+- **Import/Export Excel**:
+  - Exportar datos a Excel
+  - Importar picks desde Excel
+  - Templates predefinidos
+
+#### Mejoras de UX
+- **Notificaciones**:
+  - Toast notifications en lugar de alerts
+  - Feedback visual mejorado
+
+- **Búsqueda avanzada**:
+  - Búsqueda por match, betType
+  - Filtros por rangos de fechas
+  - Búsqueda full-text
+
+- **Dashboard personalizable**:
+  - Widgets arrastrables
+  - Configuración de métricas visibles
+  - Gráficos personalizables
+
+#### Mejoras Técnicas
+- **Testing**:
+  - Unit tests con Jest
+  - Integration tests con Cypress
+  - Tests de Firestore rules
+
+- **Performance**:
+  - Paginación de tablas grandes
+  - Lazy loading de gráficos
+  - Service Worker para offline
+
+- **Seguridad**:
+  - Rate limiting en autenticación
+  - Validación más estricta en Firestore rules
+  - Sanitización de inputs
+
+- **Refactoring**:
+  - Migrar a TypeScript
+  - Component-based architecture
+  - State management con Redux/Zustand
+
+### 📝 Notas para el Agente de IA
+
+#### Prioridades al Modificar el Código
+1. **Seguridad**: No exponer credenciales Firebase
+2. **Consistencia**: Mantener convenciones de naming
+3. **Modularidad**: No romper imports/exports existentes
+4. **UX**: Mantener feedback visual (loading, confirmaciones)
+5. **Firestore Rules**: No romper reglas de seguridad
+
+#### Al Añadir Nuevas Funcionalidades
+1. Crear módulo en carpeta apropiada (services, utils, views, modals)
+2. Exportar funciones necesarias
+3. Importar en app.js si es necesario para inicialización
+4. Actualizar listeners si afecta a datos en tiempo real
+5. Añadir estilos en style.css siguiendo variables CSS
+6. Documentar en AGENTS.md
+
+#### Al Modificar Firestore
+1. Actualizar firestore.rules si es necesario
+2. Añadir índices en firestore.indexes.json si se requieren queries compuestas
+3. Verificar que listeners se actualicen correctamente
+4. Mantener uid del usuario en todos los documentos
+
+#### Al Modificar CSS
+1. Usar variables CSS existentes
+2. Mantener dark theme
+3. Verificar responsive (max-width: 768px)
+4. No usar !important salvo necesidad extrema
+
+#### Al Depurar
+1. Revisar console.log en navegador
+2. Verificar Firebase Console para datos
+3. Usar Firebase Emulators para testing local
+4. Verificar Network tab para llamadas Firebase
+
+---
+
+## Glosario
+
+- **Pick**: Pronóstico o apuesta recomendada por un tipster
+- **Follow**: Seguimiento de una pick por el usuario
+- **Tipster**: Persona que recomienda picks
+- **Stake**: Unidades apostadas (1-10 scale)
+- **Odds**: Cuota de la apuesta
+- **Yield**: Rentabilidad porcentual sobre total apostado
+- **Winrate**: Porcentaje de aciertos
+- **Profit**: Ganancia/pérdida neta en unidades
+- **Seguibilidad**: Porcentaje de picks seguidas desde primer follow
+- **Match**: Resultado del usuario coincide con el tipster
+- **Diverge**: Resultado del usuario difiere del tipster
+- **Resolved**: Pick con resultado definido (Ganada/Perdida/Void)
+- **SPA**: Single Page Application
+- **BaaS**: Backend as a Service (Firebase)
+- **CRUD**: Create, Read, Update, Delete
+
+---
+
+**Última actualización**: 13 de Noviembre de 2025  
+**Versión del proyecto**: 1.0.0  
+**Firebase SDK**: 10.7.1  
+**Chart.js**: Latest (CDN)  
+**Lucide Icons**: Latest (CDN)
 
 - **public/index.html**: 
   - SPA con 2 pantallas (auth + main app) y 4 vistas principales
