@@ -2058,3 +2058,180 @@ git push origin main
 - **Iconos**: usar Lucide Icons cuando sea posible, los logos son SVG personalizados
 - **Modularización**: cada archivo tiene una responsabilidad única y clara
 - **Estado compartido**: usar `core/state.js` para variables globales compartidas entre módulos
+
+---
+
+## 🚀 Migración a React - Instrucciones de Trabajo
+
+### Estructura del Repositorio
+
+A partir del 14/11/2025, el repositorio contiene **DOS proyectos**:
+
+```
+tipster-tracker/
+├── public/              # ← Proyecto ORIGINAL (vanilla JS)
+│   ├── index.html
+│   ├── assets/
+│   └── js/
+├── react-app/           # ← Proyecto REACT (migración en progreso) ✨
+│   ├── src/
+│   │   ├── features/
+│   │   ├── shared/
+│   │   ├── core/
+│   │   └── assets/
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── README.md
+├── AGENTS.md            # Documentación proyecto original
+├── MIGRATION-GUIDE.md   # Guía detallada de migración
+└── firebase.json        # Configuración Firebase compartida
+```
+
+### Trabajar con el Proyecto React desde Otra Máquina
+
+#### 1. Clonar el repositorio
+
+```bash
+# Clonar el repo
+git clone git@github.com:Panigc93/tipster-tracker.git
+cd tipster-tracker
+
+# Cambiar a la rama de migración
+git checkout migration/phase-0-setup
+```
+
+#### 2. Configurar el proyecto React
+
+```bash
+# Entrar al directorio del proyecto React
+cd react-app/
+
+# Instalar dependencias
+npm install
+```
+
+#### 3. Configurar variables de entorno
+
+```bash
+# Copiar template de variables de entorno
+cp .env.example .env
+
+# Editar .env con tus credenciales de Firebase
+# Usar el mismo firebaseConfig que está en public/js/config/firebase.config.js
+nano .env  # o el editor que prefieras
+```
+
+El archivo `.env` debe contener:
+```env
+VITE_FIREBASE_API_KEY=AIzaSyAyab7F6Y82stOiNX_wlDwWxljWi4MXD6o
+VITE_FIREBASE_AUTH_DOMAIN=tipstertracker-b5e3c.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=tipstertracker-b5e3c
+VITE_FIREBASE_STORAGE_BUCKET=tipstertracker-b5e3c.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=389145799541
+VITE_FIREBASE_APP_ID=1:389145799541:web:ac0e151c694ca9ad41c13c
+VITE_FIREBASE_MEASUREMENT_ID=G-NWLSKMMLP5
+```
+
+⚠️ **IMPORTANTE**: El archivo `.env` **NO** debe subirse a Git. Ya está en `.gitignore`.
+
+#### 4. Ejecutar el proyecto React
+
+```bash
+# Desde react-app/
+npm run dev
+```
+
+La aplicación estará disponible en: **http://localhost:5173**
+
+#### 5. Comandos útiles
+
+```bash
+# Desarrollo
+npm run dev              # Servidor de desarrollo (http://localhost:5173)
+
+# Linting y formateo
+npm run lint             # Verificar código con ESLint
+npm run lint:fix         # Auto-fix de errores de ESLint
+npm run format           # Formatear código con Prettier
+npm run format:check     # Verificar formato sin modificar
+
+# Build
+npm run build            # Build para producción
+npm run preview          # Preview del build
+
+# Testing (cuando se implemente)
+npm run test             # Ejecutar tests
+```
+
+#### 6. Ejecutar proyecto original (vanilla JS) en paralelo
+
+Si necesitas comparar o probar ambas versiones:
+
+```bash
+# En otra terminal, desde la raíz del proyecto
+cd tipster-tracker/
+firebase emulators:start --import=./emulator-data --export-on-exit
+```
+
+- **Proyecto vanilla JS**: http://localhost:5000
+- **Proyecto React**: http://localhost:5173
+- **Firebase Emulator UI**: http://localhost:4000
+
+### Stack Tecnológico del Proyecto React
+
+- **React 19** - Framework UI
+- **TypeScript 5.9** - Type safety
+- **Vite 7.2** - Build tool ultrarrápido
+- **Tailwind CSS 3** - Sistema de diseño
+- **Firebase SDK 12.6** - Backend (Auth + Firestore)
+- **React Router 7.9** - Routing
+- **Chart.js 4.5** - Gráficos
+- **Lucide React 0.553** - Iconografía
+- **ESLint 9 + Prettier 3.6** - Linting y formateo
+- **Husky 9 + lint-staged 16** - Git hooks
+
+### Arquitectura Feature-Based
+
+El proyecto React sigue una arquitectura basada en features con principios SOLID:
+
+```
+react-app/src/
+├── features/           # Módulos por funcionalidad
+│   ├── auth/          # Autenticación
+│   ├── tipsters/      # Gestión de tipsters
+│   ├── picks/         # Gestión de picks
+│   ├── follows/       # Seguimiento de picks
+│   └── dashboard/     # Dashboard y estadísticas
+├── shared/            # Código compartido
+│   ├── components/    # Componentes UI reutilizables
+│   ├── hooks/         # Custom hooks
+│   ├── services/      # Servicios base
+│   ├── types/         # TypeScript types globales
+│   └── utils/         # Utilidades
+├── core/              # Configuración
+│   ├── config/        # Firebase, env vars
+│   ├── providers/     # Context providers
+│   └── routing/       # React Router
+└── assets/            # Imágenes, fonts
+```
+
+### Estado de la Migración
+
+- ✅ **Fase 0**: Setup inicial completado (14/11/2025)
+  - Proyecto React con TypeScript configurado
+  - Tailwind CSS con design system
+  - ESLint + Prettier + Husky
+  - Estructura de carpetas feature-based
+  - Firebase configurado
+  - Path aliases de TypeScript
+
+- 📋 **Fase 1**: Fundamentos y Abstracciones (próxima)
+  - Tipos TypeScript del modelo de datos
+  - Repository Pattern para Firebase
+  - Context API y custom hooks base
+
+### Documentación Adicional
+
+- **MIGRATION-GUIDE.md**: Guía completa de todas las fases de migración
+- **react-app/README.md**: Documentación específica del proyecto React
+- **AGENTS.md**: Este documento (proyecto original + migración)
