@@ -15961,18 +15961,29 @@ npm run build
 
 ## 📍 Estado Actual del Proyecto
 
+### Estructura del Repositorio
+```
+tipster-tracker/
+├── public/              # ← Proyecto ORIGINAL (vanilla JS)
+├── react-app/           # ← Proyecto REACT (migración)
+├── AGENTS.md            # Documentación proyecto original
+├── MIGRATION-GUIDE.md   # Esta guía de migración
+└── firebase.json        # Configuración Firebase compartida
+```
+
 ### Ubicación del Proyecto React
-El proyecto React migrado se encuentra en: `/home/cgarciap/Escritorio/tipster-tracker-react/`
+El proyecto React migrado se encuentra en: `./react-app/`
 
 ### Comandos Útiles
 ```bash
 # Proyecto original (vanilla JS)
-cd /home/cgarciap/Escritorio/tipster-tracker
 firebase emulators:start --import=./emulator-data --export-on-exit
+# Sirve public/ en http://localhost:5000
 
 # Proyecto React (nuevo)
-cd /home/cgarciap/Escritorio/tipster-tracker-react
-npm run dev  # http://localhost:5173
+cd react-app/
+npm install              # Primera vez
+npm run dev              # http://localhost:5173
 ```
 
 ### Fases Completadas
