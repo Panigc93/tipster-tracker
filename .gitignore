@@ -89,3 +89,11 @@ node_modules/
 dist/
 build/
 out/
+
+# React App
+react-app/.env
+react-app/.env.local
+react-app/.env.*.local
+react-app/node_modules/
+react-app/dist/
+react-app/build/
