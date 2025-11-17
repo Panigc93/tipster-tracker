@@ -3,8 +3,18 @@
  * @module shared/types
  */
 
-// Re-exportar todos los enums
+// Re-exportar todos los enums/constantes y sus tipos
 export * from './enums';
+export type {
+  Sport,
+  Channel,
+  Bookmaker,
+  PickType,
+  PickResult,
+  AppView,
+  SortBy,
+  LastPickDays,
+} from './enums';
 
 // Re-exportar todos los tipos e interfaces
 export type {
