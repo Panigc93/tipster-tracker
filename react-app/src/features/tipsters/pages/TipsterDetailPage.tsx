@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Trash2 } from 'lucide-react';
 import { Button, Spinner, Alert, Badge } from '@/shared/components/ui';
-import { useTipsterDetail } from '../hooks';
+import { useTipsterDetail, useTipsters } from '../hooks';
 import { AddTipsterModal } from '../components';
 
 type TabType = 'stats' | 'my-stats' | 'follows' | 'historial';
@@ -15,6 +15,7 @@ export function TipsterDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { tipster, loading, error, refreshTipster } = useTipsterDetail(id ?? '');
+  const { updateTipster, deleteTipster } = useTipsters();
 
   const [activeTab, setActiveTab] = useState<TabType>('stats');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -40,7 +41,7 @@ export function TipsterDetailPage() {
 
     setIsDeleting(true);
     try {
-      // Delete functionality will be implemented when connecting to repository
+      await deleteTipster(tipster.id);
       navigate('/tipsters');
     } catch (err) {
       console.error('Error deleting tipster:', err);
@@ -226,9 +227,7 @@ export function TipsterDetailPage() {
           onClose={() => setIsEditModalOpen(false)}
           onSuccess={handleEditSuccess}
           tipster={tipster}
-          onUpdate={async (id, data) => {
-            console.log('Update tipster:', id, data);
-          }}
+          onUpdate={updateTipster}
         />
       </div>
     </div>
