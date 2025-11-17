@@ -5,7 +5,7 @@ import { Button, Spinner, Alert, Badge } from '@/shared/components/ui';
 import { useTipsterDetail, useTipsters } from '../hooks';
 import { AddTipsterModal } from '../components';
 
-type TabType = 'stats' | 'my-stats' | 'follows' | 'historial';
+type TabType = 'stats' | 'my-stats';
 
 /**
  * TipsterDetail page
@@ -139,8 +139,6 @@ export function TipsterDetailPage() {
               {[
                 { id: 'stats', label: 'Estadísticas' },
                 { id: 'my-stats', label: 'Mis Estadísticas' },
-                { id: 'follows', label: 'Seguimientos' },
-                { id: 'historial', label: 'Historial' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -165,57 +163,61 @@ export function TipsterDetailPage() {
         {/* Tab Content */}
         <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
           {activeTab === 'stats' && (
-            <div>
-              <h2 className="text-xl font-semibold text-slate-200 mb-4">
-                Estadísticas Generales
-              </h2>
-              <div className="text-slate-400 text-center py-12">
-                <p>Estadísticas del tipster se mostrarán aquí</p>
-                <p className="text-sm mt-2">
-                  Se calcularán cuando se implementen las picks (Fase 5)
-                </p>
+            <div className="space-y-8">
+              {/* Estadísticas Generales */}
+              <div>
+                <h2 className="text-xl font-semibold text-slate-200 mb-4">
+                  Estadísticas Generales
+                </h2>
+                <div className="text-slate-400 text-center py-8">
+                  <p>Estadísticas del tipster se mostrarán aquí</p>
+                  <p className="text-sm mt-2">
+                    Se calcularán cuando se implementen las picks (Fase 5)
+                  </p>
+                </div>
+              </div>
+
+              {/* Historial de Picks */}
+              <div>
+                <h2 className="text-xl font-semibold text-slate-200 mb-4">
+                  Historial de Picks
+                </h2>
+                <div className="text-slate-400 text-center py-8">
+                  <p>Historial completo de picks se mostrará aquí</p>
+                  <p className="text-sm mt-2">
+                    Se implementará en la Fase 5 (Feature Picks)
+                  </p>
+                </div>
               </div>
             </div>
           )}
 
           {activeTab === 'my-stats' && (
-            <div>
-              <h2 className="text-xl font-semibold text-slate-200 mb-4">
-                Comparación: Tipster vs Mis Follows
-              </h2>
-              <div className="text-slate-400 text-center py-12">
-                <p>Comparación de estadísticas se mostrará aquí</p>
-                <p className="text-sm mt-2">
-                  Se calculará cuando se implementen los follows (Fase 6)
-                </p>
+            <div className="space-y-8">
+              {/* Comparación de Estadísticas */}
+              <div>
+                <h2 className="text-xl font-semibold text-slate-200 mb-4">
+                  Comparación: Tipster vs Mis Follows
+                </h2>
+                <div className="text-slate-400 text-center py-8">
+                  <p>Comparación de estadísticas se mostrará aquí</p>
+                  <p className="text-sm mt-2">
+                    Se calculará cuando se implementen los follows (Fase 6)
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
 
-          {activeTab === 'follows' && (
-            <div>
-              <h2 className="text-xl font-semibold text-slate-200 mb-4">
-                Picks Seguidas
-              </h2>
-              <div className="text-slate-400 text-center py-12">
-                <p>Lista de picks seguidas se mostrará aquí</p>
-                <p className="text-sm mt-2">
-                  Se implementará en la Fase 6 (Feature Follows)
-                </p>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'historial' && (
-            <div>
-              <h2 className="text-xl font-semibold text-slate-200 mb-4">
-                Historial de Picks
-              </h2>
-              <div className="text-slate-400 text-center py-12">
-                <p>Historial completo de picks se mostrará aquí</p>
-                <p className="text-sm mt-2">
-                  Se implementará en la Fase 5 (Feature Picks)
-                </p>
+              {/* Picks Seguidas */}
+              <div>
+                <h2 className="text-xl font-semibold text-slate-200 mb-4">
+                  Picks Seguidas
+                </h2>
+                <div className="text-slate-400 text-center py-8">
+                  <p>Lista de picks seguidas se mostrará aquí</p>
+                  <p className="text-sm mt-2">
+                    Se implementará en la Fase 6 (Feature Follows)
+                  </p>
+                </div>
               </div>
             </div>
           )}
