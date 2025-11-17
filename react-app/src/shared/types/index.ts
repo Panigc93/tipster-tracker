@@ -208,6 +208,7 @@ export interface Statistics {
   wonPicks: number;
   lostPicks: number;
   voidPicks: number;
+  pendingPicks: number; // Picks no resueltas aún
   winrate: number; // Porcentaje (0-100)
   yield: number; // Porcentaje (-∞ to +∞)
   totalProfit: number; // Ganancia neta en unidades
@@ -238,9 +239,9 @@ export interface ComparisonStats {
  */
 export interface TraceabilityStats {
   totalPicksSinceFirstFollow: number;
-  picksFollowed: number;
+  followedCount: number; // Alias de picksFollowed (mantener por compatibilidad)
   traceabilityPercentage: number; // Porcentaje (0-100)
-  firstFollowDate: string | null; // YYYY-MM-DD
+  firstFollowDate: string | null; // YYYY-MM-DD o ISO completo
 }
 
 // ============================================================================
