@@ -4,7 +4,8 @@
  */
 
 import { FirebaseRepository } from '@shared/services/firebase-repository';
-import type { Pick, CreatePickDTO, UpdatePickDTO, OperationResult, PickResult } from '@shared/types';
+import type { Pick, CreatePickDTO, UpdatePickDTO, OperationResult } from '@shared/types';
+import type { PickResult } from '@shared/types/enums';
 
 /**
  * Repository for managing Pick entities in Firestore
@@ -132,7 +133,7 @@ export class PickRepository extends FirebaseRepository<Pick> {
    * @param result - Pick result
    * @returns Operation result with picks with specific result
    */
-  async getPicksByResult(userId: string, result: PickResult | string): Promise<OperationResult<Pick[]>> {
+  async getPicksByResult(userId: string, result: PickResult): Promise<OperationResult<Pick[]>> {
     return this.query(userId, [
       this.whereClause('result', '==', result),
       this.orderByClause('dateTime', 'desc'),
@@ -198,7 +199,7 @@ export class PickRepository extends FirebaseRepository<Pick> {
    * @param result - New result
    * @returns Operation result
    */
-  async updatePickResult(id: string, result: PickResult | string): Promise<OperationResult> {
+  async updatePickResult(id: string, result: PickResult): Promise<OperationResult> {
     return this.update(id, {
       result,
       isResolved: result !== 'Pendiente',
