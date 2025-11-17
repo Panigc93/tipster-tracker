@@ -1,8 +1,8 @@
 # Estado Actual del Proyecto - Migración a React
 
-**Última actualización**: 14 de Noviembre de 2025  
+**Última actualización**: 17 de Noviembre de 2025  
 **Rama activa**: `migration/phase-0-setup`  
-**Fase actual**: Fase 0 - COMPLETADA ✅
+**Fase actual**: Fase 1 - EN PROGRESO 🚧
 
 ---
 
@@ -58,17 +58,29 @@
    - **Archivos**: 5 nuevos (firebase-repository.ts, 3 repositorios, README.md) + 1 fix (types.ts)
    - **Líneas**: 1639 líneas de código + documentación
 
-3. **Setup de Context API para estado global**
-   - [ ] `AuthContext` para usuario autenticado
-   - [ ] `TipstersContext` para estado de tipsters
-   - [ ] `PicksContext` para estado de picks
-   - [ ] `FollowsContext` para estado de follows
+3. **✅ Setup de Context API para estado global** (Completado 17/11/2025 - Commit: `f0cc06f`)
+   - [x] `AuthContext` + `AuthProvider` para autenticación Firebase
+   - [x] `TipstersContext` + `TipstersProvider` con listeners real-time
+   - [x] `PicksContext` + `PicksProvider` con listeners real-time
+   - [x] `FollowsContext` + `FollowsProvider` con listeners real-time
+   - [x] `AppProvider` como composition root
+   - [x] `useAuth`, `useTipsters`, `usePicks`, `useFollows` hooks
+   - [x] Documentación completa (README.md con ejemplos de uso)
+   - **Archivos**: 16 nuevos (4 contexts, 5 providers, 4 hooks, 2 barrels, 1 README)
+   - **Líneas**: 1089 líneas de código TypeScript
+   - **Características**:
+     * Separación Context/Provider (ESLint fast-refresh)
+     * onSnapshot listeners para sync real-time
+     * useMemo/useCallback para performance
+     * OperationResult<T> para manejo consistente de errores
+     * Traducciones de errores al español en AuthProvider
+     * Inicialización lazy de data providers (solo si hay usuario)
 
-4. **Implementación de custom hooks base**
-   - [ ] `useAuth` - hook para autenticación
-   - [ ] `useTipsters` - hook para acceder a tipsters
-   - [ ] `usePicks` - hook para acceder a picks
-   - [ ] `useFollows` - hook para acceder a follows
+4. **Implementación de custom hooks adicionales**
+   - [ ] `useStatistics` - cálculo de estadísticas de tipsters
+   - [ ] `useFilters` - lógica de filtrado para todas las vistas
+   - [ ] `useTraceability` - cálculo de seguibilidad
+   - [ ] `useComparison` - comparación tipster vs usuario
 
 5. **Migración del sistema de constantes**
    - [ ] Migrar `allSports`, `allBookmakers`, `allChannels`
