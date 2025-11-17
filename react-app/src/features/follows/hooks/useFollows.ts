@@ -100,7 +100,8 @@ export function useFollows(): UseFollowsReturn {
         const result = await repository.createFollow(data, user.uid);
         
         if (!result.success || !result.data) {
-          throw new Error(result.error || 'Failed to create follow');
+          const errorMsg = typeof result.error === 'string' ? result.error : result.error?.message || 'Failed to create follow';
+          throw new Error(errorMsg);
         }
 
         // Fetch the created follow to return it
@@ -132,7 +133,8 @@ export function useFollows(): UseFollowsReturn {
         const result = await repository.updateFollow(id, data);
         
         if (!result.success) {
-          throw new Error(result.error || 'Failed to update follow');
+          const errorMsg = typeof result.error === 'string' ? result.error : result.error?.message || 'Failed to update follow';
+          throw new Error(errorMsg);
         }
 
         // Real-time listener will update the state automatically
@@ -156,7 +158,8 @@ export function useFollows(): UseFollowsReturn {
         const result = await repository.deleteFollow(id);
         
         if (!result.success) {
-          throw new Error(result.error || 'Failed to delete follow');
+          const errorMsg = typeof result.error === 'string' ? result.error : result.error?.message || 'Failed to delete follow';
+          throw new Error(errorMsg);
         }
 
         // Real-time listener will update the state automatically
