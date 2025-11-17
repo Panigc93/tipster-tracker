@@ -62,7 +62,7 @@ export function TipsterDetailPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <Spinner size="lg" />
       </div>
     );
@@ -71,24 +71,21 @@ export function TipsterDetailPage() {
   // Error state
   if (error || !tipster) {
     return (
-      <div className="min-h-screen bg-slate-900 p-6">
-        <div className="max-w-7xl mx-auto">
-          <Alert variant="error" className="mb-6">
-            {error || 'No se encontró el tipster'}
-          </Alert>
-          <Button variant="secondary" onClick={handleBack}>
-            Volver a Tipsters
-          </Button>
-        </div>
-      </div>
+      <>
+        <Alert variant="error" className="mb-6">
+          {error || 'No se encontró el tipster'}
+        </Alert>
+        <Button variant="secondary" onClick={handleBack}>
+          Volver a Tipsters
+        </Button>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
+    <>
+      {/* Header */}
+      <div className="mb-8">
           <Button
             variant="secondary"
             size="sm"
@@ -396,7 +393,6 @@ export function TipsterDetailPage() {
           }}
           tipsters={[tipster]}
         />
-      </div>
-    </div>
+    </>
   );
 }
