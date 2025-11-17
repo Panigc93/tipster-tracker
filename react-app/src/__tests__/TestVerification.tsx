@@ -45,7 +45,6 @@ interface TestResult {
 }
 
 export const TestVerification = () => {
-  // eslint-disable-next-line max-lines-per-function
   const runTests = useCallback((): void => {
     const results: TestResult[] = [];
 
