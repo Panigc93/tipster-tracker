@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Plus } from 'lucide-react';
 import { Button, Spinner, Alert, Badge } from '@/shared/components/ui';
 import { useTipsterDetail, useTipsters } from '../hooks';
 import { AddTipsterModal } from '../components';
+import { calculateTipsterStats } from '../utils';
+import { usePicksByTipster } from '@features/picks/hooks';
+import { PickTableRow, AddPickModal } from '@features/picks/components';
 
 type TabType = 'stats' | 'my-stats';
 
@@ -16,10 +19,15 @@ export function TipsterDetailPage() {
   const navigate = useNavigate();
   const { tipster, loading, error, refreshTipster } = useTipsterDetail(id ?? '');
   const { updateTipster, deleteTipster } = useTipsters();
+  const { picks, loading: picksLoading } = usePicksByTipster(id ?? '');
 
   const [activeTab, setActiveTab] = useState<TabType>('stats');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddPickModalOpen, setIsAddPickModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Calculate stats from picks
+  const stats = useMemo(() => calculateTipsterStats(picks), [picks]);
 
   const handleBack = () => {
     navigate('/tipsters');
@@ -166,29 +174,175 @@ export function TipsterDetailPage() {
             <div className="space-y-8">
               {/* Estadísticas Generales */}
               <div>
-                <h2 className="text-xl font-semibold text-slate-200 mb-4">
-                  Estadísticas Generales
-                </h2>
-                <div className="text-slate-400 text-center py-8">
-                  <p>Estadísticas del tipster se mostrarán aquí</p>
-                  <p className="text-sm mt-2">
-                    Se calcularán cuando se implementen las picks (Fase 5)
-                  </p>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-slate-200">
+                    Estadísticas Generales
+                  </h2>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setIsAddPickModalOpen(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Añadir Pick
+                  </Button>
                 </div>
+
+                {(() => {
+                  if (picksLoading) {
+                    return (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+                      </div>
+                    );
+                  }
+
+                  if (picks.length === 0) {
+                    return (
+                      <div className="text-center py-12 bg-slate-900/50 rounded-lg border border-slate-700">
+                        <p className="text-slate-400 mb-4">
+                          Aún no hay picks registradas para este tipster
+                        </p>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => setIsAddPickModalOpen(true)}
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Añadir Primera Pick
+                        </Button>
+                      </div>
+                    );
+                  }
+
+                  return (
+                  <>
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-slate-400 text-sm mb-1">Total Picks</p>
+                        <p className="text-2xl font-bold text-slate-100">{stats.totalPicks}</p>
+                      </div>
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-slate-400 text-sm mb-1">Resueltas</p>
+                        <p className="text-2xl font-bold text-blue-400">{stats.resolvedPicks}</p>
+                      </div>
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-slate-400 text-sm mb-1">Ganadas</p>
+                        <p className="text-2xl font-bold text-green-400">{stats.wonPicks}</p>
+                      </div>
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-slate-400 text-sm mb-1">Winrate</p>
+                        <p className="text-2xl font-bold text-slate-100">{stats.winrate}%</p>
+                      </div>
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-slate-400 text-sm mb-1">Yield</p>
+                        <p className={`text-2xl font-bold ${
+                          (() => {
+                            if (stats.yield > 0) return 'text-green-400';
+                            if (stats.yield < 0) return 'text-red-400';
+                            return 'text-slate-100';
+                          })()
+                        }`}>
+                          {stats.yield > 0 ? '+' : ''}{stats.yield}%
+                        </p>
+                      </div>
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-slate-400 text-sm mb-1">Profit</p>
+                        <p className={`text-2xl font-bold ${
+                          (() => {
+                            if (stats.profit > 0) return 'text-green-400';
+                            if (stats.profit < 0) return 'text-red-400';
+                            return 'text-slate-100';
+                          })()
+                        }`}>
+                          {stats.profit > 0 ? '+' : ''}{stats.profit}u
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Additional Stats */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-slate-400 text-sm mb-1">Pendientes</p>
+                        <p className="text-lg font-semibold text-yellow-400">{stats.pendingPicks}</p>
+                      </div>
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-slate-400 text-sm mb-1">Perdidas</p>
+                        <p className="text-lg font-semibold text-red-400">{stats.lostPicks}</p>
+                      </div>
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-slate-400 text-sm mb-1">Cuota Media</p>
+                        <p className="text-lg font-semibold text-slate-100">{stats.avgOdds}</p>
+                      </div>
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-slate-400 text-sm mb-1">Stake Medio</p>
+                        <p className="text-lg font-semibold text-slate-100">{stats.avgStake}u</p>
+                      </div>
+                    </div>
+                  </>
+                  );
+                })()}
               </div>
 
               {/* Historial de Picks */}
-              <div>
-                <h2 className="text-xl font-semibold text-slate-200 mb-4">
-                  Historial de Picks
-                </h2>
-                <div className="text-slate-400 text-center py-8">
-                  <p>Historial completo de picks se mostrará aquí</p>
-                  <p className="text-sm mt-2">
-                    Se implementará en la Fase 5 (Feature Picks)
-                  </p>
+              {picks.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-200 mb-4">
+                    Historial de Picks ({picks.length})
+                  </h2>
+                  <div className="bg-slate-900/50 border border-slate-700 rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-blue-500/10 border-b border-slate-700">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                              Fecha
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                              Partido
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                              Deporte
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                              Tipo
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                              Apuesta
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                              Cuota
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                              Stake
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                              Bookmaker
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                              Resultado
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                              Profit
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-700">
+                          {picks.map((pick) => (
+                            <PickTableRow
+                              key={pick.id}
+                              pick={pick}
+                              tipsterName={tipster.name}
+                              showActions={false}
+                            />
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -223,13 +377,24 @@ export function TipsterDetailPage() {
           )}
         </div>
 
-        {/* Edit Modal */}
+        {/* Edit Tipster Modal */}
         <AddTipsterModal
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           onSuccess={handleEditSuccess}
           tipster={tipster}
           onUpdate={updateTipster}
+        />
+
+        {/* Add Pick Modal */}
+        <AddPickModal
+          isOpen={isAddPickModalOpen}
+          onClose={() => setIsAddPickModalOpen(false)}
+          onSuccess={() => {
+            setIsAddPickModalOpen(false);
+            // Refresh is automatic via listener
+          }}
+          tipsters={[tipster]}
         />
       </div>
     </div>
