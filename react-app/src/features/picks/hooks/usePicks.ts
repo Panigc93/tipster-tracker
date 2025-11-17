@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { db } from '@core/config/firebase.config';
 import { useAuth } from '@features/auth/hooks';
 import { PickRepository } from '../services/pick-repository';
 import type { Pick, CreatePickDTO, UpdatePickDTO } from '@shared/types';
@@ -15,7 +17,7 @@ interface UsePicksReturn {
 
 /**
  * Custom hook for managing picks
- * Handles CRUD operations and state management
+ * Handles CRUD operations and state management with real-time updates
  */
 // Create repository instance (singleton pattern)
 const repository = new PickRepository();
@@ -26,40 +28,64 @@ export function usePicks(): UsePicksReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all picks
-  const fetchPicks = useCallback(async () => {
+  // Setup real-time listener for picks
+  useEffect(() => {
     if (!user?.uid) {
       setPicks([]);
       setLoading(false);
       return;
     }
 
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await repository.getAllPicks(user.uid);
-      
-      if (result.success && result.data) {
-        // Sort by dateTime descending (newest first)
-        const sortedPicks = [...result.data].sort((a, b) => 
-          new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
-        );
-        setPicks(sortedPicks);
-      } else {
-        setError(result.error?.message || 'Failed to load picks');
+    setLoading(true);
+    setError(null);
+
+    // Create Firestore query
+    const picksQuery = query(
+      collection(db, 'picks'),
+      where('uid', '==', user.uid),
+      orderBy('dateTime', 'desc')
+    );
+
+    // Setup real-time listener
+    const unsubscribe = onSnapshot(
+      picksQuery,
+      (snapshot) => {
+        const picksData: Pick[] = [];
+        for (const doc of snapshot.docs) {
+          picksData.push({
+            id: doc.id,
+            ...doc.data(),
+          } as Pick);
+        }
+        setPicks(picksData);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Error in picks listener:', err);
+        setError(err.message);
+        setLoading(false);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load picks');
-      console.error('Error fetching picks:', err);
-    } finally {
-      setLoading(false);
-    }
+    );
+
+    // Cleanup listener on unmount
+    return () => {
+      unsubscribe();
+    };
   }, [user?.uid]);
 
-  // Load picks on mount and when user changes
-  useEffect(() => {
-    void fetchPicks();
-  }, [fetchPicks]);
+  // Refresh picks (refetch from repository)
+  const refreshPicks = useCallback(async () => {
+    if (!user?.uid) return;
+
+    try {
+      const result = await repository.getAllPicks(user.uid);
+      if (result.success && result.data) {
+        setPicks(result.data);
+      }
+    } catch (err) {
+      console.error('Error refreshing picks:', err);
+    }
+  }, [user?.uid]);
 
   // Create pick
   const createPick = useCallback(
@@ -75,15 +101,15 @@ export function usePicks(): UsePicksReturn {
           throw new Error(result.error?.message || 'Failed to create pick');
         }
 
-        // Get the created pick to return it
-        const pickResult = await repository.getPickById(result.data);
-        if (!pickResult.success || !pickResult.data) {
-          throw new Error('Pick created but failed to retrieve');
-        }
-
-        const newPick = pickResult.data;
-        setPicks((prev) => [newPick, ...prev]);
-        return newPick;
+        // Return a temporary pick object (real-time listener will update the list)
+        // We need to return something for the modal to know it succeeded
+        const tempPick: Pick = {
+          id: result.data,
+          uid: user.uid,
+          ...data,
+        };
+        
+        return tempPick;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to create pick';
@@ -108,9 +134,7 @@ export function usePicks(): UsePicksReturn {
           throw new Error(result.error?.message || 'Failed to update pick');
         }
 
-        setPicks((prev) =>
-          prev.map((p) => (p.id === id ? { ...p, ...data } : p))
-        );
+        // Real-time listener will update the list automatically
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to update pick';
@@ -135,7 +159,7 @@ export function usePicks(): UsePicksReturn {
           throw new Error(result.error?.message || 'Failed to delete pick');
         }
 
-        setPicks((prev) => prev.filter((p) => p.id !== id));
+        // Real-time listener will update the list automatically
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delete pick';
@@ -145,11 +169,6 @@ export function usePicks(): UsePicksReturn {
     },
     [user?.uid]
   );
-
-  // Refresh picks (useful after external changes)
-  const refreshPicks = useCallback(async () => {
-    await fetchPicks();
-  }, [fetchPicks]);
 
   return {
     picks,
