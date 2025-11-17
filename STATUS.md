@@ -49,11 +49,14 @@
    - **Archivos**: 5 nuevos (enums.ts, index.ts, types.ts, examples.ts, README.md)
    - **Líneas**: 1070 líneas de TypeScript con 100% JSDoc coverage
 
-2. **Implementar Repository Pattern para Firebase**
-   - [ ] `TipsterRepository` con métodos CRUD
-   - [ ] `PickRepository` con métodos CRUD
-   - [ ] `FollowRepository` con métodos CRUD
-   - [ ] Base `FirebaseRepository` abstracto
+2. **✅ Implementar Repository Pattern para Firebase** (Completado 17/11/2025 - Commit: `a5f4c43`)
+   - [x] `TipsterRepository` con métodos CRUD (13 métodos)
+   - [x] `PickRepository` con métodos CRUD (20+ métodos)
+   - [x] `FollowRepository` con métodos CRUD (20+ métodos)
+   - [x] Base `FirebaseRepository` abstracto
+   - [x] Documentación completa (README.md con ejemplos)
+   - **Archivos**: 5 nuevos (firebase-repository.ts, 3 repositorios, README.md) + 1 fix (types.ts)
+   - **Líneas**: 1639 líneas de código + documentación
 
 3. **Setup de Context API para estado global**
    - [ ] `AuthContext` para usuario autenticado
