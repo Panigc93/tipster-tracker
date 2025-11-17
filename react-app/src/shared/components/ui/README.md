@@ -1,8 +1,34 @@
 # UI Components - Base Design System
 
+**✅ Phase 2 COMPLETA** - Design System completo
+
 Componentes UI fundamentales que se reutilizan en todas las features de la aplicación.
 
-## 🎨 Componentes
+## 📦 Componentes Disponibles
+
+### Componentes Base (MINI-Phase 2)
+- ✅ **Button** - Botón con variantes, tamaños y loading
+- ✅ **Input** - Campo de entrada con label y validación
+- ✅ **Card** - Contenedor con sections opcionales
+- ✅ **Alert** - Mensajes informativos con variantes
+
+### Componentes Phase 2 COMPLETE
+- ✅ **Modal** - Dialog con portal, backdrop y animaciones
+- ✅ **Dropdown** - Select single/multi con búsqueda
+- ✅ **Table** - Tabla con sorting y estados
+- ✅ **Badge** - Status badges con variantes
+- ✅ **Spinner** - Loading indicators
+- ✅ **Toast** - Notificaciones temporales con ToastProvider
+- ✅ **Tabs** - Navegación por pestañas con keyboard
+- ✅ **Checkbox** - Checkbox con estado indeterminate
+- ✅ **Radio** - RadioGroup para selección única
+- ✅ **Switch** - Toggle con loading state
+- ✅ **Textarea** - Textarea con auto-resize y contador
+- ✅ **Divider** - Separador horizontal/vertical
+
+**Total: 16 componentes**
+
+## 🎨 Componentes Detallados
 
 ### Button
 
@@ -277,9 +303,94 @@ import { Input } from '@shared/components/ui/Input';
 - ✅ Keyboard navigation
 - ✅ Screen reader friendly
 
+## 🆕 Componentes Phase 2 COMPLETE
+
+### Modal
+Dialog modal con Portal rendering y animaciones.
+
+```tsx
+const [isOpen, setIsOpen] = useState(false);
+
+<Modal
+  isOpen={isOpen}
+  onClose={() => setIsOpen(false)}
+  title="Confirmar acción"
+  size="md"
+  footer={<Button onClick={() => setIsOpen(false)}>Cerrar</Button>}
+>
+  <p>¿Estás seguro de realizar esta acción?</p>
+</Modal>
+```
+
+### Dropdown
+Select con single/multi-select y búsqueda.
+
+```tsx
+<Dropdown
+  mode="multi"
+  searchable
+  options={[
+    { value: 'football', label: 'Fútbol' },
+    { value: 'basketball', label: 'Baloncesto' }
+  ]}
+  value={selected}
+  onChange={setSelected}
+/>
+```
+
+### Table
+Tabla con sorting y estados de loading/empty.
+
+```tsx
+<Table
+  columns={[
+    { key: 'name', label: 'Nombre', sortable: true },
+    { key: 'email', label: 'Email' }
+  ]}
+  data={users}
+  keyExtractor={(user) => user.id}
+  onRowClick={(user) => navigate(`/users/${user.id}`)}
+/>
+```
+
+### Toast
+Sistema de notificaciones con provider y hook.
+
+```tsx
+// En App.tsx
+<ToastProvider>
+  <ToastContainer position="top-right" />
+  <YourApp />
+</ToastProvider>
+
+// En cualquier componente
+const { addToast } = useToast();
+addToast('Guardado correctamente', 'success');
+```
+
+### Tabs
+Navegación por pestañas con keyboard support.
+
+```tsx
+<Tabs 
+  tabs={[
+    { key: 'profile', label: 'Perfil' },
+    { key: 'settings', label: 'Ajustes' }
+  ]}
+  activeTab={activeTab}
+  onChange={setActiveTab}
+/>
+<TabPanel tabKey="profile" activeTab={activeTab}>
+  <ProfileContent />
+</TabPanel>
+```
+
+Ver ejemplos detallados de todos los componentes en cada archivo individual.
+
 ## 📝 Notas
 
-- Estos son los componentes **mínimos** para desbloquear la Fase 3 (Auth)
-- La Fase 2 completa incluirá más componentes: Modal, Dropdown, Table, Badge, Spinner, Toast, etc.
+- ✅ **Phase 2 COMPLETA**: 16 componentes implementados
 - Todos los componentes son **TypeScript strict mode**
-- 0 errores de ESLint requeridos
+- 0 errores de ESLint
+- Accesibilidad completa (ARIA, keyboard, screen readers)
+- Design system consistente con Tailwind CSS
