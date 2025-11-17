@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { db } from '@core/config/firebase.config';
 import { useAuth } from '@features/auth/hooks';
 import { PickRepository } from '../services/pick-repository';
 import type { Pick } from '@shared/types';
@@ -11,7 +13,7 @@ interface UsePicksByTipsterReturn {
 }
 
 /**
- * Custom hook for getting picks for a specific tipster
+ * Custom hook for getting picks for a specific tipster with real-time updates
  * Read-only hook for displaying tipster's pick history
  */
 // Create repository instance (singleton pattern)
@@ -23,45 +25,65 @@ export function usePicksByTipster(tipsterId: string | null): UsePicksByTipsterRe
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch picks for tipster
-  const fetchPicks = useCallback(async () => {
+  // Setup real-time listener for tipster picks
+  useEffect(() => {
     if (!user?.uid || !tipsterId) {
       setPicks([]);
       setLoading(false);
       return;
     }
 
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await repository.getPicksByTipster(user.uid, tipsterId);
-      
-      if (result.success && result.data) {
-        // Sort by dateTime descending (newest first)
-        const sortedPicks = [...result.data].sort((a, b) => 
-          new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
-        );
-        setPicks(sortedPicks);
-      } else {
-        setError(result.error?.message || 'Failed to load picks');
+    setLoading(true);
+    setError(null);
+
+    // Create Firestore query for this tipster's picks
+    const picksQuery = query(
+      collection(db, 'picks'),
+      where('uid', '==', user.uid),
+      where('tipsterId', '==', tipsterId),
+      orderBy('dateTime', 'desc')
+    );
+
+    // Setup real-time listener
+    const unsubscribe = onSnapshot(
+      picksQuery,
+      (snapshot) => {
+        const picksData: Pick[] = [];
+        for (const doc of snapshot.docs) {
+          picksData.push({
+            id: doc.id,
+            ...doc.data(),
+          } as Pick);
+        }
+        setPicks(picksData);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Error in picks listener for tipster:', err);
+        setError(err.message);
+        setLoading(false);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load picks');
-      console.error('Error fetching picks for tipster:', err);
-    } finally {
-      setLoading(false);
-    }
+    );
+
+    // Cleanup listener on unmount or when tipsterId changes
+    return () => {
+      unsubscribe();
+    };
   }, [user?.uid, tipsterId]);
 
-  // Load picks on mount and when user/tipster changes
-  useEffect(() => {
-    void fetchPicks();
-  }, [fetchPicks]);
-
-  // Refresh picks (useful after external changes)
+  // Refresh picks (refetch from repository)
   const refreshPicks = useCallback(async () => {
-    await fetchPicks();
-  }, [fetchPicks]);
+    if (!user?.uid || !tipsterId) return;
+
+    try {
+      const result = await repository.getPicksByTipster(user.uid, tipsterId);
+      if (result.success && result.data) {
+        setPicks(result.data);
+      }
+    } catch (err) {
+      console.error('Error refreshing picks for tipster:', err);
+    }
+  }, [user?.uid, tipsterId]);
 
   return {
     picks,
