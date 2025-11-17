@@ -2,6 +2,20 @@
 
 Proyecto React con TypeScript para la migración del Tipster Tracker.
 
+## ⚠️ IMPORTANTE
+
+**Este es el proyecto React en desarrollo. Siempre ejecuta comandos desde ESTA carpeta (`react-app/`).**
+
+```bash
+# ✅ CORRECTO - Estás en react-app/
+cd /home/cgarciap/Escritorio/tipster-tracker/react-app
+npm run dev    # → http://localhost:5173 (Vite)
+
+# ❌ INCORRECTO - Estás en la raíz
+cd /home/cgarciap/Escritorio/tipster-tracker
+npm run dev    # → http://localhost:5000 (Firebase Emulators - proyecto antiguo)
+```
+
 ## 🚀 Stack Tecnológico
 
 - **React 19** - Framework UI

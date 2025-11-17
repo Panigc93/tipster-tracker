@@ -144,7 +144,7 @@ export function Dropdown({
         disabled={disabled}
         className={`
           flex items-center justify-between w-full px-4 py-2
-          bg-slate-700 border border-slate-600 rounded-lg
+          bg-slate-700 border border-slate-600 rounded-md
           text-sm text-slate-200
           transition-all duration-200
           ${disabled 
@@ -154,10 +154,13 @@ export function Dropdown({
           ${isOpen ? 'ring-2 ring-blue-500 border-blue-500' : ''}
         `}
       >
-        <span className={selectedOptions.length === 0 ? 'text-slate-400' : ''}>
+        <span 
+          className={`flex-1 text-left truncate ${selectedOptions.length === 0 ? 'text-slate-400' : ''}`}
+          title={displayText}
+        >
           {displayText}
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {mode === 'multi' && selectedOptions.length > 0 && !disabled && (
             <X
               className="h-4 w-4 text-slate-400 hover:text-slate-200"
@@ -217,11 +220,11 @@ export function Dropdown({
                       ${selected ? 'bg-blue-500/10 text-blue-400' : 'text-slate-200'}
                     `}
                   >
-                    <div className="flex items-center gap-2">
-                      {option.icon && <span className="h-4 w-4">{option.icon}</span>}
-                      <span>{option.label}</span>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {option.icon && <span className="h-4 w-4 flex-shrink-0">{option.icon}</span>}
+                      <span className="truncate" title={option.label}>{option.label}</span>
                     </div>
-                    {selected && <Check className="h-4 w-4 text-blue-400" />}
+                    {selected && <Check className="h-4 w-4 text-blue-400 flex-shrink-0" />}
                   </button>
                 );
               })

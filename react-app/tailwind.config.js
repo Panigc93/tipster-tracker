@@ -61,10 +61,10 @@ export default {
         '64': '64px',
       },
       borderRadius: {
-        sm: '6px',
-        DEFAULT: '8px',
-        md: '10px',
-        lg: '12px',
+        sm: '4px',
+        DEFAULT: '6px',
+        md: '8px',
+        lg: '10px',
         full: '9999px',
       },
       boxShadow: {

@@ -3,6 +3,24 @@
 
 ---
 
+## ⚠️ IMPORTANTE - COMANDOS DE DESARROLLO
+
+**SIEMPRE trabajar en la carpeta `react-app/`:**
+
+```bash
+# ✅ CORRECTO - Proyecto React
+cd /home/cgarciap/Escritorio/tipster-tracker/react-app
+npm run dev              # Vite dev server → http://localhost:5173
+npm run build            # Build producción
+npm run lint             # ESLint
+
+# ❌ INCORRECTO - Raíz del proyecto
+cd /home/cgarciap/Escritorio/tipster-tracker
+npm run dev              # ⚠️ Esto levanta Firebase Emulators (puerto 5000)
+```
+
+---
+
 ## 📋 Índice
 1. [Visión General de la Migración](#visión-general-de-la-migración)
 2. [Objetivos de la Migración](#objetivos-de-la-migración)
@@ -808,10 +826,10 @@ export default {
         '32': '32px',
       },
       borderRadius: {
-        'sm': '6px',
-        'base': '8px',
-        'md': '10px',
-        'lg': '12px',
+        'sm': '4px',
+        'base': '6px',
+        'md': '8px',
+        'lg': '10px',
         'full': '9999px',
       },
       boxShadow: {

@@ -1,5 +1,29 @@
 # AGENTS.md - Documentación del Proyecto Tipster Tracker
 
+---
+
+## ⚠️ IMPORTANTE - DESARROLLO CON REACT
+
+**SIEMPRE EJECUTAR npm run dev DESDE LA CARPETA `react-app/`:**
+
+```bash
+# ✅ CORRECTO - Proyecto React (Vite)
+cd /home/cgarciap/Escritorio/tipster-tracker/react-app
+npm run dev
+# Servidor en: http://localhost:5173
+
+# ❌ INCORRECTO - Proyecto antiguo (Firebase Emulators)
+cd /home/cgarciap/Escritorio/tipster-tracker
+npm run dev
+# Este levanta Firebase Emulators en puerto 5000
+```
+
+**Estructura del repositorio:**
+- `/public/` → Proyecto ORIGINAL vanilla JS (NO USAR para desarrollo)
+- `/react-app/` → Proyecto REACT migración (USAR ESTE)
+
+---
+
 ## 📋 Índice
 1. [Resumen Ejecutivo](#resumen-ejecutivo)
 2. [Arquitectura General](#arquitectura-general)
@@ -1010,10 +1034,10 @@ Renderiza:
   --space-32: 32px;
   
   /* Border radius */
-  --radius-sm: 6px;
-  --radius-base: 8px;
-  --radius-md: 10px;
-  --radius-lg: 12px;
+  --radius-sm: 4px;
+  --radius-base: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
   --radius-full: 9999px;
   
   /* Shadows */
@@ -1903,10 +1927,10 @@ import { renderDashboard } from './views/dashboard.js';
 - Variables: `--space-4`, `--space-8`, `--space-16`, etc.
 
 **Border radius:**
-- `--radius-sm: 6px`
-- `--radius-base: 8px`
-- `--radius-md: 10px`
-- `--radius-lg: 12px`
+- `--radius-sm: 4px`
+- `--radius-base: 6px`
+- `--radius-md: 8px`
+- `--radius-lg: 10px`
 - `--radius-full: 9999px` (pills)
 
 **Shadows:**
