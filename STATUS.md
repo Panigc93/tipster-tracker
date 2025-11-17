@@ -100,10 +100,22 @@
      * Auto-complete en IDE
      * Documentación con JSDoc completo
 
-6. **Implementación de utilidades compartidas**
-   - [ ] Migrar `date-utils.ts` con tipos
-   - [ ] Migrar `calculations.ts` con tipos
-   - [ ] Crear utilidades de formato
+6. **✅ Implementación de utilidades compartidas** (Completado 17/11/2025 - Commit: `eacf178`)
+   - [x] `date.utils.ts` con formateo, parsing y validación de fechas
+   - [x] `calculation.utils.ts` con cálculos de yield, winrate, profit, traceability
+   - [x] `format.utils.ts` con formateo de números, moneda, porcentajes, texto
+   - [x] `validation.utils.ts` con validaciones de datos, odds, stakes, emails
+   - [x] Documentación completa (README.md con ejemplos)
+   - **Archivos**: 6 nuevos (4 archivos de utils, 1 barrel export, 1 README)
+   - **Líneas**: 1524 líneas de código + documentación
+   - **Características**:
+     * Separación cálculo vs formateo
+     * Funciones puras sin side effects
+     * Type guards para validación runtime
+     * Optimizaciones (for...of, Set para O(1))
+     * Intl API nativa para formateo
+     * JSDoc completo
+     * Fácil testing (pure functions)
 
 ---
 
