@@ -36,9 +36,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
    * Se ejecuta cuando Firebase detecta cambios en el estado de autenticación
    */
   useEffect(() => {
-    console.log('🔐 Setting up auth state listener...');
     const unsubscribe = authService.onAuthStateChanged((user) => {
-      console.log('🔐 Auth state changed:', user ? `User: ${user.email}` : 'No user');
       setState((prev) => ({
         ...prev,
         user,
@@ -46,10 +44,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       }));
     });
 
-    return () => {
-      console.log('🔐 Cleaning up auth state listener');
-      unsubscribe();
-    };
+    return unsubscribe;
   }, []);
 
   /**

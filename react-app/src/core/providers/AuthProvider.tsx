@@ -21,15 +21,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   });
 
   useEffect(() => {
-    console.log('🔐 Setting up auth state listener...');
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('🔐 Auth state changed:', user ? `User: ${user.email}` : 'No user');
       setAuthState({ user, loading: false, error: null });
     });
-    return () => {
-      console.log('🔐 Cleaning up auth state listener');
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {

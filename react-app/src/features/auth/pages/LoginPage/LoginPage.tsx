@@ -11,7 +11,6 @@ export function LoginPage() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleLoginSuccess = () => {
-    console.log('Login successful, navigating to dashboard...');
     navigate('/');
   };
 

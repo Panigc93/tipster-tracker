@@ -15,15 +15,8 @@ import type { PrivateRouteProps } from './PrivateRoute.types';
 export function PrivateRoute({ children, redirectTo = '/login' }: PrivateRouteProps) {
   const { user, loading } = useAuth();
 
-  console.log('🚧 PrivateRoute render:', { 
-    hasUser: !!user, 
-    userEmail: user?.email, 
-    loading 
-  });
-
   // Show loading spinner while checking auth
   if (loading) {
-    console.log('🚧 PrivateRoute: Showing loading spinner');
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="text-center">
@@ -36,11 +29,9 @@ export function PrivateRoute({ children, redirectTo = '/login' }: PrivateRoutePr
 
   // If not authenticated, redirect to login
   if (!user) {
-    console.log('🚧 PrivateRoute: No user, redirecting to', redirectTo);
     return <Navigate to={redirectTo} replace />;
   }
 
   // User is authenticated, render children
-  console.log('🚧 PrivateRoute: User authenticated, rendering children');
   return <>{children}</>;
 }

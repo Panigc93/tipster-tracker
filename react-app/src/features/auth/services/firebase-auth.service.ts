@@ -105,9 +105,7 @@ export class FirebaseAuthService implements IAuthService {
    * Observar cambios en autenticación
    */
   onAuthStateChanged(callback: (user: User | null) => void): () => void {
-    console.log('🔥 Firebase onAuthStateChanged listener setup');
     return firebaseOnAuthStateChanged(auth, (firebaseUser) => {
-      console.log('🔥 Firebase auth state change detected:', firebaseUser ? firebaseUser.email : 'No user');
       const user = firebaseUser ? this.mapFirebaseUser(firebaseUser) : null;
       callback(user);
     });

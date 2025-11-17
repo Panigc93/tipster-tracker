@@ -9,7 +9,6 @@ export function SignupPage() {
   const navigate = useNavigate();
 
   const handleSignupSuccess = () => {
-    console.log('Signup successful, navigating to dashboard...');
     navigate('/');
   };
 
