@@ -2,7 +2,7 @@
  * Input component types
  */
 
-export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date' | 'time';
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   /**
