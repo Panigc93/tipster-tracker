@@ -1,0 +1,1 @@
+export { MyPicksPage } from './MyPicksPage';

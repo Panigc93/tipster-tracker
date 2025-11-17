@@ -3,6 +3,7 @@ import { LoginPage, SignupPage } from '@features/auth/pages';
 import { PrivateRoute } from '@features/auth/components';
 import { TipsterListPage, TipsterDetailPage } from '@features/tipsters/pages';
 import { PicksListPage } from '@features/picks/pages';
+import { MyPicksPage } from '@features/follows/pages';
 import { Layout } from '@shared/components/layout';
 import { DashboardPlaceholder } from './DashboardPlaceholder';
 
@@ -54,6 +55,16 @@ export const router = createBrowserRouter([
       <PrivateRoute>
         <Layout>
           <PicksListPage />
+        </Layout>
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/my-picks',
+    element: (
+      <PrivateRoute>
+        <Layout>
+          <MyPicksPage />
         </Layout>
       </PrivateRoute>
     ),

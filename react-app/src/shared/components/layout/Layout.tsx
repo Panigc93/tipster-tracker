@@ -41,6 +41,11 @@ export function Layout({ children }: LayoutProps) {
       label: 'Picks',
       icon: FileText,
     },
+    {
+      path: '/my-picks',
+      label: 'Mis Picks',
+      icon: FileText,
+    },
   ];
 
   return (
