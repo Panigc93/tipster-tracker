@@ -6883,66 +6883,65 @@ La Fase 4 se considera **completada** cuando:
 
 ---
 
-## FASE 5: Feature - Picks (Detallado)
+## FASE 5: Feature - Picks ✅ COMPLETADA
 
-### Duración Estimada
-**3-4 semanas** (60-80 horas de trabajo)
+### Estado: ✅ COMPLETADA (17 Nov 2025)
 
-### Objetivos de la Fase
-1. Implementar CRUD completo de picks usando Repository Pattern
-2. Crear hooks personalizados: usePicks, usePick, usePickFilters
-3. Migrar componentes: PickTable, PickRow, PickForm
-4. Implementar modal complejo de añadir/editar pick
-5. Sistema de filtrado avanzado multi-criterio
-6. Integrar con tipsters para mostrar relación
-7. Cálculo de estadísticas por pick
-8. Testing manual del feature
+### Duración Real
+**5 días** (Nov 13-17, 2025)
 
-**Nota**: Esta es la feature más compleja. Los picks son el núcleo de la aplicación y requieren validación estricta.
+### Objetivos Cumplidos
+✅ Implementar CRUD completo de picks con Repository Pattern y real-time listeners
+✅ Crear hooks personalizados: usePicks (CRUD + onSnapshot), usePicksByTipster (filtered + onSnapshot)
+✅ Componente PickTableRow reutilizable (11 columnas)
+✅ Modal AddPickModal complejo (12 campos, create/edit modes, initialTipsterId)
+✅ Sistema de filtrado multi-criterio (tipster, sport, result, búsqueda)
+✅ Integración con tipsters en Layout, TipsterDetailPage y PicksListPage
+✅ Cálculo de estadísticas y profit con utilidad calculateTipsterStats
+✅ Testing exhaustivo con checklist de 10 secciones - 100% aprobado
+✅ Fix de 5 bugs descubiertos durante testing
+
+**Resumen**: Feature Picks completa con CRUD, filtros, stats, real-time updates, y navegación integrada.
 
 ---
 
-### 1. Estructura del Feature Picks
+### 1. Estructura Real Implementada
 
 ```
 src/features/picks/
 ├── components/
-│   ├── PickTable/
-│   │   ├── PickTable.tsx
-│   │   ├── PickTable.module.css
+│   ├── PickTableRow/
+│   │   ├── PickTableRow.tsx          # 165 líneas - Fila reutilizable 11 columnas
+│   │   ├── PickTableRow.types.ts     # Props interface
 │   │   └── index.ts
-│   ├── PickRow/
-│   │   ├── PickRow.tsx
-│   │   ├── PickRow.module.css
-│   │   └── index.ts
-│   ├── PickForm/
-│   │   ├── PickForm.tsx
-│   │   ├── PickForm.module.css
-│   │   └── index.ts
-│   ├── PickModal/
-│   │   ├── PickModal.tsx
-│   │   └── index.ts
-│   ├── PickFilters/
-│   │   ├── PickFilters.tsx
-│   │   ├── PickFilters.module.css
+│   ├── AddPickModal/
+│   │   ├── AddPickModal.tsx          # 480 líneas - Modal complejo create/edit
+│   │   ├── AddPickModal.types.ts     # Props + interfaces
 │   │   └── index.ts
 │   └── index.ts
 ├── hooks/
-│   ├── usePicks.ts
-│   ├── usePick.ts
-│   ├── usePickModal.ts
-│   ├── usePickFilters.ts
+│   ├── usePicks.ts                   # 183 líneas - CRUD + onSnapshot
+│   ├── usePicksByTipster.ts          # 95 líneas - Filtered + onSnapshot
 │   └── index.ts
 ├── pages/
-│   ├── AllPicksPage/
-│   │   ├── AllPicksPage.tsx
-│   │   ├── AllPicksPage.module.css
+│   ├── PicksListPage/
+│   │   ├── PicksListPage.tsx         # 406 líneas - Lista principal + filtros
+│   │   ├── PicksListPage.types.ts    # Interfaces
 │   │   └── index.ts
 │   └── index.ts
 ├── utils/
-│   ├── pick-validation.utils.ts
+│   ├── sport-icons.ts                # 25 líneas - Emoji mapping
 │   └── index.ts
 └── index.ts
+
+// Archivos adicionales modificados/creados:
+features/tipsters/
+├── utils/
+│   └── calculate-stats.ts            # 95 líneas - Estadísticas de tipster
+shared/components/layout/
+└── Layout.tsx                         # 115 líneas - Navbar persistente
+core/routing/
+└── routes.tsx                         # Actualizado con /picks route
 ```
 
 ---
@@ -8848,28 +8847,96 @@ firebase emulators:start
 
 ---
 
+### Commits de la Fase 5
+
+**Implementación Principal (6 commits):**
+1. `e7dc5c6` - feat(phase-5): add Pick hooks usePicks and usePicksByTipster
+2. `b116c1f` - feat(phase-5): add AddPickModal with full pick form
+3. `1e55a54` - feat(phase-5): add PicksListPage with filters and stats
+4. `fe5dd6b` - feat(phase-5): integrate real picks data in TipsterDetailPage
+5. `fcd4a53` - feat(phase-5): add router configuration and navigation layout
+
+**Fixes Descubiertos Durante Testing (4 commits):**
+6. `c56c8df` - fix(phase-5): implement real-time updates with onSnapshot in usePicks
+7. `324dac5` - fix(phase-5): fix TipsterDetailPage table and modal issues
+8. `71159e5` - fix(phase-5): implement real-time updates in usePicksByTipster
+9. `68043ea` - fix: enable edit/delete actions in TipsterDetailPage pick history
+
+**Total: 9 commits**
+
+---
+
+### Bugs Encontrados y Arreglados Durante Testing
+
+**Bug #1 - Picks no aparecían después de crear:**
+- **Problema**: Crear pick → guardar → no aparece en lista hasta refresh
+- **Causa**: usePicks usaba manual fetch sin listener real-time
+- **Solución**: Implementar onSnapshot en useEffect de usePicks
+- **Commit**: `c56c8df`
+
+**Bug #2 - Falta columna Tipster en TipsterDetailPage:**
+- **Problema**: Tabla con 11 columnas pero solo 10 headers
+- **Causa**: Missing `<th>Tipster</th>` en tabla de TipsterDetailPage
+- **Solución**: Agregar header de columna Tipster
+- **Commit**: `324dac5`
+
+**Bug #3 - Tipster no pre-seleccionado en modal:**
+- **Problema**: Abrir modal desde tipster detail → dropdown vacío
+- **Causa**: No había prop para pasar tipster inicial
+- **Solución**: Agregar prop `initialTipsterId` a AddPickModal
+- **Commit**: `324dac5`
+
+**Bug #4 - TipsterDetailPage no se actualiza al crear pick:**
+- **Problema**: Crear pick desde detalle → stats y lista no actualizan
+- **Causa**: usePicksByTipster usaba manual fetch sin listener
+- **Solución**: Implementar onSnapshot en usePicksByTipster
+- **Commit**: `71159e5`
+
+**Bug #5 - No se puede editar/borrar desde TipsterDetailPage:**
+- **Problema**: Botones edit/delete no visibles en tabla de tipster
+- **Causa**: `showActions={false}` en PickTableRow, faltaba lógica
+- **Solución**: Import usePicks, agregar handlers, cambiar a `showActions={true}`
+- **Commit**: `68043ea`
+
+---
+
+### Testing Exhaustivo Completado
+
+**10 Secciones del Checklist - 100% Aprobadas:**
+1. ✅ Login y Navegación
+2. ✅ Gestión de Picks - CRUD desde PicksListPage
+3. ✅ Filtros (tipster, sport, result, búsqueda)
+4. ✅ Estadísticas (5 cards con datos reales)
+5. ✅ TipsterDetailPage (10 stats, tabla, add/edit/delete picks)
+6. ✅ Cálculos de Profit (Ganada: (odds-1)×stake, Perdida: -stake)
+7. ✅ Real-time Updates (onSnapshot en ambos hooks)
+8. ✅ Validaciones (odds > 1, stake 1-10, campos required)
+9. ✅ UI/UX (badges, colores, iconos, spinners, modals)
+10. ✅ Edge Cases (sin picks, división por cero, datos incorrectos)
+
+---
+
 ### Resumen de la Fase 5
 
 **Completado:**
-✅ Repository Pattern ya implementado en Fase 1
-✅ Hooks personalizados: usePicks, usePick, usePickModal, usePickFilters
-✅ Validación completa de picks
-✅ PickForm con 10+ campos y validación
-✅ PickFilters con 6 criterios + búsqueda
-✅ PickTable con ordenación y profit
-✅ PickModal para CRUD
-✅ AllPicksPage integrada
-✅ Navegación en Header
-✅ Real-time sync con Firestore
-✅ Cálculos de profit y estadísticas
-✅ Integración con tipsters
+✅ CRUD completo con Repository Pattern (PickRepository pre-existente, 299 líneas)
+✅ 2 Hooks con real-time: usePicks (183 líneas), usePicksByTipster (95 líneas)
+✅ PickTableRow reutilizable (165 líneas, 11 columnas, cálculo de profit)
+✅ AddPickModal complejo (480 líneas, 12 campos, create/edit modes)
+✅ PicksListPage con filtros y stats (406 líneas, 5 stat cards)
+✅ TipsterDetailPage integration (stats, tabla, CRUD completo)
+✅ Layout con navbar persistente (115 líneas, Dashboard/Tipsters/Picks)
+✅ Utilidad calculateTipsterStats (95 líneas, 10 métricas)
+✅ Sistema de filtrado multi-criterio con búsqueda en tiempo real
+✅ Real-time sync con Firestore via onSnapshot listeners
+✅ Testing exhaustivo: 10 secciones, 5 bugs encontrados y arreglados
 
-**Duración real estimada**: 60-80 horas
+**Duración real**: 5 días (13-17 Nov 2025)
 
-**Archivos creados**: ~20 archivos
-**Líneas de código**: ~1,500 líneas
+**Archivos creados/modificados**: 13 archivos
+**Líneas de código**: ~1,650 líneas
 
-**Importante**: Esta fase establece el patrón de tabla compleja que se adaptará en Follows (Fase 6) para comparar resultados usuario vs tipster.
+**Patrón establecido**: CRUD con real-time updates, filtrado avanzado, estadísticas calculadas, y tablas complejas reutilizables - base para Follows (Fase 6).
 
 ---
 
