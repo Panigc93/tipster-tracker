@@ -297,6 +297,9 @@ export function TipsterDetailPage() {
                               Fecha
                             </th>
                             <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                              Tipster
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
                               Partido
                             </th>
                             <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
@@ -392,6 +395,7 @@ export function TipsterDetailPage() {
             // Refresh is automatic via listener
           }}
           tipsters={[tipster]}
+          initialTipsterId={tipster.id}
         />
     </>
   );

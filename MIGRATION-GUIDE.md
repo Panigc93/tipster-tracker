@@ -16245,12 +16245,7 @@ match /tipsters/{tipsterId} {
 
 ### Próximos Pasos
 
-**Fase 5 - Feature Picks** (siguiente):
-- Modelo de datos Pick con relación a Tipster
-- CRUD de picks
-- Cálculo de estadísticas reales
-- Integración con TipsterDetailPage (tab Stats)
-- Historial de picks por tipster
+**Fase 5 - Feature Picks**: ✅ **COMPLETADA** (ver sección siguiente)
 
 **Dependencias resueltas**:
 - ✅ Auth funcionando
@@ -16261,7 +16256,516 @@ match /tipsters/{tipsterId} {
 
 ---
 
+## 📦 FASE 5: Feature Picks - COMPLETADA
+
+**Fecha de completación**: 17 de Noviembre de 2025  
+**Duración real**: 1 día intensivo  
+**Branch**: `migration/phase-0-setup`  
+**Commits**: 6 commits (e7dc5c6, b116c1f, 1e55a54, fe5dd6b, fcd4a53, + fix onSnapshot)
+
+### Resumen Ejecutivo
+
+Se implementó el feature completo de gestión de picks (pronósticos), incluyendo:
+- CRUD completo con Repository Pattern
+- Sistema de filtrado multi-criterio avanzado
+- Cálculo de 10 métricas estadísticas en tiempo real
+- Integración completa con tipsters
+- Navegación consistente con Layout component
+- **Real-time updates** con Firestore `onSnapshot`
+
+### Objetivos Cumplidos
+
+✅ **1. Repository y Tipos**
+- PickRepository con 20+ métodos (pre-existente)
+- Tipos TypeScript completos: Pick, CreatePickDTO, UpdatePickDTO
+- Modelo con 13 campos + relación tipsterId
+
+✅ **2. Custom Hooks**
+- `usePicks`: CRUD operations con onSnapshot para real-time updates
+- `usePicksByTipster`: Hook filtrado read-only para detalles de tipster
+
+✅ **3. Componentes**
+- `PickTableRow`: 11 columnas, cálculo de profit, badges coloreados
+- `AddPickModal`: Formulario completo con 12 campos y validaciones
+- `PicksListPage`: Página principal con filtros y stats
+
+✅ **4. Integración con Tipsters**
+- TipsterDetailPage muestra 10 stat cards reales
+- Historial completo de picks del tipster
+- Botón "Añadir Pick" pre-selecciona tipster
+
+✅ **5. Navegación**
+- Layout component con navbar persistente
+- 3 links: Dashboard, Tipsters, Picks
+- Active route highlighting
+- User email + logout button
+
+✅ **6. Estadísticas**
+- Utility `calculateTipsterStats`: 10 métricas
+- Winrate, Yield, Profit, Total Staked, Avg Odds, Avg Stake
+- Distribución por resultado (Won, Lost, Void, Pending)
+
+✅ **7. Filtrado Avanzado**
+- Search por nombre de match
+- Filter por Tipster (dropdown)
+- Filter por Sport (dropdown)
+- Filter por Result (dropdown)
+- Stats cards reactivas a filtros
+
+✅ **8. Real-time Updates**
+- onSnapshot listener en `usePicks`
+- Sincronización automática cross-tab
+- Sin necesidad de refresh manual
+
+### Estructura de Archivos Creados
+
+```
+react-app/src/features/picks/
+├── hooks/
+│   ├── usePicks.ts                    # 183 lines - CRUD + onSnapshot
+│   └── usePicksByTipster.ts           # 71 lines - Filtered hook
+├── components/
+│   ├── PickTableRow/
+│   │   ├── PickTableRow.tsx           # 165 lines - 11 columns
+│   │   ├── PickTableRow.types.ts
+│   │   └── index.ts
+│   └── AddPickModal/
+│       ├── AddPickModal.tsx           # 480 lines - Complete form
+│       ├── AddPickModal.types.ts
+│       └── index.ts
+├── pages/
+│   └── PicksListPage/
+│       ├── PicksListPage.tsx          # 406 lines - Main page
+│       └── index.ts
+├── utils/
+│   └── sport-icons.ts                 # 25 lines - Emoji mapping
+└── services/
+    └── pick-repository.ts             # 299 lines (pre-existing)
+
+react-app/src/features/tipsters/
+└── utils/
+    └── calculate-stats.ts             # 95 lines - Statistics utility
+
+react-app/src/shared/components/layout/
+└── Layout.tsx                         # 115 lines - App layout + navbar
+```
+
+### Detalles de Implementación
+
+#### 1. Modelo de Datos Pick
+
+```typescript
+interface Pick {
+  id: string;
+  uid: string;
+  tipsterId: string;           // FK a Tipster
+  match: string;
+  sport: Sport;                // Enum: 16 deportes
+  pickType: PickType;          // Pre | Live | Combinado
+  betType: string;             // Descripción libre
+  bookmaker: Bookmaker;        // Enum: 10 casas
+  odds: number;                // > 1.0
+  stake: number;               // 1-10
+  date: string;                // YYYY-MM-DD
+  time: string;                // HH:MM
+  dateTime: string;            // ISO completo (para ordenación)
+  result: PickResult;          // Ganada | Perdida | Void | Pendiente
+  isResolved: boolean;         // Auto-calculado: result !== 'Pendiente'
+  comments?: string;           // Opcional
+  status?: string;             // Legacy: 'Seguido' | 'No Seguido'
+}
+```
+
+#### 2. Hook usePicks con onSnapshot
+
+**Problema original**: Las picks creadas no aparecían en la lista.
+
+**Causa**: El hook usaba fetch manual sin listener en tiempo real.
+
+**Solución implementada**:
+```typescript
+// Setup real-time listener
+useEffect(() => {
+  if (!user?.uid) return;
+
+  const picksQuery = query(
+    collection(db, 'picks'),
+    where('uid', '==', user.uid),
+    orderBy('dateTime', 'desc')
+  );
+
+  const unsubscribe = onSnapshot(
+    picksQuery,
+    (snapshot) => {
+      const picksData: Pick[] = [];
+      for (const doc of snapshot.docs) {
+        picksData.push({ id: doc.id, ...doc.data() } as Pick);
+      }
+      setPicks(picksData);
+      setLoading(false);
+    },
+    (err) => {
+      setError(err.message);
+      setLoading(false);
+    }
+  );
+
+  return () => unsubscribe();
+}, [user?.uid]);
+```
+
+**Beneficios**:
+- ✅ CRUD sin actualizaciones manuales de estado
+- ✅ Sincronización cross-tab automática
+- ✅ Consistencia con proyecto vanilla JS original
+- ✅ Código más limpio y mantenible
+
+#### 3. AddPickModal - Formulario Completo
+
+**12 campos con validaciones**:
+1. Tipster (select, required)
+2. Match (text, required)
+3. Sport (select, required)
+4. Pick Type (select, required)
+5. Bet Type (text, required)
+6. Bookmaker (select, required)
+7. Odds (number, > 1.0, required)
+8. Stake (number, 1-10, required)
+9. Date (date, required)
+10. Time (time, required)
+11. Result (select, default: Pendiente)
+12. Comments (textarea, optional)
+
+**Auto-cálculos**:
+- `isResolved = result !== 'Pendiente'`
+- `dateTime = combineDateTimeISO(date, time)`
+
+**Modos**:
+- **Create**: Modal vacío con fecha de hoy
+- **Edit**: Pre-rellena todos los campos con pick existente
+
+#### 4. PicksListPage - Página Principal
+
+**Secciones**:
+
+1. **Stats Cards** (5 cards):
+   - Total Picks
+   - Picks Resueltas
+   - Picks Pendientes
+   - Picks Ganadas
+   - Winrate (%)
+
+2. **Filtros** (4 dropdowns + search):
+   - Search: Busca en match name
+   - Tipster: Multi-select por tipster
+   - Sport: Multi-select por deporte
+   - Result: Ganada/Perdida/Void/Pendiente
+
+3. **Tabla de Picks** (11 columnas):
+   - Fecha
+   - Tipster (name)
+   - Match
+   - Sport (emoji icon)
+   - Pick Type
+   - Bet Type
+   - Odds
+   - Stake
+   - Bookmaker
+   - Result (badge)
+   - Profit (colored)
+   - Actions (Edit/Delete)
+
+**Optimizaciones**:
+- `useMemo` para filteredPicks y stats calculation
+- Real-time filtering sin debounce (instantáneo)
+
+#### 5. TipsterDetailPage - Integración
+
+**Tab Stats mejorado**:
+- 10 stat cards con datos reales (antes placeholders)
+- Historial completo de picks en tabla
+- Botón "Añadir Pick" (pre-selecciona tipster actual)
+
+**Métricas calculadas**:
+```typescript
+{
+  totalPicks: number,
+  resolvedPicks: number,
+  pendingPicks: number,
+  wonPicks: number,
+  lostPicks: number,
+  voidPicks: number,
+  winrate: number,        // %
+  yield: number,          // %
+  profit: number,         // units
+  totalStaked: number,    // units
+  avgOdds: number,
+  avgStake: number
+}
+```
+
+**Cálculo de profit**:
+```typescript
+if (result === 'Ganada') {
+  profit = (odds - 1) * stake;
+} else if (result === 'Perdida') {
+  profit = -stake;
+} else if (result === 'Void') {
+  profit = 0;
+}
+```
+
+#### 6. Layout Component - Navegación
+
+**Características**:
+- Navbar sticky con max-w-7xl container
+- Logo SVG + 3 navigation links
+- Active route highlighting (bg-blue-600)
+- User email display
+- Logout button
+- Responsive design
+
+**Rutas**:
+- `/` → Dashboard (pendiente implementación)
+- `/tipsters` → TipsterListPage
+- `/picks` → PicksListPage
+
+### Validaciones Implementadas
+
+#### Validaciones de Formulario
+
+```typescript
+// Odds
+if (odds <= 1) {
+  error = 'La cuota debe ser mayor a 1.0';
+}
+
+// Stake
+if (stake < 1 || stake > 10) {
+  error = 'El stake debe estar entre 1 y 10';
+}
+
+// Campos requeridos
+if (!tipsterId || !match || !sport || !pickType || 
+    !betType || !bookmaker || !date || !time) {
+  error = 'Todos los campos son requeridos';
+}
+```
+
+#### Validaciones TypeScript
+
+- Enums estrictos para Sport, PickType, PickResult, Bookmaker
+- Número mínimo/máximo en inputs HTML5
+- Type guards en utils
+
+### Testing Manual Realizado
+
+✅ **CRUD Operations**:
+- Crear nueva pick → Aparece inmediatamente en lista
+- Editar pick existente → Actualiza sin refresh
+- Eliminar pick → Desaparece con confirmación
+- Modal pre-rellena correctamente en edit mode
+
+✅ **Real-time Updates**:
+- Crear pick en tab 1 → Aparece en tab 2 automáticamente
+- Editar en una tab → Actualiza en todas las tabs abiertas
+- Eliminar → Sincroniza cross-tab
+
+✅ **Filtrado**:
+- Search por match → Filtra instantáneamente
+- Filtro por tipster → Solo muestra picks del tipster seleccionado
+- Filtro por sport → Agrupa por deporte correctamente
+- Filtro por resultado → Separa Ganadas/Perdidas/Void/Pendientes
+- Combinar filtros → AND logic funciona bien
+- Clear filters → Resetea a vista completa
+
+✅ **Estadísticas**:
+- Stats cards calculan correctamente
+- Winrate: (wonPicks / resolvedPicks) * 100
+- Yield: (profit / totalStaked) * 100
+- Profit con color verde/rojo según signo
+- TipsterDetailPage muestra métricas reales
+
+✅ **Navegación**:
+- Links navbar funcionan correctamente
+- Active route se resalta en azul
+- Back button en TipsterDetail regresa a lista
+- Layout persiste en todas las páginas
+
+✅ **Validaciones**:
+- Odds < 1.0 → Muestra error
+- Stake fuera de 1-10 → Bloquea submit
+- Campos vacíos → Previene guardar
+- Inputs type="date" y type="time" nativos HTML5
+
+✅ **Edge Cases**:
+- Sin picks → Empty state correcto
+- Sin tipsters → No permite crear pick
+- Pick sin resultado → Marca como Pendiente
+- Comentarios vacíos → Guarda correctamente
+
+### Métricas de la Fase
+
+**Código escrito**:
+- TypeScript: ~1,800 líneas nuevas
+- Componentes: 3 componentes nuevos (PickTableRow, AddPickModal, PicksListPage)
+- Hooks: 2 hooks (usePicks, usePicksByTipster)
+- Utils: 2 utilities (sport-icons, calculate-stats)
+- Layout: 1 component (Layout)
+
+**Commits**:
+1. `e7dc5c6` - Hooks (usePicks, usePicksByTipster) + PickTableRow
+2. `b116c1f` - AddPickModal component
+3. `1e55a54` - PicksListPage
+4. `fe5dd6b` - TipsterDetailPage integration + calculateTipsterStats
+5. `fcd4a53` - Layout component + router configuration
+6. `fix` - onSnapshot implementation for real-time updates
+
+**Tests**:
+- Testing manual: ✅ Completo (30 minutos)
+- Unit tests: ❌ Pendiente (Fase de Testing)
+- E2E tests: ❌ Pendiente (Fase de Testing)
+
+### Problemas Encontrados y Soluciones
+
+#### Problema 1: Picks no aparecían al crearlas
+
+**Síntoma**: Al guardar una pick nueva, no aparecía en la tabla.
+
+**Causa**: Hook `usePicks` solo hacía fetch inicial sin listener en tiempo real.
+
+**Solución**: Implementar `onSnapshot` para sincronización automática.
+
+**Resultado**: ✅ Picks aparecen instantáneamente sin refresh.
+
+#### Problema 2: Input types no soportados
+
+**Síntoma**: TypeScript error en Input component con type="date" y type="time".
+
+**Causa**: InputType enum no incluía estos tipos HTML5.
+
+**Solución**: Extender InputType: `'date' | 'time'` en Input.types.ts.
+
+**Resultado**: ✅ Inputs nativos funcionan correctamente.
+
+#### Problema 3: ESLint warnings en nested ternaries
+
+**Síntoma**: ESLint quejándose de ternarios anidados complejos.
+
+**Causa**: Expresiones condicionales largas inline.
+
+**Solución**: Extraer a IIFE con if/else limpio.
+
+**Resultado**: ✅ Código más legible sin warnings.
+
+#### Problema 4: Layout wrapper duplicado
+
+**Síntoma**: Páginas tenían doble wrapper (Layout + propio wrapper).
+
+**Causa**: Páginas tenían min-h-screen wrapper antes de añadir Layout.
+
+**Solución**: Remover wrappers de TipsterListPage y TipsterDetailPage.
+
+**Resultado**: ✅ Layout único y consistente.
+
+### Lecciones Aprendidas
+
+1. **onSnapshot es clave**: Para apps en tiempo real, usar listeners desde el inicio evita refactoring posterior.
+
+2. **Repository Pattern escala**: Con 20+ métodos en PickRepository, el patrón demuestra su valor.
+
+3. **useMemo para performance**: Con muchas picks, filtrado optimizado previene re-renders innecesarios.
+
+4. **Type safety salva tiempo**: TypeScript detectó varios bugs antes de runtime.
+
+5. **Layout component centralizado**: Un solo punto de navegación simplifica enormemente el código.
+
+6. **Stats en tiempo real**: Calcular stats en el cliente es viable hasta ~1000 picks (después considerar backend aggregation).
+
+### Archivos Modificados vs Creados
+
+**Creados** (nuevos):
+- `features/picks/hooks/usePicks.ts`
+- `features/picks/hooks/usePicksByTipster.ts`
+- `features/picks/components/PickTableRow/*`
+- `features/picks/components/AddPickModal/*`
+- `features/picks/pages/PicksListPage/*`
+- `features/picks/utils/sport-icons.ts`
+- `features/tipsters/utils/calculate-stats.ts`
+- `shared/components/layout/Layout.tsx`
+
+**Modificados** (updates):
+- `features/tipsters/pages/TipsterDetailPage.tsx` (integración picks)
+- `features/tipsters/pages/TipsterListPage.tsx` (remover wrapper)
+- `shared/components/ui/Input/Input.types.ts` (añadir date/time)
+- `core/routing/routes.tsx` (añadir /picks route + Layout)
+
+### Dependencias Técnicas
+
+**NPM packages** (ya instaladas):
+- React 19
+- TypeScript 5.9
+- Firebase SDK 12.6
+- Lucide React (icons)
+- Tailwind CSS
+
+**Ninguna dependencia nueva requerida** ✅
+
+### Estado de Firestore
+
+**Collections activas**:
+```
+tipsters/
+  {tipsterId}/
+    - id, uid, name, channel, createdDate, lastPickDate
+
+picks/
+  {pickId}/
+    - id, uid, tipsterId (FK)
+    - match, sport, pickType, betType, bookmaker
+    - odds, stake, date, time, dateTime
+    - result, isResolved, comments, status
+```
+
+**Índices compuestos necesarios**:
+```javascript
+// Firestore Index para query con where + orderBy
+{
+  collectionGroup: "picks",
+  queryScope: "COLLECTION",
+  fields: [
+    { fieldPath: "uid", order: "ASCENDING" },
+    { fieldPath: "dateTime", order: "DESCENDING" }
+  ]
+}
+```
+
+**Nota**: Firebase crea índices automáticamente al detectar la query.
+
+### Próximos Pasos
+
+**Fase 6 - Feature Follows** (siguiente):
+- Modelo UserFollow (relación Pick → User)
+- Hook `useFollows` con onSnapshot
+- Integración en AddPickModal (checkbox "Seguir pick")
+- MyPicksPage (picks seguidas por el usuario)
+- Comparación Tipster vs User (match/diverge)
+- Cálculo de seguibilidad por tipster
+
+**Refactorings pendientes**:
+- Extraer PickFilters a componente separado (actualmente inline)
+- Crear custom hook `usePickFilters` para lógica de filtrado
+- Componentizar stat cards (actualmente repetidas)
+
+**Mejoras futuras**:
+- Paginación para > 100 picks
+- Export a Excel/CSV
+- Gráficos de evolución temporal
+- Sistema de notificaciones
+
+---
+
 **Última actualización**: 17 de Noviembre de 2025  
-**Versión del documento**: 1.2.0  
+**Versión del documento**: 1.3.0  
 **Autor**: AI Assistant + Development Team
 

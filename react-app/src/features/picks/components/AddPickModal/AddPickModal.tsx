@@ -28,6 +28,7 @@ export function AddPickModal({
   tipsters,
   pick,
   onUpdate,
+  initialTipsterId,
 }: AddPickModalProps) {
   const { createPick } = usePicks();
   const isEditMode = !!pick;
@@ -50,7 +51,7 @@ export function AddPickModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize form with pick data in edit mode
+  // Initialize form with pick data in edit mode or initialTipsterId in create mode
   useEffect(() => {
     if (isEditMode && pick) {
       setTipsterId(pick.tipsterId);
@@ -68,8 +69,12 @@ export function AddPickModal({
     } else {
       // Reset form for create mode
       resetForm();
+      // If initialTipsterId is provided, pre-select it
+      if (initialTipsterId) {
+        setTipsterId(initialTipsterId);
+      }
     }
-  }, [isEditMode, pick]);
+  }, [isEditMode, pick, initialTipsterId]);
 
   const resetForm = () => {
     setTipsterId('');

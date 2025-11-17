@@ -35,4 +35,9 @@ export interface AddPickModalProps {
    * Function to update a pick (required in edit mode)
    */
   onUpdate?: (id: string, data: Partial<Pick>) => Promise<void>;
+
+  /**
+   * Initial tipster ID to pre-select (useful when opening from tipster detail page)
+   */
+  initialTipsterId?: string;
 }
