@@ -114,6 +114,7 @@ export const exampleEstadisticas: Statistics = {
   wonPicks: 58,
   lostPicks: 35,
   voidPicks: 2,
+    pendingPicks: 5,
   winrate: 61.05, // (58 / 95) * 100
   yield: 12.5, // Porcentaje de ganancia
   totalProfit: 25.3, // Unidades ganadas
