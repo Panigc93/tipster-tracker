@@ -2,7 +2,6 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginPage, SignupPage } from '@features/auth/pages';
 import { PrivateRoute } from '@features/auth/components';
 import { DashboardPlaceholder } from './DashboardPlaceholder';
-import { ComponentsDemo } from '../../pages/ComponentsDemo';
 
 /**
  * Application routes configuration
@@ -23,10 +22,6 @@ export const router = createBrowserRouter([
         <DashboardPlaceholder />
       </PrivateRoute>
     ),
-  },
-  {
-    path: '/components-demo',
-    element: <ComponentsDemo />,
   },
   {
     path: '*',
