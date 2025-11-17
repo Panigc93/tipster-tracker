@@ -5,8 +5,9 @@ import { Button, Spinner, Alert, Badge } from '@/shared/components/ui';
 import { useTipsterDetail, useTipsters } from '../hooks';
 import { AddTipsterModal } from '../components';
 import { calculateTipsterStats } from '../utils';
-import { usePicksByTipster } from '@features/picks/hooks';
+import { usePicksByTipster, usePicks } from '@features/picks/hooks';
 import { PickTableRow, AddPickModal } from '@features/picks/components';
+import type { Pick } from '@shared/types';
 
 type TabType = 'stats' | 'my-stats';
 
@@ -20,10 +21,13 @@ export function TipsterDetailPage() {
   const { tipster, loading, error, refreshTipster } = useTipsterDetail(id ?? '');
   const { updateTipster, deleteTipster } = useTipsters();
   const { picks, loading: picksLoading } = usePicksByTipster(id ?? '');
+  const { updatePick, deletePick } = usePicks();
 
   const [activeTab, setActiveTab] = useState<TabType>('stats');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddPickModalOpen, setIsAddPickModalOpen] = useState(false);
+  const [isEditPickModalOpen, setIsEditPickModalOpen] = useState(false);
+  const [selectedPick, setSelectedPick] = useState<Pick | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Calculate stats from picks
@@ -57,6 +61,32 @@ export function TipsterDetailPage() {
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  // Pick handlers
+  const handleEditPick = (pick: Pick) => {
+    setSelectedPick(pick);
+    setIsEditPickModalOpen(true);
+  };
+
+  const handleDeletePick = async (pick: Pick) => {
+    const confirmed = globalThis.confirm(
+      `¿Estás seguro de que quieres eliminar esta pick? Esta acción no se puede deshacer.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deletePick(pick.id);
+    } catch (err) {
+      console.error('Error deleting pick:', err);
+      globalThis.alert('Error al eliminar la pick');
+    }
+  };
+
+  const handleEditPickSuccess = () => {
+    setIsEditPickModalOpen(false);
+    setSelectedPick(null);
   };
 
   // Loading state
@@ -334,7 +364,9 @@ export function TipsterDetailPage() {
                               key={pick.id}
                               pick={pick}
                               tipsterName={tipster.name}
-                              showActions={false}
+                              showActions={true}
+                              onEdit={handleEditPick}
+                              onDelete={handleDeletePick}
                             />
                           ))}
                         </tbody>
@@ -397,6 +429,21 @@ export function TipsterDetailPage() {
           tipsters={[tipster]}
           initialTipsterId={tipster.id}
         />
+
+        {/* Edit Pick Modal */}
+        {selectedPick && (
+          <AddPickModal
+            isOpen={isEditPickModalOpen}
+            onClose={() => {
+              setIsEditPickModalOpen(false);
+              setSelectedPick(null);
+            }}
+            onSuccess={handleEditPickSuccess}
+            tipsters={[tipster]}
+            pick={selectedPick}
+            onUpdate={updatePick}
+          />
+        )}
     </>
   );
 }
