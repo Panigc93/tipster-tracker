@@ -393,3 +393,17 @@ export interface PaginatedResult<T> {
   limit: number;
   hasMore: boolean;
 }
+
+// ============================================================================
+// RE-EXPORTS FROM ENUMS
+// ============================================================================
+
+export type {
+  Sport,
+  Channel,
+  Bookmaker,
+  PickType,
+  PickResult,
+  SortBy,
+  LastPickDays,
+} from './enums';
