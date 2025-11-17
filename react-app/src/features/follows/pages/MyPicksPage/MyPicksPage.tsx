@@ -10,7 +10,7 @@ import type { UserFollow, Pick } from '@/shared/types';
 
 export const MyPicksPage = () => {
   // Hooks
-  const { follows, isLoading, deleteFollow } = useFollows();
+  const { follows, loading, deleteFollow, updateFollow } = useFollows();
   const { tipsters } = useTipsters();
   const { picks } = usePicks();
 
@@ -59,18 +59,18 @@ export const MyPicksPage = () => {
     let matchCount = 0;
     let divergeCount = 0;
 
-    follows.forEach((follow) => {
-      if (!follow.isResolved) return;
+    for (const follow of follows) {
+      if (!follow.isResolved) continue;
 
       const originalPick = picks.find((p) => p.id === follow.pickId);
-      if (!originalPick || !originalPick.isResolved) return;
+      if (!originalPick?.isResolved) continue;
 
       if (follow.userResult === originalPick.result) {
         matchCount++;
       } else {
         divergeCount++;
       }
-    });
+    }
 
     const matchRate = resolvedFollows.length > 0 ? (matchCount / resolvedFollows.length) * 100 : 0;
 
@@ -280,8 +280,9 @@ export const MyPicksPage = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Tipster filter */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-300">Tipster</label>
+            <label htmlFor="filter-tipster" className="mb-1 block text-sm font-medium text-gray-300">Tipster</label>
             <select
+              id="filter-tipster"
               value={filters.tipsterId}
               onChange={(e) => handleFilterChange('tipsterId', e.target.value)}
               className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -297,8 +298,9 @@ export const MyPicksPage = () => {
 
           {/* Result filter */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-300">Resultado</label>
+            <label htmlFor="filter-result" className="mb-1 block text-sm font-medium text-gray-300">Resultado</label>
             <select
+              id="filter-result"
               value={filters.result}
               onChange={(e) => handleFilterChange('result', e.target.value)}
               className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -313,8 +315,9 @@ export const MyPicksPage = () => {
 
           {/* Match/Diverge filter */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-300">Match/Diverge</label>
+            <label htmlFor="filter-match" className="mb-1 block text-sm font-medium text-gray-300">Match/Diverge</label>
             <select
+              id="filter-match"
               value={filters.matchStatus}
               onChange={(e) => handleFilterChange('matchStatus', e.target.value)}
               className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -327,8 +330,9 @@ export const MyPicksPage = () => {
 
           {/* Search filter */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-300">Búsqueda</label>
+            <label htmlFor="filter-search" className="mb-1 block text-sm font-medium text-gray-300">Búsqueda</label>
             <input
+              id="filter-search"
               type="text"
               value={filters.searchQuery}
               onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
@@ -341,26 +345,35 @@ export const MyPicksPage = () => {
 
       {/* Table */}
       <div className="rounded-lg bg-slate-800 p-4">
-        {isLoading ? (
-          <div className="py-12 text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
-            <p className="mt-2 text-sm text-gray-400">Cargando follows...</p>
-          </div>
-        ) : filteredFollows.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="text-gray-400">
-              {hasActiveFilters ? 'No se encontraron follows con estos filtros' : 'No has seguido ninguna pick todavía'}
-            </p>
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="mt-2 text-sm text-blue-400 hover:text-blue-300"
-              >
-                Limpiar filtros
-              </button>
-            )}
-          </div>
-        ) : (
+        {(() => {
+          if (loading) {
+            return (
+              <div className="py-12 text-center">
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
+                <p className="mt-2 text-sm text-gray-400">Cargando follows...</p>
+              </div>
+            );
+          }
+
+          if (filteredFollows.length === 0) {
+            return (
+              <div className="py-12 text-center">
+                <p className="text-gray-400">
+                  {hasActiveFilters ? 'No se encontraron follows con estos filtros' : 'No has seguido ninguna pick todavía'}
+                </p>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="mt-2 text-sm text-blue-400 hover:text-blue-300"
+                  >
+                    Limpiar filtros
+                  </button>
+                )}
+              </div>
+            );
+          }
+
+          return (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -402,12 +415,15 @@ export const MyPicksPage = () => {
                   const originalPick = picks.find((p) => p.id === follow.pickId);
                   if (!originalPick) return null;
 
+                  const tipster = tipsters.find((t) => t.id === follow.tipsterId);
+                  const tipsterName = tipster?.name || 'Desconocido';
+
                   return (
                     <FollowTableRow
                       key={follow.id}
                       follow={follow}
-                      originalPick={originalPick}
-                      tipsters={tipsters}
+                      pick={originalPick}
+                      tipsterName={tipsterName}
                       onEdit={() => handleEdit(follow)}
                       onDelete={() => handleDelete(follow)}
                     />
@@ -416,7 +432,8 @@ export const MyPicksPage = () => {
               </tbody>
             </table>
           </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* Edit Modal */}
@@ -428,13 +445,14 @@ export const MyPicksPage = () => {
             setSelectedFollow(null);
             setSelectedPick(null);
           }}
-          pick={selectedPick}
-          existingFollow={selectedFollow}
-          onUpdate={() => {
+          onSuccess={() => {
             setIsEditModalOpen(false);
             setSelectedFollow(null);
             setSelectedPick(null);
           }}
+          pick={selectedPick}
+          follow={selectedFollow}
+          onUpdate={updateFollow}
         />
       )}
 
