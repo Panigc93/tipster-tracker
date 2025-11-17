@@ -86,11 +86,11 @@ export function TipsterListPage() {
             </div>
 
             {/* Channel Filter */}
-            <div className="w-full sm:w-48">
+            <div className="w-full sm:w-56">
               <select
                 value={selectedChannel}
                 onChange={(e) => setSelectedChannel(e.target.value)}
-                className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-md text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-5 py-2.5 bg-slate-800 border border-slate-600 rounded-md text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">Todos los canales</option>
                 {channels

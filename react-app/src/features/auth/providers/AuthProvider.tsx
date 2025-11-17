@@ -36,7 +36,9 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
    * Se ejecuta cuando Firebase detecta cambios en el estado de autenticación
    */
   useEffect(() => {
+    console.log('🔐 Setting up auth state listener...');
     const unsubscribe = authService.onAuthStateChanged((user) => {
+      console.log('🔐 Auth state changed:', user ? `User: ${user.email}` : 'No user');
       setState((prev) => ({
         ...prev,
         user,
@@ -44,14 +46,17 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       }));
     });
 
-    return unsubscribe;
+    return () => {
+      console.log('🔐 Cleaning up auth state listener');
+      unsubscribe();
+    };
   }, []);
 
   /**
    * Login con email y password
    */
   const login = useCallback(async (credentials: LoginCredentials) => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, error: null }));
     try {
       await authService.login(credentials);
       // El usuario se actualizará automáticamente por onAuthStateChanged
@@ -59,7 +64,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       const firebaseError = error as { message?: string };
       setState((prev) => ({
         ...prev,
-        loading: false,
         error: getAuthErrorMessage(firebaseError.message || ''),
       }));
       throw error;
@@ -70,7 +74,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
    * Registro de nuevo usuario
    */
   const signup = useCallback(async (data: SignupData) => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, error: null }));
     try {
       await authService.signup(data);
       // El usuario se actualizará automáticamente por onAuthStateChanged
@@ -78,7 +82,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       const firebaseError = error as { message?: string };
       setState((prev) => ({
         ...prev,
-        loading: false,
         error: getAuthErrorMessage(firebaseError.message || ''),
       }));
       throw error;

@@ -21,17 +21,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   });
 
   useEffect(() => {
+    console.log('🔐 Setting up auth state listener...');
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log('🔐 Auth state changed:', user ? `User: ${user.email}` : 'No user');
       setAuthState({ user, loading: false, error: null });
     });
-    return () => unsubscribe();
+    return () => {
+      console.log('🔐 Cleaning up auth state listener');
+      unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      setAuthState((prev) => ({ ...prev, loading: false }));
+      // onAuthStateChanged will update the state automatically
     } catch {
       const errorMessage = 'Error de autenticacion';
       setAuthState((prev) => ({ ...prev, loading: false, error: errorMessage }));
@@ -43,7 +48,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      setAuthState((prev) => ({ ...prev, loading: false }));
+      // onAuthStateChanged will update the state automatically
     } catch {
       const errorMessage = 'Error al crear cuenta';
       setAuthState((prev) => ({ ...prev, loading: false, error: errorMessage }));

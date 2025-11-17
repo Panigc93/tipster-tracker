@@ -24,8 +24,11 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
   const hostname = window.location.hostname;
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     console.log('🔧 Connecting to Firebase Emulators...');
+    console.log('   Auth Emulator: http://localhost:9099');
+    console.log('   Firestore Emulator: localhost:8080');
     connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
     connectFirestoreEmulator(db, 'localhost', 8080);
+    console.log('✅ Connected to emulators successfully');
   }
 }
 

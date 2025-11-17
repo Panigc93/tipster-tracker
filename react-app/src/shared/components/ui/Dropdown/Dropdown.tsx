@@ -143,7 +143,7 @@ export function Dropdown({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
-          flex items-center justify-between w-full px-4 py-2
+          flex items-center justify-between w-full px-5 py-2.5
           bg-slate-700 border border-slate-600 rounded-md
           text-sm text-slate-200
           transition-all duration-200

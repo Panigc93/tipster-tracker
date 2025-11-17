@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@shared/components/ui';
 import { LoginForm, ForgotPasswordForm } from '@features/auth/components';
 
@@ -6,18 +7,16 @@ import { LoginForm, ForgotPasswordForm } from '@features/auth/components';
  * Login page with authentication form
  */
 export function LoginPage() {
+  const navigate = useNavigate();
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleLoginSuccess = () => {
-    // TODO: Navigate to dashboard after successful login
-    // Will be implemented with React Router
     console.log('Login successful, navigating to dashboard...');
+    navigate('/');
   };
 
   const handleSignupClick = () => {
-    // TODO: Navigate to signup page
-    // Will be implemented with React Router
-    console.log('Navigate to signup...');
+    navigate('/signup');
   };
 
   const handleForgotPasswordClick = () => {

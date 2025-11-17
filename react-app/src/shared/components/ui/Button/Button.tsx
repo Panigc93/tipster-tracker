@@ -44,9 +44,9 @@ export function Button({
 
   // Size classes
   const sizeClasses = {
-    sm: 'px-3 py-1 text-sm',
-    md: 'px-4 py-1.5 text-base',
-    lg: 'px-6 py-2 text-lg',
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-5 py-2.5 text-base',
+    lg: 'px-7 py-3 text-lg',
   };
 
   // Width classes

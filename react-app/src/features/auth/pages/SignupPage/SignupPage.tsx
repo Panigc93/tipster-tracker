@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@shared/components/ui';
 import { SignupForm } from '@features/auth/components';
 
@@ -5,16 +6,15 @@ import { SignupForm } from '@features/auth/components';
  * Signup page with registration form
  */
 export function SignupPage() {
+  const navigate = useNavigate();
+
   const handleSignupSuccess = () => {
-    // TODO: Navigate to dashboard after successful signup
-    // Will be implemented with React Router
     console.log('Signup successful, navigating to dashboard...');
+    navigate('/');
   };
 
   const handleLoginClick = () => {
-    // TODO: Navigate to login page
-    // Will be implemented with React Router
-    console.log('Navigate to login...');
+    navigate('/login');
   };
 
   return (
