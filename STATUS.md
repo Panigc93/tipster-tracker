@@ -82,11 +82,23 @@
    - [ ] `useTraceability` - cálculo de seguibilidad
    - [ ] `useComparison` - comparación tipster vs usuario
 
-5. **Migración del sistema de constantes**
-   - [ ] Migrar `allSports`, `allBookmakers`, `allChannels`
-   - [ ] Migrar `sportIcons`
-   - [ ] Migrar `chartColors`
-   - [ ] Crear types para todas las constantes
+5. **✅ Migración del sistema de constantes** (Completado 17/11/2025 - Commit: `7a4be47`)
+   - [x] `ALL_SPORTS`, `ALL_CHANNELS`, `ALL_BOOKMAKERS` con tipos readonly
+   - [x] `SPORT_ICONS` con mapeo Sport -> emoji
+   - [x] `CHART_COLORS` y configuraciones Chart.js (DEFAULT, BAR, DOUGHNUT)
+   - [x] `PICK_STATUS_COLORS` para estados de picks
+   - [x] Type guards: `isValidSport`, `isValidChannel`, `isValidBookmaker`
+   - [x] Helpers: `getSportIcon`, `getChartColor`, `generateChartColors`, `getPickStatusColor`
+   - [x] Documentación completa (README.md con ejemplos)
+   - **Archivos**: 6 nuevos (4 archivos de constantes, 1 barrel export, 1 README)
+   - **Líneas**: 779 líneas de código + documentación
+   - **Características**:
+     * Constantes inmutables (readonly/as const)
+     * Type safety con enums de @shared/types
+     * Type guards para validación runtime
+     * Helpers con fallback para valores desconocidos
+     * Auto-complete en IDE
+     * Documentación con JSDoc completo
 
 6. **Implementación de utilidades compartidas**
    - [ ] Migrar `date-utils.ts` con tipos
