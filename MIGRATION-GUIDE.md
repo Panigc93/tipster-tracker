@@ -211,20 +211,27 @@ feature/
 #### [📖 Ver detalle completo de Fase 6](#fase-6-feature---follows-detallado)
 
 ### **FASE 7: Feature - Dashboard**
-- Implementación de hooks de estadísticas
-- Migración de componentes de visualización
-- Integración de Chart.js con React (react-chartjs-2)
-- Sistema de filtros del dashboard
-- Cálculo de métricas en tiempo real
+- Implementación de hooks de estadísticas globales
+- Personal Stats Panel (8 stat cards)
+- Sistema de filtros avanzado (multi-select, search, sort)
+- Grid de TipsterCards con navegación
+- Empty states y loading states
 - Testing del feature
+- **Nota**: Charts se implementan en Fase 8
 
-### **FASE 8: Feature - Tipster Detail**
-- Implementación de vista detalle
-- Sistema de tabs
-- Integración de gráficos específicos
-- Tabla de historial de picks
-- Comparación de estadísticas
-- Testing del feature
+### **FASE 8: Feature - Charts & Visualizations**
+- Integración de Chart.js con React (react-chartjs-2)
+- Charts en TipsterDetailPage - Tab "Estadísticas":
+  * Distribución de odds (bar chart)
+  * Distribución de stakes (bar chart)
+  * Distribución de deportes (doughnut chart)
+  * Distribución de tipos de pick (doughnut chart)
+- Charts en TipsterDetailPage - Tab "Mis Estadísticas":
+  * Mismos charts pero para follows del usuario de ese tipster
+- Charts en MyPicksPage:
+  * Charts globales de todos los follows del usuario
+- Responsive charts y configuración de Chart.js
+- Testing de visualizaciones
 
 ### **FASE 9: Migración de Datos y Deploy**
 - Script de migración de datos si es necesario
@@ -11338,21 +11345,46 @@ El diseño original del tab "Mis Estadísticas" mostraba una comparación lado a
 
 ## FASE 7: Feature - Dashboard (Detallado)
 
-### Duración Estimada
-**3-4 semanas** (60-80 horas de trabajo)
+### ⚠️ DECISIÓN ARQUITECTÓNICA: Charts Separados en Fase 8
 
-### Objetivos de la Fase
+**Fecha**: 18 de noviembre de 2025  
+**Contexto**: Inicio de Fase 7
+
+**Decisión**: Los gráficos de Chart.js se implementarán en una **Fase 8 dedicada** en lugar de incluirlos en Fase 7.
+
+**Razones**:
+1. **Separación de responsabilidades**: Dashboard (Fase 7) se centra en filtrado, búsqueda y navegación. Charts (Fase 8) se centra en visualizaciones.
+2. **Complejidad**: Integrar `react-chartjs-2` + configuración de charts añade complejidad que puede retrasar el dashboard funcional.
+3. **Testing más claro**: Facilita testing independiente de lógica de filtros vs. rendering de charts.
+4. **Priorización**: Dashboard funcional es más crítico que visualizaciones en este punto.
+
+**Ubicación de Charts (Fase 8)**:
+- **TipsterDetailPage - Tab "Estadísticas"**: Charts del tipster (4 gráficos)
+  * Distribución de odds (bar chart)
+  * Distribución de stakes (bar chart)
+  * Distribución de deportes (doughnut chart)
+  * Distribución de tipos de pick (doughnut chart)
+- **TipsterDetailPage - Tab "Mis Estadísticas"**: Charts de follows del usuario para ese tipster (4 gráficos)
+- **MyPicksPage**: Charts globales de todos los follows del usuario (4 gráficos)
+
+---
+
+### Duración Estimada
+**2-3 semanas** (40-60 horas de trabajo) - **Reducido** al excluir charts
+
+### Objetivos de la Fase 7
 1. Implementar dashboard principal con estadísticas agregadas
 2. Crear hooks: useDashboard, useDashboardFilters, useDashboardStats
-3. Migrar componentes: TipsterGrid, TipsterCard, PersonalStatsGrid
+3. Migrar componentes: TipsterGrid, TipsterCard, PersonalStatsPanel
 4. Implementar sistema de filtrado avanzado (deportes, canales, yield, última pick)
-5. Ordenación multi-criterio (yield, winrate, picks, nombre)
-6. Búsqueda por nombre de tipster
+5. Ordenación multi-criterio (yield, winrate, picks, nombre, traceability)
+6. Búsqueda por nombre de tipster con debounce
 7. Estadísticas personales globales (8 stat-cards)
 8. Integración de seguibilidad (traceability) por tipster
-9. Testing manual del feature
+9. Click en TipsterCard navega a TipsterDetailPage
+10. Testing manual completo del feature
 
-**Nota**: El dashboard es la vista principal de la aplicación. Muestra todos los tipsters con sus estadísticas y permite filtrarlos/ordenarlos.
+**Nota**: El dashboard es la vista principal de la aplicación ("/"). Muestra todos los tipsters con sus estadísticas y permite filtrarlos/ordenarlos. **No incluye gráficos** (ver Fase 8).
 
 ---
 
