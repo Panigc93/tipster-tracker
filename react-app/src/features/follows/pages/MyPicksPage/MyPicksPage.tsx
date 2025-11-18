@@ -1,5 +1,9 @@
 import { useState, useMemo } from 'react';
 import { Trash2, Filter, X, TrendingUp, Target, Percent, DollarSign } from 'lucide-react';
+import {
+  OddsDistributionChart,
+  StakeDistributionChart,
+} from '@/shared/components';
 import { useFollows } from '../../hooks/useFollows';
 import { useTipsters } from '@/features/tipsters/hooks/useTipsters';
 import { usePicks } from '@/features/picks/hooks/usePicks';
@@ -273,6 +277,19 @@ export const MyPicksPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Charts */}
+      {follows.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold text-slate-200 mb-4">
+            Distribuciones Globales de tus Follows
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <OddsDistributionChart follows={follows} height={180} title="Tus Cuotas" />
+            <StakeDistributionChart follows={follows} height={180} title="Tus Stakes" />
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="rounded-lg bg-slate-800 p-4">

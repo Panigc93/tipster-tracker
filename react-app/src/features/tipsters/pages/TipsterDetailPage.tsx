@@ -1,7 +1,16 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Trash2, Plus } from 'lucide-react';
-import { Button, Spinner, Alert, Badge } from '@/shared/components/ui';
+import {
+  Button,
+  Spinner,
+  Alert,
+  Badge,
+  OddsDistributionChart,
+  StakeDistributionChart,
+  SportDistributionChart,
+  PickTypeDistributionChart,
+} from '@/shared/components';
 import { useTipsterDetail, useTipsters } from '../hooks';
 import { AddTipsterModal } from '../components';
 import { calculateTipsterStats } from '../utils';
@@ -327,7 +336,7 @@ export function TipsterDetailPage() {
                     </div>
 
                     {/* Additional Stats */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
                       <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
                         <p className="text-slate-400 text-sm mb-1">Pendientes</p>
                         <p className="text-lg font-semibold text-yellow-400">{stats.pendingPicks}</p>
@@ -344,6 +353,14 @@ export function TipsterDetailPage() {
                         <p className="text-slate-400 text-sm mb-1">Stake Medio</p>
                         <p className="text-lg font-semibold text-slate-100">{stats.avgStake}u</p>
                       </div>
+                    </div>
+
+                    {/* Charts */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                      <OddsDistributionChart picks={picks} height={180} />
+                      <StakeDistributionChart picks={picks} height={180} />
+                      <SportDistributionChart picks={picks} height={180} />
+                      <PickTypeDistributionChart picks={picks} height={180} />
                     </div>
                   </>
                   );
@@ -593,6 +610,32 @@ export function TipsterDetailPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Charts de Follows */}
+                  {(() => {
+                    // Get original picks from follows
+                    const followedPicks = tipsterFollows
+                      .map(follow => picks.find(pick => pick.id === follow.pickId))
+                      .filter((pick): pick is Pick => pick !== undefined);
+
+                    if (followedPicks.length === 0) {
+                      return null;
+                    }
+
+                    return (
+                      <div>
+                        <h2 className="text-xl font-semibold text-slate-200 mb-4">
+                          Distribuciones de tus Follows
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                          <OddsDistributionChart follows={tipsterFollows} height={180} title="Tus Cuotas" />
+                          <StakeDistributionChart follows={tipsterFollows} height={180} title="Tus Stakes" />
+                          <SportDistributionChart picks={followedPicks} height={180} title="Deportes Seguidos" />
+                          <PickTypeDistributionChart picks={followedPicks} height={180} title="Tipos de Pick Seguidos" />
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Historial de Picks Seguidas */}
                   <div>

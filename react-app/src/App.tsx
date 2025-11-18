@@ -1,6 +1,7 @@
 import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from '@features/auth/providers';
 import { router } from '@core/routing';
+import '@shared/config/chart.config'; // Initialize Chart.js
 
 /**
  * Main App component with routing and authentication

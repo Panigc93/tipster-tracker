@@ -32,7 +32,7 @@ export const PICK_STATUS_COLORS = {
 } as const;
 
 /**
- * Opciones base para gráficos Chart.js
+ * Opciones base para gráficos Chart.js (dark theme)
  * @constant
  */
 export const DEFAULT_CHART_OPTIONS = {
@@ -42,43 +42,136 @@ export const DEFAULT_CHART_OPTIONS = {
     legend: {
       display: true,
       position: 'top' as const,
+      labels: {
+        color: '#E0E0E0', // slate-300
+        padding: 15,
+        font: {
+          size: 12,
+          weight: 500,
+        },
+      },
     },
     tooltip: {
       enabled: true,
       mode: 'index' as const,
       intersect: false,
-    },
-  },
-} as const;
-
-/**
- * Opciones para gráficos de barras
- * @constant
- */
-export const BAR_CHART_OPTIONS = {
-  ...DEFAULT_CHART_OPTIONS,
-  scales: {
-    y: {
-      beginAtZero: true,
-      ticks: {
-        precision: 0,
+      backgroundColor: '#1E293B', // slate-800
+      titleColor: '#F1F5F9', // slate-100
+      bodyColor: '#E2E8F0', // slate-200
+      borderColor: '#475569', // slate-600
+      borderWidth: 1,
+      padding: 12,
+      displayColors: true,
+      titleFont: {
+        size: 13,
+        weight: 600,
+      },
+      bodyFont: {
+        size: 12,
       },
     },
   },
 } as const;
 
 /**
- * Opciones para gráficos circulares (doughnut/pie)
+ * Opciones para gráficos de barras verticales (dark theme)
  * @constant
  */
-export const DOUGHNUT_CHART_OPTIONS = {
-  ...DEFAULT_CHART_OPTIONS,
-  cutout: '60%',
+export const BAR_CHART_OPTIONS = {
+  indexAxis: 'x' as const,
+  responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     ...DEFAULT_CHART_OPTIONS.plugins,
     legend: {
+      display: false,
+    },
+  },
+  datasets: {
+    bar: {
+      barPercentage: 0.6, // Reduce bar width
+      categoryPercentage: 0.7, // Reduce category width
+    },
+  },
+  scales: {
+    x: {
+      beginAtZero: true,
+      ticks: {
+        precision: 0,
+        color: '#94A3B8', // slate-400
+        font: {
+          size: 10,
+        },
+      },
+      grid: {
+        color: '#334155', // slate-700
+        drawBorder: false,
+      },
+    },
+    y: {
+      ticks: {
+        color: '#E0E0E0', // slate-300
+        font: {
+          size: 11,
+        },
+      },
+      grid: {
+        display: false,
+      },
+    },
+  },
+} as const;
+
+/**
+ * Opciones para gráficos circulares (doughnut/pie) con dark theme
+ * @constant
+ */
+export const DOUGHNUT_CHART_OPTIONS = {
+  responsive: true,
+  maintainAspectRatio: false,
+  cutout: '65%',
+  plugins: {
+    legend: {
       display: true,
       position: 'right' as const,
+      labels: {
+        color: '#E0E0E0', // slate-300
+        padding: 8,
+        font: {
+          size: 10,
+          weight: 500,
+        },
+        usePointStyle: true,
+        pointStyle: 'circle',
+        boxWidth: 10,
+        boxHeight: 10,
+      },
+    },
+    tooltip: {
+      enabled: true,
+      backgroundColor: '#1E293B', // slate-800
+      titleColor: '#F1F5F9', // slate-100
+      bodyColor: '#E2E8F0', // slate-200
+      borderColor: '#475569', // slate-600
+      borderWidth: 1,
+      padding: 12,
+      displayColors: true,
+      titleFont: {
+        size: 13,
+        weight: 600,
+      },
+      bodyFont: {
+        size: 12,
+      },
+      callbacks: {
+        label: (context: { label?: string; parsed: number; dataset: { data: number[] } }) => {
+          const label = context.label || '';
+          const value = context.parsed || 0;
+          const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+          const percentage = ((value / total) * 100).toFixed(1);
+          return `${label}: ${value} (${percentage}%)`;
+        },
+      },
     },
   },
 } as const;
