@@ -30,10 +30,17 @@ export const MyPicksPage = () => {
 
   // Calculate stats
   const stats = useMemo<FollowStats>(() => {
+    console.log('🔍 Calculating stats for follows:', follows);
+    console.log('📊 Total follows:', follows.length);
+    
     const resolvedFollows = follows.filter((f) => f.isResolved);
+    console.log('✅ Resolved follows:', resolvedFollows.length, resolvedFollows);
+    
     const wonFollows = resolvedFollows.filter((f) => f.userResult === 'Ganada');
     const lostFollows = resolvedFollows.filter((f) => f.userResult === 'Perdida');
     const voidFollows = resolvedFollows.filter((f) => f.userResult === 'Void');
+    
+    console.log('📈 Won:', wonFollows.length, 'Lost:', lostFollows.length, 'Void:', voidFollows.length);
 
     const totalStaked = resolvedFollows.reduce((sum, f) => {
       if (f.userResult === 'Void') return sum;

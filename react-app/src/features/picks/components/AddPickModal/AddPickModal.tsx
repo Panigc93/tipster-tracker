@@ -70,7 +70,6 @@ export function AddPickModal({
   const [userBookmaker, setUserBookmaker] = useState('');
   const [userBetType, setUserBetType] = useState('');
   const [userResult, setUserResult] = useState('Pendiente');
-  const [userIsResolved, setUserIsResolved] = useState(false);
   const [dateFollowed, setDateFollowed] = useState('');
   const [timeFollowed, setTimeFollowed] = useState('');
   const [userComments, setUserComments] = useState('');
@@ -105,7 +104,6 @@ export function AddPickModal({
         setUserBookmaker(existingFollow.userBookmaker);
         setUserBetType(existingFollow.userBetType);
         setUserResult(existingFollow.userResult);
-        setUserIsResolved(existingFollow.isResolved);
         setDateFollowed(existingFollow.dateFollowed);
         setTimeFollowed(existingFollow.timeFollowed);
         setUserComments(existingFollow.comments || '');
@@ -142,7 +140,6 @@ export function AddPickModal({
     setUserBookmaker('');
     setUserBetType('');
     setUserResult('Pendiente');
-    setUserIsResolved(false);
     setDateFollowed(new Date().toISOString().split('T')[0]);
     setTimeFollowed(new Date().toTimeString().slice(0, 5));
     setUserComments('');
@@ -281,7 +278,7 @@ export function AddPickModal({
             userBookmaker: userBookmaker.trim(),
             userBetType: userBetType.trim(),
             userResult,
-            isResolved: userIsResolved || userResult !== 'Pendiente',
+            isResolved: userResult !== 'Pendiente', // Auto-calculate based on result
             dateFollowed,
             timeFollowed,
             dateTimeFollowed,
@@ -301,7 +298,7 @@ export function AddPickModal({
               userBookmaker: userBookmaker.trim(),
               userBetType: userBetType.trim(),
               userResult,
-              isResolved: userIsResolved || userResult !== 'Pendiente',
+              isResolved: userResult !== 'Pendiente', // Auto-calculate based on result
               dateFollowed,
               timeFollowed,
               dateTimeFollowed,
@@ -348,7 +345,7 @@ export function AddPickModal({
             userBookmaker: userBookmaker.trim(),
             userBetType: userBetType.trim(),
             userResult,
-            isResolved: userIsResolved || userResult !== 'Pendiente',
+            isResolved: userResult !== 'Pendiente', // Auto-calculate based on result
             dateFollowed,
             timeFollowed,
             dateTimeFollowed,
@@ -781,21 +778,9 @@ export function AddPickModal({
                     </option>
                   ))}
                 </select>
-              </div>
-
-              {/* User Resolved Checkbox */}
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="userIsResolved"
-                  checked={userIsResolved || userResult !== 'Pendiente'}
-                  onChange={(e) => setUserIsResolved(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-slate-800 border-slate-700 rounded focus:ring-blue-500"
-                  disabled={loading || userResult !== 'Pendiente'}
-                />
-                <label htmlFor="userIsResolved" className="text-sm text-slate-300">
-                  Ya ha finalizado mi apuesta
-                </label>
+                <p className="mt-1.5 text-xs text-slate-500">
+                  Si seleccionas un resultado diferente a "Pendiente", tu follow se marcará automáticamente como resuelto
+                </p>
               </div>
 
               {/* User Comments */}

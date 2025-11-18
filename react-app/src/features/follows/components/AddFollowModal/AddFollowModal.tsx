@@ -152,7 +152,7 @@ export function AddFollowModal({
           userBookmaker: formData.userBookmaker,
           userBetType: formData.userBetType,
           userResult: formData.userResult,
-          isResolved: formData.userIsResolved,
+          isResolved: formData.userResult !== 'Pendiente', // Auto-calculate based on result
           dateFollowed: formData.dateFollowed,
           timeFollowed: formData.timeFollowed,
           dateTimeFollowed: combineDateTimeISO(formData.dateFollowed, formData.timeFollowed),
@@ -175,7 +175,7 @@ export function AddFollowModal({
           userBookmaker: formData.userBookmaker,
           userBetType: formData.userBetType,
           userResult: formData.userResult,
-          isResolved: formData.userIsResolved,
+          isResolved: formData.userResult !== 'Pendiente', // Auto-calculate based on result
           dateFollowed: formData.dateFollowed,
           timeFollowed: formData.timeFollowed,
           dateTimeFollowed: combineDateTimeISO(formData.dateFollowed, formData.timeFollowed),
@@ -371,20 +371,9 @@ export function AddFollowModal({
                 </option>
               ))}
             </select>
-          </div>
-
-          {/* Is Resolved Checkbox */}
-          <div className="flex items-center pt-8">
-            <input
-              type="checkbox"
-              id="userIsResolved"
-              checked={formData.userIsResolved}
-              onChange={(e) => handleInputChange('userIsResolved', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-600 rounded bg-slate-700"
-            />
-            <label htmlFor="userIsResolved" className="ml-2 text-sm text-slate-300">
-              Ya ha finalizado mi apuesta
-            </label>
+            <p className="mt-1.5 text-xs text-slate-500">
+              Si seleccionas un resultado diferente a "Pendiente", el follow se marcará automáticamente como resuelto
+            </p>
           </div>
 
           {/* Comments */}
