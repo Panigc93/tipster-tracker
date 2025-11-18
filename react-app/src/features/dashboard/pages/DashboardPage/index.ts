@@ -1,5 +1,5 @@
 /**
- * Dashboard pages barrel export
+ * DashboardPage barrel export
  */
 
 export { DashboardPage } from './DashboardPage';
