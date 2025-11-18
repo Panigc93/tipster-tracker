@@ -1,5 +1,5 @@
 import { Edit2, Trash2 } from 'lucide-react';
-import { Badge, Button } from '@shared/components/ui';
+import { Badge } from '@shared/components/ui';
 import { formatDate } from '@shared/utils/date.utils';
 import { getSportIcon } from '@features/picks/utils/sport-icons';
 import type { FollowTableRowProps } from './FollowTableRow.types';
@@ -184,26 +184,24 @@ export function FollowTableRow({
         <td className="px-4 py-3">
           <div className="flex items-center justify-end gap-2">
             {onEdit && (
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<Edit2 className="h-3.5 w-3.5" />}
+              <button
                 onClick={() => onEdit(follow)}
+                className="p-2 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-200 transition-colors"
                 aria-label="Editar follow"
+                title="Editar follow"
               >
-                Editar
-              </Button>
+                <Edit2 className="h-5 w-5" />
+              </button>
             )}
             {onDelete && (
-              <Button
-                variant="danger"
-                size="sm"
-                icon={<Trash2 className="h-3.5 w-3.5" />}
+              <button
                 onClick={() => onDelete(follow)}
+                className="p-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
                 aria-label="Eliminar follow"
+                title="Eliminar follow"
               >
-                Eliminar
-              </Button>
+                <Trash2 className="h-5 w-5" />
+              </button>
             )}
           </div>
         </td>

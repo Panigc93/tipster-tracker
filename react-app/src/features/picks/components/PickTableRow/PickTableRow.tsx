@@ -4,7 +4,7 @@
  */
 
 import { Edit2, Trash2, UserPlus, Check } from 'lucide-react';
-import { Badge, Button } from '@shared/components/ui';
+import { Badge } from '@shared/components/ui';
 import { getSportIcon } from '../../utils/sport-icons';
 import type { PickTableRowProps } from './PickTableRow.types';
 
@@ -159,47 +159,42 @@ export function PickTableRow({
       {/* Actions */}
       {showActions && (
         <td className="px-4 py-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
             {onFollow && !isFollowed && (
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<UserPlus className="h-3.5 w-3.5" />}
+              <button
                 onClick={handleFollow}
+                className="p-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
                 aria-label="Seguir pick"
+                title="Seguir pick"
               >
-                Seguir
-              </Button>
+                <UserPlus className="h-5 w-5" />
+              </button>
             )}
             {isFollowed && (
-              <Button
-                variant="success"
-                size="sm"
-                icon={<Check className="h-3.5 w-3.5" />}
-                disabled
+              <div
+                className="p-2 rounded-full bg-green-600/30 text-green-400"
                 aria-label="Pick ya seguido"
+                title="Pick seguido"
               >
-                Seguido
-              </Button>
+                <Check className="h-5 w-5" />
+              </div>
             )}
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<Edit2 className="h-3.5 w-3.5" />}
+            <button
               onClick={handleEdit}
+              className="p-2 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-200 transition-colors"
               aria-label="Editar pick"
+              title="Editar pick"
             >
-              Editar
-            </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              icon={<Trash2 className="h-3.5 w-3.5" />}
+              <Edit2 className="h-5 w-5" />
+            </button>
+            <button
               onClick={handleDelete}
+              className="p-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
               aria-label="Eliminar pick"
+              title="Eliminar pick"
             >
-              Eliminar
-            </Button>
+              <Trash2 className="h-5 w-5" />
+            </button>
           </div>
         </td>
       )}
