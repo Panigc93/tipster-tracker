@@ -196,13 +196,19 @@ feature/
 
 #### [📖 Ver detalle completo de Fase 5](#fase-5-feature---picks-detallado)
 
-### **FASE 6: Feature - Follows**
-- Implementación de follow service
-- Creación de hooks: useFollows, useFollow
-- Migración de componentes de seguimiento
-- Implementación de modal de seguir pick
-- Comparación tipster vs usuario
-- Testing del feature
+### **FASE 6: Feature - Follows** ✅ **COMPLETADA**
+- ✅ Implementación de follow service (FollowRepository)
+- ✅ Creación de hooks: useFollows, useFollow, useFollowsByTipster
+- ✅ Migración de componentes: FollowTableRow, MyPicksPage
+- ✅ Implementación de modals: AddFollowModal, EditFollowModal
+- ✅ Integración de "Seguir" en AddPickModal y PickTableRow
+- ✅ Sistema de comparación tipster vs usuario (Match/Diverge)
+- ✅ Estadísticas de seguibilidad y traceability
+- ✅ TipsterDetailPage con tabs (Estadísticas, Mis Estadísticas, Follows)
+- ✅ Testing completo (10 secciones: CRUD, Stats, Filters, Real-time, Edge cases, UX)
+- ✅ 11 commits, 15+ bugs fixed, 6 UX improvements
+
+#### [📖 Ver detalle completo de Fase 6](#fase-6-feature---follows-detallado)
 
 ### **FASE 7: Feature - Dashboard**
 - Implementación de hooks de estadísticas
@@ -11187,36 +11193,65 @@ Seguibilidad = (Picks Seguidas / Total Picks Desde Primer Follow) * 100
 
 ---
 
-### Resumen de la Fase 6
+### Resumen de la Fase 6 ✅ **COMPLETADA - 100%**
+
+**Fecha de finalización**: 18 de noviembre de 2025
 
 **Completado:**
-✅ Repository Pattern ya implementado en Fase 1
-✅ Hooks personalizados: useFollows, useFollow, useFollowModal, useFollowStats
-✅ Validación completa de follows
-✅ FollowForm con info de pick + datos usuario
-✅ ComparisonStats con 4 cards
-✅ FollowRow con comparación completa
-✅ FollowTable con columnas comparativas
-✅ FollowModal integrado
-✅ MyPicksPage con estadísticas y tabla
-✅ Botón "Seguir" en AllPicksPage
-✅ Navegación en Header con "Mis Picks"
-✅ Real-time sync con Firestore
-✅ Cálculos de match/diverge
-✅ Función de seguibilidad (traceability)
-✅ Integración con picks y tipsters
+✅ Repository Pattern: FollowRepository con CRUD completo
+✅ Hooks personalizados: useFollows, useFollow, useFollowsByTipster
+✅ Validación completa de follows (odds, stakes, resultados)
+✅ AddFollowModal con info de pick + datos usuario
+✅ EditFollowModal con pre-llenado de datos
+✅ FollowTableRow con comparación tipster vs usuario
+✅ MyPicksPage completa con estadísticas y filtros avanzados
+✅ Botón "Seguir" integrado en PickTableRow
+✅ Integración de follow en AddPickModal (checkbox + sección)
+✅ TipsterDetailPage con 3 tabs (Estadísticas, Mis Estadísticas, Follows)
+✅ Real-time sync con Firestore (listeners onSnapshot)
+✅ Cálculos de match/diverge, traceability, comparación de yields
+✅ Sistema de filtros: tipster, resultado, match/diverge
+✅ Comentarios colapsables en modals
+✅ Botones icon-only para acciones (diseño compacto)
+✅ Testing exhaustivo (10 secciones completas)
+✅ 11 commits realizados
+✅ 15+ bugs corregidos
+✅ 6 mejoras de UX implementadas
 
-**Duración real estimada**: 40-60 horas
+**Duración real**: ~8 horas de trabajo intensivo (18/11/2025)
 
-**Archivos creados**: ~18 archivos
-**Líneas de código**: ~1,400 líneas
+**Archivos creados**: ~15 archivos
+**Líneas de código**: ~1,800 líneas
 
-**Archivos modificados**:
-- `src/App.tsx` (ruta /my-picks)
-- `src/shared/components/Layout/Header/Header.tsx` (navegación)
-- `src/features/picks/pages/AllPicksPage/AllPicksPage.tsx` (modal follows)
-- `src/features/picks/components/PickTable/PickTable.tsx` (prop onFollow)
-- `src/features/picks/components/PickRow/PickRow.tsx` (botón seguir)
+**Archivos principales**:
+- `src/features/follows/` - Feature completo con hooks, components, pages
+- `src/shared/utils/calculations.ts` - Función calculateTraceability
+- Integración en PickTableRow, AddPickModal, TipsterDetailPage
+
+**Bugs corregidos durante testing**:
+1. Filtro "Diverge" demasiado restrictivo
+2. Badge de contador de filtros faltante
+3. Match Rate siempre verde
+4. Flechas de comparación faltantes
+5. Botones Edit/Delete no funcionales
+6. Stats "Resueltos" redundante
+7. Edit follow creando duplicados
+8. Texto "Seguida" vs "Seguido"
+9. Badge "Seguido" no verde
+10. Bookmaker innecesariamente required
+11. Follow fields no sincronizando
+12. Edit mode no pre-llenando follow fields
+13. Actions en tabla colapsadas
+14. Comentarios siempre visibles
+15. Botones demasiado grandes
+
+**Mejoras de UX implementadas**:
+1. Sistema de badges para filters activos
+2. Comparación visual con flechas y colores
+3. Tab "Mis Estadísticas" user-centric (no side-by-side)
+4. Comentarios colapsables (MessageSquare button)
+5. Tabla de acciones consistente y alineada
+6. Botones icon-only compactos (h-5 w-5, 20px)
 
 **Importante**: Esta fase completa el sistema de seguimiento y comparación. Es fundamental para entender el rendimiento real del usuario vs los tipsters. La función `calculateTraceability()` será usada extensivamente en el Dashboard (Fase 7).
 
