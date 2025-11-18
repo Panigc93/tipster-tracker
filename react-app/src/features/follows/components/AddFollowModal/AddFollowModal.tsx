@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { MessageSquare } from 'lucide-react';
 import { Modal, Button, Input, Badge } from '@shared/components/ui';
 import { PickResult, Bookmaker } from '@shared/types/enums';
 import { useFollows } from '../../hooks';
@@ -65,6 +66,7 @@ export function AddFollowModal({
   // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showComments, setShowComments] = useState(false);
 
   // Initialize form with follow data in edit mode or pick data in create mode
   useEffect(() => {
@@ -80,6 +82,10 @@ export function AddFollowModal({
         timeFollowed: follow.timeFollowed,
         comments: follow.comments || '',
       });
+      // Show comments section if there are existing comments
+      if (follow.comments) {
+        setShowComments(true);
+      }
     } else if (pick && !isEditMode) {
       // Pre-fill with pick data for convenience
       setFormData({
@@ -376,17 +382,46 @@ export function AddFollowModal({
             </p>
           </div>
 
-          {/* Comments */}
+          {/* Comments - Collapsible */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Comentarios
-            </label>
-            <textarea
-              value={formData.comments}
-              onChange={(e) => handleInputChange('comments', e.target.value)}
-              placeholder="Notas adicionales (opcional)"
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
-            />
+            {!showComments ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                icon={<MessageSquare className="h-4 w-4" />}
+                onClick={() => setShowComments(true)}
+                disabled={loading}
+              >
+                Añadir comentarios
+              </Button>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-slate-300">
+                    Comentarios (opcional)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowComments(false);
+                      handleInputChange('comments', '');
+                    }}
+                    className="text-xs text-slate-400 hover:text-slate-300"
+                    disabled={loading}
+                  >
+                    Quitar
+                  </button>
+                </div>
+                <textarea
+                  value={formData.comments}
+                  onChange={(e) => handleInputChange('comments', e.target.value)}
+                  placeholder="Notas adicionales..."
+                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
+                  disabled={loading}
+                />
+              </div>
+            )}
           </div>
         </div>
 

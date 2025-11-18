@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { MessageSquare } from 'lucide-react';
 import { Modal, Button, Input } from '@shared/components/ui';
 import { Sport, PickType, PickResult, Bookmaker } from '@shared/types/enums';
 import { usePicks } from '../../hooks';
@@ -77,6 +78,8 @@ export function AddPickModal({
   // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showComments, setShowComments] = useState(false);
+  const [showFollowComments, setShowFollowComments] = useState(false);
 
   // Initialize form with pick data in edit mode or initialTipsterId in create mode
   useEffect(() => {
@@ -94,6 +97,10 @@ export function AddPickModal({
       setTime(pick.time);
       setResult(pick.result);
       setComments(pick.comments || '');
+      // Show comments section if there are existing comments
+      if (pick.comments) {
+        setShowComments(true);
+      }
       
       // Check if pick has follow and load follow data
       const existingFollow = getFollowByPickId(pick.id);
@@ -107,6 +114,10 @@ export function AddPickModal({
         setDateFollowed(existingFollow.dateFollowed);
         setTimeFollowed(existingFollow.timeFollowed);
         setUserComments(existingFollow.comments || '');
+        // Show follow comments section if there are existing comments
+        if (existingFollow.comments) {
+          setShowFollowComments(true);
+        }
       }
     } else {
       // Reset form for create mode
@@ -144,6 +155,9 @@ export function AddPickModal({
     setTimeFollowed(new Date().toTimeString().slice(0, 5));
     setUserComments('');
     
+    // Reset UI states
+    setShowComments(false);
+    setShowFollowComments(false);
     setError(null);
   };
 
@@ -613,20 +627,48 @@ export function AddPickModal({
           </p>
         </div>
 
-        {/* Comments */}
+        {/* Comments - Collapsible */}
         <div>
-          <label htmlFor="comments" className="block text-sm font-medium text-slate-300 mb-2">
-            Comentarios (opcional)
-          </label>
-          <textarea
-            id="comments"
-            value={comments}
-            onChange={(e) => setComments(e.target.value)}
-            rows={3}
-            className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            placeholder="Añade notas o comentarios sobre esta pick..."
-            disabled={loading}
-          />
+          {!showComments ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              icon={<MessageSquare className="h-4 w-4" />}
+              onClick={() => setShowComments(true)}
+              disabled={loading}
+            >
+              Añadir comentarios
+            </Button>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="comments" className="block text-sm font-medium text-slate-300">
+                  Comentarios (opcional)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowComments(false);
+                    setComments('');
+                  }}
+                  className="text-xs text-slate-400 hover:text-slate-300"
+                  disabled={loading}
+                >
+                  Quitar
+                </button>
+              </div>
+              <textarea
+                id="comments"
+                value={comments}
+                onChange={(e) => setComments(e.target.value)}
+                rows={3}
+                className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                placeholder="Añade notas o comentarios sobre esta pick..."
+                disabled={loading}
+              />
+            </div>
+          )}
         </div>
 
         {/* Follow Section */}
@@ -781,20 +823,48 @@ export function AddPickModal({
                 </p>
               </div>
 
-              {/* User Comments */}
+              {/* User Comments - Collapsible */}
               <div>
-                <label htmlFor="userComments" className="block text-sm font-medium text-slate-300 mb-2">
-                  Tus comentarios (opcional)
-                </label>
-                <textarea
-                  id="userComments"
-                  value={userComments}
-                  onChange={(e) => setUserComments(e.target.value)}
-                  rows={2}
-                  className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                  placeholder="Añade notas sobre tu apuesta..."
-                  disabled={loading}
-                />
+                {!showFollowComments ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    icon={<MessageSquare className="h-4 w-4" />}
+                    onClick={() => setShowFollowComments(true)}
+                    disabled={loading}
+                  >
+                    Añadir comentarios
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="userComments" className="block text-sm font-medium text-slate-300">
+                        Tus comentarios (opcional)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowFollowComments(false);
+                          setUserComments('');
+                        }}
+                        className="text-xs text-slate-400 hover:text-slate-300"
+                        disabled={loading}
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                    <textarea
+                      id="userComments"
+                      value={userComments}
+                      onChange={(e) => setUserComments(e.target.value)}
+                      rows={2}
+                      className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      placeholder="Añade notas sobre tu apuesta..."
+                      disabled={loading}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}

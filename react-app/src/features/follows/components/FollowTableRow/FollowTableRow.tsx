@@ -181,26 +181,28 @@ export function FollowTableRow({
 
       {/* Acciones */}
       {showActions && (onEdit || onDelete) && (
-        <td className="px-4 py-3 text-sm whitespace-nowrap">
-          <div className="flex items-center gap-2">
+        <td className="px-4 py-3">
+          <div className="flex items-center justify-end gap-2">
             {onEdit && (
               <Button
                 variant="secondary"
                 size="sm"
+                icon={<Edit2 className="h-3.5 w-3.5" />}
                 onClick={() => onEdit(follow)}
-                title="Editar follow"
+                aria-label="Editar follow"
               >
-                <Edit2 className="h-4 w-4" />
+                Editar
               </Button>
             )}
             {onDelete && (
               <Button
                 variant="danger"
                 size="sm"
+                icon={<Trash2 className="h-3.5 w-3.5" />}
                 onClick={() => onDelete(follow)}
-                title="Eliminar follow"
+                aria-label="Eliminar follow"
               >
-                <Trash2 className="h-4 w-4" />
+                Eliminar
               </Button>
             )}
           </div>

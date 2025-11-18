@@ -425,7 +425,7 @@ export const MyPicksPage = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                     Match
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-400 w-40">
                     Acciones
                   </th>
                 </tr>
