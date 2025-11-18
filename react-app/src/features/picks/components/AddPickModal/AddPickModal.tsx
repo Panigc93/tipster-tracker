@@ -367,14 +367,16 @@ export function AddPickModal({
     setShouldFollow(checked);
     
     // Pre-fill follow fields with pick data when checkbox is checked (only once)
-    if (checked && !isEditMode) {
-      setUserOdds(odds || '');
-      setUserStake(stake || '');
-      setUserBookmaker(bookmaker || '');
-      setUserBetType(betType || '');
-      setUserResult(result);
-      setDateFollowed(new Date().toISOString().split('T')[0]);
-      setTimeFollowed(new Date().toTimeString().slice(0, 5));
+    // This works both in create and edit mode when there's no existing follow
+    if (checked) {
+      // Only pre-fill if fields are empty (no existing follow data loaded)
+      if (!userOdds) setUserOdds(odds || '');
+      if (!userStake) setUserStake(stake || '');
+      if (!userBookmaker) setUserBookmaker(bookmaker || '');
+      if (!userBetType) setUserBetType(betType || '');
+      if (!userResult || userResult === 'Pendiente') setUserResult(result);
+      if (!dateFollowed) setDateFollowed(new Date().toISOString().split('T')[0]);
+      if (!timeFollowed) setTimeFollowed(new Date().toTimeString().slice(0, 5));
     }
   };
 
