@@ -383,7 +383,7 @@ export function AddFollowModal({
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-600 rounded bg-slate-700"
             />
             <label htmlFor="userIsResolved" className="ml-2 text-sm text-slate-300">
-              Apuesta resuelta
+              Ya ha finalizado mi apuesta
             </label>
           </div>
 
