@@ -7,10 +7,10 @@ import { AddTipsterModal } from '../components';
 import { calculateTipsterStats } from '../utils';
 import { usePicksByTipster, usePicks } from '@features/picks/hooks';
 import { PickTableRow, AddPickModal } from '@features/picks/components';
-import { useFollowsByTipster } from '@features/follows/hooks';
-import { FollowTableRow } from '@features/follows/components';
+import { useFollowsByTipster, useFollows } from '@features/follows/hooks';
+import { FollowTableRow, AddFollowModal } from '@features/follows/components';
 import { calculateTraceability } from '@features/follows/utils';
-import type { Pick } from '@shared/types';
+import type { Pick, UserFollow } from '@shared/types';
 
 type TabType = 'stats' | 'my-stats';
 
@@ -26,6 +26,7 @@ export function TipsterDetailPage() {
   const { picks, loading: picksLoading } = usePicksByTipster(id ?? '');
   const { updatePick, deletePick } = usePicks();
   const { follows: tipsterFollows, loading: followsLoading } = useFollowsByTipster(id ?? '');
+  const { updateFollow, deleteFollow } = useFollows();
 
   const [activeTab, setActiveTab] = useState<TabType>('stats');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -33,6 +34,8 @@ export function TipsterDetailPage() {
   const [isEditPickModalOpen, setIsEditPickModalOpen] = useState(false);
   const [selectedPick, setSelectedPick] = useState<Pick | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditFollowModalOpen, setIsEditFollowModalOpen] = useState(false);
+  const [selectedFollow, setSelectedFollow] = useState<UserFollow | null>(null);
 
   // Calculate stats from picks
   const stats = useMemo(() => calculateTipsterStats(picks), [picks]);
@@ -97,6 +100,31 @@ export function TipsterDetailPage() {
   const handleEditPickSuccess = () => {
     setIsEditPickModalOpen(false);
     setSelectedPick(null);
+  };
+
+  const handleEditFollow = (follow: UserFollow) => {
+    setSelectedFollow(follow);
+    setIsEditFollowModalOpen(true);
+  };
+
+  const handleDeleteFollow = async (follow: UserFollow) => {
+    const confirmed = globalThis.confirm(
+      `¿Estás seguro de que quieres eliminar este follow? Esta acción no se puede deshacer.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteFollow(follow.id);
+    } catch (err) {
+      console.error('Error deleting follow:', err);
+      globalThis.alert('Error al eliminar el follow');
+    }
+  };
+
+  const handleEditFollowSuccess = () => {
+    setIsEditFollowModalOpen(false);
+    setSelectedFollow(null);
   };
 
   // Loading state
@@ -441,207 +469,125 @@ export function TipsterDetailPage() {
                     </div>
                   </div>
 
-                  {/* Comparación de Estadísticas */}
+                  {/* Tus Estadísticas de Seguimiento */}
                   <div>
                     <h2 className="text-xl font-semibold text-slate-200 mb-4">
-                      Comparación: Tipster vs Mis Follows
+                      Tus Estadísticas de Seguimiento
                     </h2>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Tipster Stats */}
-                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6">
-                        <h3 className="text-lg font-semibold text-purple-400 mb-4">
-                          Estadísticas del Tipster
-                        </h3>
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Picks Resueltas:</span>
-                            <span className="font-semibold text-slate-200">
-                              {traceabilityStats.tipsterResolvedPicks}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Ganadas:</span>
-                            <span className="font-semibold text-green-400">
-                              {traceabilityStats.tipsterWonPicks}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Winrate:</span>
-                            <span className="font-semibold text-slate-200">
-                              {traceabilityStats.tipsterWinrate.toFixed(1)}%
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Yield:</span>
-                            <span
-                              className={`font-semibold ${
-                                traceabilityStats.tipsterYield >= 0 ? 'text-green-400' : 'text-red-400'
-                              }`}
-                            >
-                              {traceabilityStats.tipsterYield >= 0 ? '+' : ''}
-                              {traceabilityStats.tipsterYield.toFixed(2)}%
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Profit:</span>
-                            <span
-                              className={`font-semibold ${
-                                traceabilityStats.tipsterProfit >= 0 ? 'text-green-400' : 'text-red-400'
-                              }`}
-                            >
-                              {traceabilityStats.tipsterProfit >= 0 ? '+' : ''}
-                              {traceabilityStats.tipsterProfit.toFixed(2)}u
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Cuota Media:</span>
-                            <span className="font-semibold text-slate-200">
-                              {traceabilityStats.tipsterAvgOdds.toFixed(2)}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Stake Medio:</span>
-                            <span className="font-semibold text-slate-200">
-                              {traceabilityStats.tipsterAvgStake.toFixed(2)}u
-                            </span>
-                          </div>
-                        </div>
+                    {/* Grid de Stats del Usuario (7 cards) */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                      {/* Total Follows */}
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-xs text-slate-400 mb-1">Total Follows</p>
+                        <p className="text-2xl font-bold text-slate-200">
+                          {traceabilityStats.totalFollows}
+                        </p>
                       </div>
 
-                      {/* User Stats */}
-                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6">
-                        <h3 className="text-lg font-semibold text-blue-400 mb-4">
-                          Tus Estadísticas
-                        </h3>
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Follows Resueltos:</span>
-                            <span className="font-semibold text-slate-200">
-                              {traceabilityStats.userResolvedFollows}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Ganadas:</span>
-                            <span className="font-semibold text-green-400">
-                              {traceabilityStats.userWonFollows}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Winrate:</span>
-                            <span className="font-semibold text-slate-200">
-                              {traceabilityStats.userWinrate.toFixed(1)}%
-                              <span
-                                className={`ml-2 text-xs ${
-                                  traceabilityStats.winrateDiff >= 0 ? 'text-green-400' : 'text-red-400'
-                                }`}
-                              >
-                                ({traceabilityStats.winrateDiff >= 0 ? '+' : ''}
-                                {traceabilityStats.winrateDiff.toFixed(1)}%)
-                              </span>
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Yield:</span>
-                            <span
-                              className={`font-semibold ${
-                                traceabilityStats.userYield >= 0 ? 'text-green-400' : 'text-red-400'
-                              }`}
-                            >
-                              {traceabilityStats.userYield >= 0 ? '+' : ''}
-                              {traceabilityStats.userYield.toFixed(2)}%
-                              <span
-                                className={`ml-2 text-xs ${
-                                  traceabilityStats.yieldDiff >= 0 ? 'text-green-400' : 'text-red-400'
-                                }`}
-                              >
-                                ({traceabilityStats.yieldDiff >= 0 ? '+' : ''}
-                                {traceabilityStats.yieldDiff.toFixed(2)}%)
-                              </span>
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Profit:</span>
-                            <span
-                              className={`font-semibold ${
-                                traceabilityStats.userProfit >= 0 ? 'text-green-400' : 'text-red-400'
-                              }`}
-                            >
-                              {traceabilityStats.userProfit >= 0 ? '+' : ''}
-                              {traceabilityStats.userProfit.toFixed(2)}u
-                              <span
-                                className={`ml-2 text-xs ${
-                                  traceabilityStats.profitDiff >= 0 ? 'text-green-400' : 'text-red-400'
-                                }`}
-                              >
-                                ({traceabilityStats.profitDiff >= 0 ? '+' : ''}
-                                {traceabilityStats.profitDiff.toFixed(2)}u)
-                              </span>
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Cuota Media:</span>
-                            <span className="font-semibold text-slate-200">
-                              {traceabilityStats.userAvgOdds.toFixed(2)}
-                              <span
-                                className={`ml-2 text-xs ${
-                                  traceabilityStats.avgOddsDiff >= 0 ? 'text-blue-400' : 'text-orange-400'
-                                }`}
-                              >
-                                ({traceabilityStats.avgOddsDiff >= 0 ? '+' : ''}
-                                {traceabilityStats.avgOddsDiff.toFixed(2)})
-                              </span>
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Stake Medio:</span>
-                            <span className="font-semibold text-slate-200">
-                              {traceabilityStats.userAvgStake.toFixed(2)}u
-                              <span
-                                className={`ml-2 text-xs ${
-                                  traceabilityStats.avgStakeDiff >= 0 ? 'text-blue-400' : 'text-orange-400'
-                                }`}
-                              >
-                                ({traceabilityStats.avgStakeDiff >= 0 ? '+' : ''}
-                                {traceabilityStats.avgStakeDiff.toFixed(2)}u)
-                              </span>
-                            </span>
-                          </div>
-                        </div>
+                      {/* Ganados */}
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-xs text-slate-400 mb-1">Ganados</p>
+                        <p className="text-2xl font-bold text-green-400">
+                          {traceabilityStats.userWonFollows}
+                        </p>
+                      </div>
+
+                      {/* Perdidos */}
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-xs text-slate-400 mb-1">Perdidos</p>
+                        <p className="text-2xl font-bold text-red-400">
+                          {traceabilityStats.userResolvedFollows - traceabilityStats.userWonFollows}
+                        </p>
+                      </div>
+
+                      {/* Winrate */}
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-xs text-slate-400 mb-1">Winrate</p>
+                        <p className="text-2xl font-bold text-slate-200">
+                          {traceabilityStats.userWinrate.toFixed(1)}%
+                        </p>
+                      </div>
+
+                      {/* Yield */}
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-xs text-slate-400 mb-1">Yield</p>
+                        <p
+                          className={`text-2xl font-bold ${
+                            traceabilityStats.userYield >= 0 ? 'text-green-400' : 'text-red-400'
+                          }`}
+                        >
+                          {traceabilityStats.userYield >= 0 ? '+' : ''}
+                          {traceabilityStats.userYield.toFixed(2)}%
+                        </p>
+                      </div>
+
+                      {/* Profit Total */}
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-xs text-slate-400 mb-1">Profit Total</p>
+                        <p
+                          className={`text-2xl font-bold ${
+                            traceabilityStats.userProfit >= 0 ? 'text-green-400' : 'text-red-400'
+                          }`}
+                        >
+                          {traceabilityStats.userProfit >= 0 ? '+' : ''}
+                          {traceabilityStats.userProfit.toFixed(2)}u
+                        </p>
+                      </div>
+
+                      {/* Match Rate */}
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                        <p className="text-xs text-slate-400 mb-1">Match Rate</p>
+                        <p
+                          className={`text-2xl font-bold ${
+                            traceabilityStats.matchRate >= 80
+                              ? 'text-green-400'
+                              : traceabilityStats.matchRate >= 50
+                                ? 'text-yellow-400'
+                                : 'text-red-400'
+                          }`}
+                        >
+                          {traceabilityStats.matchRate.toFixed(1)}%
+                        </p>
                       </div>
                     </div>
 
-                    {/* Match Rate */}
-                    <div className="mt-6 bg-green-500/10 border border-green-500/30 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-green-400 mb-4">
-                        Coincidencia de Resultados (Match Rate)
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <p className="text-sm text-slate-400 mb-1">Match</p>
-                          <p className="text-2xl font-bold text-green-400">
-                            {traceabilityStats.matchCount}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            Mismo resultado
-                          </p>
+                    {/* Resumen Comparativo */}
+                    <div
+                      className={`rounded-lg p-4 border mb-6 ${
+                        traceabilityStats.yieldDiff >= 2
+                          ? 'bg-green-500/10 border-green-500/30'
+                          : traceabilityStats.yieldDiff <= -2
+                            ? 'bg-red-500/10 border-red-500/30'
+                            : 'bg-blue-500/10 border-blue-500/30'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-3xl">
+                          {traceabilityStats.yieldDiff >= 2
+                            ? '🟢'
+                            : traceabilityStats.yieldDiff <= -2
+                              ? '🔴'
+                              : '⚪'}
                         </div>
                         <div>
-                          <p className="text-sm text-slate-400 mb-1">Diverge</p>
-                          <p className="text-2xl font-bold text-yellow-400">
-                            {traceabilityStats.divergeCount}
+                          <p
+                            className={`font-semibold ${
+                              traceabilityStats.yieldDiff >= 2
+                                ? 'text-green-400'
+                                : traceabilityStats.yieldDiff <= -2
+                                  ? 'text-red-400'
+                                  : 'text-blue-400'
+                            }`}
+                          >
+                            {traceabilityStats.yieldDiff >= 2
+                              ? `Superando al tipster en +${traceabilityStats.yieldDiff.toFixed(2)}% yield`
+                              : traceabilityStats.yieldDiff <= -2
+                                ? `Por debajo del tipster en ${traceabilityStats.yieldDiff.toFixed(2)}% yield`
+                                : 'Rendimiento similar al tipster'}
                           </p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            Resultado diferente
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-slate-400 mb-1">Match Rate</p>
-                          <p className="text-2xl font-bold text-green-400">
-                            {traceabilityStats.matchRate.toFixed(1)}%
-                          </p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            Porcentaje de coincidencias
+                          <p className="text-sm text-slate-400 mt-1">
+                            Comparado con el yield del tipster ({traceabilityStats.tipsterYield.toFixed(2)}%)
                           </p>
                         </div>
                       </div>
@@ -701,14 +647,8 @@ export function TipsterDetailPage() {
                                   follow={follow}
                                   pick={originalPick}
                                   tipsterName={tipster.name}
-                                  onEdit={() => {
-                                    // TODO: Implement edit modal
-                                    console.log('Edit follow:', follow.id);
-                                  }}
-                                  onDelete={() => {
-                                    // TODO: Implement delete confirmation
-                                    console.log('Delete follow:', follow.id);
-                                  }}
+                                  onEdit={() => handleEditFollow(follow)}
+                                  onDelete={() => handleDeleteFollow(follow)}
                                 />
                               );
                             })}
@@ -759,6 +699,25 @@ export function TipsterDetailPage() {
             onUpdate={updatePick}
           />
         )}
+
+        {/* Edit Follow Modal */}
+        {selectedFollow && (() => {
+          const followPick = picks.find((p) => p.id === selectedFollow.pickId);
+          return (
+            <AddFollowModal
+              isOpen={isEditFollowModalOpen}
+              onClose={() => {
+                setIsEditFollowModalOpen(false);
+                setSelectedFollow(null);
+              }}
+              onSuccess={handleEditFollowSuccess}
+              follow={selectedFollow}
+              pick={followPick}
+              tipsterName={tipster.name}
+              onUpdate={updateFollow}
+            />
+          );
+        })()}
     </>
   );
 }

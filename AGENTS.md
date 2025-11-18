@@ -2249,10 +2249,74 @@ react-app/src/
   - Firebase configurado
   - Path aliases de TypeScript
 
-- 📋 **Fase 1**: Fundamentos y Abstracciones (próxima)
-  - Tipos TypeScript del modelo de datos
-  - Repository Pattern para Firebase
-  - Context API y custom hooks base
+- ✅ **Fases 1-5**: Completadas (100%)
+  - Tipos TypeScript y Repository Pattern
+  - Features: Auth, Tipsters, Picks
+  - Todas las funcionalidades base migradas
+
+- 🔄 **Fase 6**: Feature Follows (en progreso - 95%)
+  - ✅ CRUD completo de follows
+  - ✅ MyPicksPage con estadísticas y filtros
+  - ✅ Integración en TipsterDetailPage
+  - ✅ Botón "Seguir" en PickTableRow
+  - ✅ Sección follow en AddPickModal
+  - ✅ Sistema de comparación Match/Diverge
+  - 🔄 Testing en progreso (Sección 5 de 10)
+
+### Decisiones de Diseño UX - Fase 6
+
+#### Tab "Mis Estadísticas" en TipsterDetailPage
+
+**Decisión (18/11/2025)**: Refactor del layout para centrar el foco en las estadísticas del usuario.
+
+**Problema identificado**:
+- El diseño original mostraba comparación lado a lado (Tipster vs Usuario)
+- Enfoque en diferencias, no en el rendimiento propio
+- Stats del tipster ya están disponibles en el tab "Estadísticas"
+- El usuario quiere saber: "¿Cómo me está yendo siguiendo a este tipster?"
+
+**Solución implementada**:
+```
+┌─────────────────────────────────────────────┐
+│  Sección 1: Seguibilidad (3 stat-cards)     │
+│  • Total Picks del Tipster                  │
+│  • Picks Seguidos por Ti                    │
+│  • Tasa de Seguibilidad (%)                 │
+└─────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────┐
+│  Sección 2: Tus Stats de Seguimiento        │
+│  Grid de 7 stat-cards:                      │
+│  • Total Follows                            │
+│  • Ganados                                  │
+│  • Perdidos                                 │
+│  • Winrate (%)                              │
+│  • Yield (%)                                │
+│  • Profit Total (unidades)                  │
+│  • Match Rate vs Tipster (%)                │
+└─────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────┐
+│  Sección 3: Resumen Comparativo (1 card)    │
+│  Badge visual con mensaje:                  │
+│  🟢 "Superando al tipster en +2.5% yield"   │
+│  🔴 "Por debajo del tipster en -1.2% yield" │
+│  ⚪ "Mismo rendimiento que el tipster"       │
+└─────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────┐
+│  Sección 4: Historial (tabla completa)      │
+│  Tabla comparativa de todos los follows     │
+│  con acciones: Editar, Eliminar             │
+└─────────────────────────────────────────────┘
+```
+
+**Ventajas**:
+- ✅ Foco en las estadísticas del usuario (user-centric)
+- ✅ Información del tipster disponible en otro tab
+- ✅ Comparación como resumen breve y visual
+- ✅ Layout más claro y organizado
+- ✅ Toda la información relevante accesible
 
 ### Documentación Adicional
 

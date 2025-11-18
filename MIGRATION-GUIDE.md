@@ -11222,6 +11222,85 @@ Seguibilidad = (Picks Seguidas / Total Picks Desde Primer Follow) * 100
 
 ---
 
+### Decisión de UX: Tab "Mis Estadísticas" en TipsterDetailPage
+
+**Fecha**: 18 de noviembre de 2025  
+**Contexto**: Durante el testing de Fase 6 (Sección 5 del checklist)
+
+#### Problema Identificado
+
+El diseño original del tab "Mis Estadísticas" mostraba una comparación lado a lado entre el tipster y el usuario (2 columnas con 8 stats cada una). Esto presentaba varios problemas:
+
+1. **Falta de foco**: El usuario quiere saber "¿Cómo me está yendo siguiendo a este tipster?", no ver stats duplicadas
+2. **Redundancia**: Las estadísticas del tipster ya están disponibles en el tab "Estadísticas"
+3. **Comparación demasiado prominente**: La diferencia (diff) debería ser un resumen, no el foco principal
+4. **Layout confuso**: Mucho espacio dedicado a información que no aporta valor en este contexto
+
+#### Solución Implementada
+
+**Nuevo layout centrado en el usuario (user-centric)**:
+
+```
+┌─────────────────────────────────────────────┐
+│  Sección 1: Seguibilidad (3 stat-cards)     │
+│  • Total Picks del Tipster                  │
+│  • Picks Seguidos por Ti                    │
+│  • Tasa de Seguibilidad (%)                 │
+└─────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────┐
+│  Sección 2: Tus Stats de Seguimiento        │
+│  Grid de 7 stat-cards con TUS números:      │
+│  • Total Follows                            │
+│  • Ganados                                  │
+│  • Perdidos                                 │
+│  • Winrate (%)                              │
+│  • Yield (%)                                │
+│  • Profit Total (unidades)                  │
+│  • Match Rate vs Tipster (%)                │
+└─────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────┐
+│  Sección 3: Resumen Comparativo (1 card)    │
+│  Badge visual con mensaje contextual:       │
+│  🟢 "Superando al tipster en +2.5% yield"   │
+│  🔴 "Por debajo del tipster en -1.2% yield" │
+│  ⚪ "Mismo rendimiento que el tipster"       │
+└─────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────┐
+│  Sección 4: Historial (tabla completa)      │
+│  Tabla comparativa de todos tus follows     │
+│  con acciones: Editar, Eliminar             │
+└─────────────────────────────────────────────┘
+```
+
+#### Ventajas del Nuevo Diseño
+
+1. ✅ **User-centric**: El foco está en TUS estadísticas, no en las del tipster
+2. ✅ **No redundante**: Info del tipster disponible en tab "Estadísticas"
+3. ✅ **Comparación como resumen**: Un badge breve y visual en lugar de columnas completas
+4. ✅ **Layout más claro**: Flujo de información lógico y organizado
+5. ✅ **Toda la info accesible**: Nada se pierde, solo se reorganiza mejor
+6. ✅ **Responde la pregunta clave**: "¿Cómo me está yendo con este tipster?"
+
+#### Cambios en el Código
+
+- **Archivo**: `src/features/tipsters/pages/TipsterDetailPage.tsx`
+- **Componentes afectados**:
+  - Sección de seguibilidad (ya existía)
+  - Grid de stats del usuario (refactorizado desde comparación)
+  - Nueva sección de resumen comparativo (badge con mensaje)
+  - Tabla de historial (sin cambios)
+
+#### Impacto
+
+- **UX**: Mejora significativa, más intuitivo y útil
+- **Código**: Refactor menor, principalmente layout y mensajes
+- **Testing**: Re-test de Sección 5 del checklist después del refactor
+
+---
+
 ## FASE 7: Feature - Dashboard (Detallado)
 
 ### Duración Estimada

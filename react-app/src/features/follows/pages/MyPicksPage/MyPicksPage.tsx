@@ -117,7 +117,8 @@ export const MyPicksPage = () => {
       // Filter by match status
       if (filters.matchStatus !== 'all') {
         const originalPick = picks.find((p) => p.id === follow.pickId);
-        if (!originalPick || !originalPick.isResolved || !follow.isResolved) return false;
+        // Solo requiere que el follow esté resuelto y que exista el pick original
+        if (!originalPick || !follow.isResolved) return false;
 
         const isMatch = follow.userResult === originalPick.result;
         if (filters.matchStatus === 'match' && !isMatch) return false;
@@ -191,6 +192,13 @@ export const MyPicksPage = () => {
     filters.matchStatus !== 'all' ||
     filters.searchQuery !== '';
 
+  const activeFilterCount = [
+    filters.tipsterId !== 'all',
+    filters.result !== 'all',
+    filters.matchStatus !== 'all',
+    filters.searchQuery !== '',
+  ].filter(Boolean).length;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -211,7 +219,7 @@ export const MyPicksPage = () => {
               <p className="text-sm font-medium text-gray-400">Total Follows</p>
               <p className="mt-2 text-3xl font-semibold text-white">{stats.totalFollows}</p>
               <p className="mt-1 text-xs text-gray-500">
-                {stats.resolvedFollows} resueltas · {stats.pendingFollows} pendientes
+                {stats.pendingFollows} pendientes
               </p>
             </div>
             <TrendingUp className="h-8 w-8 text-blue-500" />
@@ -272,6 +280,11 @@ export const MyPicksPage = () => {
           <div className="flex items-center gap-2">
             <Filter className="h-5 w-5 text-gray-400" />
             <h2 className="text-lg font-semibold text-white">Filtros</h2>
+            {hasActiveFilters && (
+              <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-blue-400">
+                {activeFilterCount} {activeFilterCount === 1 ? 'filtro activo' : 'filtros activos'}
+              </span>
+            )}
           </div>
           {hasActiveFilters && (
             <button
