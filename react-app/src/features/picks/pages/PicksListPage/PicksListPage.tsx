@@ -442,7 +442,7 @@ export function PicksListPage() {
             setFollowingPick(undefined);
           }}
           pick={followingPick}
-          onUpdate={() => {
+          onSuccess={() => {
             setIsFollowModalOpen(false);
             setFollowingPick(undefined);
           }}
