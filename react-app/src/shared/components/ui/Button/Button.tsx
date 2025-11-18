@@ -40,6 +40,8 @@ export function Button({
       'bg-transparent text-slate-200 border border-slate-600 hover:bg-slate-800 active:bg-slate-700 focus:ring-slate-500',
     danger:
       'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus:ring-red-500',
+    success:
+      'bg-green-600 text-white hover:bg-green-700 active:bg-green-800 focus:ring-green-500',
   };
 
   // Size classes

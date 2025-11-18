@@ -173,13 +173,13 @@ export function PickTableRow({
             )}
             {isFollowed && (
               <Button
-                variant="secondary"
+                variant="success"
                 size="sm"
                 icon={<Check className="h-3.5 w-3.5" />}
                 disabled
-                aria-label="Pick ya seguida"
+                aria-label="Pick ya seguido"
               >
-                Seguida
+                Seguido
               </Button>
             )}
             <Button

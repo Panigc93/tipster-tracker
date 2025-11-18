@@ -168,10 +168,6 @@ export function AddPickModal({
       setError('Introduce el tipo de apuesta');
       return false;
     }
-    if (!bookmaker) {
-      setError('Selecciona una casa de apuestas');
-      return false;
-    }
     
     const oddsNum = Number.parseFloat(odds);
     if (Number.isNaN(oddsNum) || oddsNum <= 1) {
@@ -370,12 +366,13 @@ export function AddPickModal({
   const handleFollowCheckboxChange = (checked: boolean) => {
     setShouldFollow(checked);
     
-    // Pre-fill follow fields with pick data when checkbox is checked
+    // Pre-fill follow fields with pick data when checkbox is checked (only once)
     if (checked && !isEditMode) {
       setUserOdds(odds || '');
       setUserStake(stake || '');
       setUserBookmaker(bookmaker || '');
       setUserBetType(betType || '');
+      setUserResult(result);
       setDateFollowed(new Date().toISOString().split('T')[0]);
       setTimeFollowed(new Date().toTimeString().slice(0, 5));
     }
@@ -506,14 +503,13 @@ export function AddPickModal({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label htmlFor="bookmaker" className="block text-sm font-medium text-slate-300 mb-2">
-              Bookmaker <span className="text-red-400">*</span>
+              Bookmaker
             </label>
             <select
               id="bookmaker"
               value={bookmaker}
               onChange={(e) => setBookmaker(e.target.value)}
               className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
               disabled={loading}
             >
               <option value="">Selecciona</option>
