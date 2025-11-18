@@ -3,7 +3,8 @@
  * Comprehensive filtering UI for dashboard tipsters
  */
 
-import { Search, X } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Search, X, ChevronDown } from 'lucide-react';
 import { ALL_SPORTS, ALL_CHANNELS } from '@shared/constants';
 import type { DashboardFiltersState } from '../../utils/dashboard-filters.utils';
 
@@ -30,6 +31,37 @@ export function DashboardFilters({
   onSearchQueryChange,
   onResetFilters,
 }: Readonly<DashboardFiltersProps>) {
+  const [sportsOpen, setSportsOpen] = useState(false);
+  const [channelsOpen, setChannelsOpen] = useState(false);
+  const sportsRef = useRef<HTMLDivElement>(null);
+  const channelsRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sportsRef.current && !sportsRef.current.contains(event.target as Node)) {
+        setSportsOpen(false);
+      }
+      if (channelsRef.current && !channelsRef.current.contains(event.target as Node)) {
+        setChannelsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Toggle all sports
+  const toggleAllSports = () => {
+    if (filters.sports.length === ALL_SPORTS.length) {
+      // If all selected, deselect all
+      onSportsChange([]);
+    } else {
+      // Select all
+      onSportsChange([...ALL_SPORTS]);
+    }
+  };
+
   // Toggle sport in array
   const toggleSport = (sport: string) => {
     const newSports = filters.sports.includes(sport)
@@ -38,12 +70,37 @@ export function DashboardFilters({
     onSportsChange(newSports);
   };
 
+  // Toggle all channels
+  const toggleAllChannels = () => {
+    if (filters.channels.length === ALL_CHANNELS.length) {
+      // If all selected, deselect all
+      onChannelsChange([]);
+    } else {
+      // Select all
+      onChannelsChange([...ALL_CHANNELS]);
+    }
+  };
+
   // Toggle channel in array
   const toggleChannel = (channel: string) => {
     const newChannels = filters.channels.includes(channel)
       ? filters.channels.filter((c) => c !== channel)
       : [...filters.channels, channel];
     onChannelsChange(newChannels);
+  };
+
+  // Get display text for sports dropdown
+  const getSportsDisplayText = () => {
+    if (filters.sports.length === 0) return 'Todos los deportes';
+    const plural = filters.sports.length > 1 ? 's' : '';
+    return `${filters.sports.length} seleccionado${plural}`;
+  };
+
+  // Get display text for channels dropdown
+  const getChannelsDisplayText = () => {
+    if (filters.channels.length === 0) return 'Todos los canales';
+    const plural = filters.channels.length > 1 ? 's' : '';
+    return `${filters.channels.length} seleccionado${plural}`;
   };
 
   return (
@@ -91,40 +148,90 @@ export function DashboardFilters({
 
       {/* Filters grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Sports multi-select */}
-        <div>
+        {/* Sports multi-select dropdown */}
+        <div className="relative" ref={sportsRef}>
           <div className="block text-sm font-medium text-slate-300 mb-2">Deportes</div>
-          <div className="space-y-2 max-h-40 overflow-y-auto bg-slate-900 border border-slate-700 rounded-md p-3">
-            {ALL_SPORTS.map((sport: string) => (
-              <label key={sport} className="flex items-center gap-2 cursor-pointer hover:bg-slate-800 p-1 rounded">
+          <button
+            type="button"
+            onClick={() => setSportsOpen(!sportsOpen)}
+            className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-100 text-left flex items-center justify-between hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <span className="text-sm">{getSportsDisplayText()}</span>
+            <ChevronDown className={`h-4 w-4 transition-transform ${sportsOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {sportsOpen && (
+            <div className="absolute z-10 mt-1 w-full bg-slate-900 border border-slate-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
+              {/* Select All option */}
+              <label className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-800 transition-colors border-b border-slate-700 bg-slate-850">
                 <input
                   type="checkbox"
-                  checked={filters.sports.includes(sport)}
-                  onChange={() => toggleSport(sport)}
+                  checked={filters.sports.length === ALL_SPORTS.length}
+                  onChange={toggleAllSports}
                   className="w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
                 />
-                <span className="text-sm text-slate-300">{sport}</span>
+                <span className="text-sm text-slate-100 font-medium">Todos los deportes</span>
               </label>
-            ))}
-          </div>
+              
+              {/* Individual sports */}
+              {ALL_SPORTS.map((sport: string) => (
+                <label
+                  key={sport}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-800 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.sports.includes(sport)}
+                    onChange={() => toggleSport(sport)}
+                    className="w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="text-sm text-slate-300">{sport}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Channels multi-select */}
-        <div>
+        {/* Channels multi-select dropdown */}
+        <div className="relative" ref={channelsRef}>
           <div className="block text-sm font-medium text-slate-300 mb-2">Canales</div>
-          <div className="space-y-2 max-h-40 overflow-y-auto bg-slate-900 border border-slate-700 rounded-md p-3">
-            {ALL_CHANNELS.map((channel: string) => (
-              <label key={channel} className="flex items-center gap-2 cursor-pointer hover:bg-slate-800 p-1 rounded">
+          <button
+            type="button"
+            onClick={() => setChannelsOpen(!channelsOpen)}
+            className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-100 text-left flex items-center justify-between hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <span className="text-sm">{getChannelsDisplayText()}</span>
+            <ChevronDown className={`h-4 w-4 transition-transform ${channelsOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {channelsOpen && (
+            <div className="absolute z-10 mt-1 w-full bg-slate-900 border border-slate-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
+              {/* Select All option */}
+              <label className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-800 transition-colors border-b border-slate-700 bg-slate-850">
                 <input
                   type="checkbox"
-                  checked={filters.channels.includes(channel)}
-                  onChange={() => toggleChannel(channel)}
+                  checked={filters.channels.length === ALL_CHANNELS.length}
+                  onChange={toggleAllChannels}
                   className="w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
                 />
-                <span className="text-sm text-slate-300">{channel}</span>
+                <span className="text-sm text-slate-100 font-medium">Todos los canales</span>
               </label>
-            ))}
-          </div>
+              
+              {/* Individual channels */}
+              {ALL_CHANNELS.map((channel: string) => (
+                <label
+                  key={channel}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-800 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.channels.includes(channel)}
+                    onChange={() => toggleChannel(channel)}
+                    className="w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="text-sm text-slate-300">{channel}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Yield min */}
