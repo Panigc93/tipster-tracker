@@ -27,6 +27,16 @@ export interface PickTableRowProps {
   onDelete?: (pick: Pick) => void;
 
   /**
+   * Callback when follow button is clicked
+   */
+  onFollow?: (pick: Pick) => void;
+
+  /**
+   * Whether the pick is already followed
+   */
+  isFollowed?: boolean;
+
+  /**
    * Whether to show actions column
    * @default true
    */

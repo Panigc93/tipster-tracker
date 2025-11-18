@@ -9,6 +9,8 @@ import { Button } from '@shared/components/ui';
 import { PickTableRow, AddPickModal } from '../../components';
 import { usePicks } from '../../hooks';
 import { useTipsters } from '@features/tipsters/hooks';
+import { useFollows } from '@features/follows/hooks';
+import { AddFollowModal } from '@features/follows/components';
 import { Sport, PickResult } from '@shared/types/enums';
 import type { Pick } from '@shared/types';
 import type { PickFilters } from './PicksListPage.types';
@@ -61,11 +63,14 @@ const filterPicks = (picks: Pick[], filters: PickFilters): Pick[] => {
 export function PicksListPage() {
   const { picks, loading, error, deletePick, updatePick } = usePicks();
   const { tipsters, loading: tipstersLoading } = useTipsters();
+  const { isPickFollowed } = useFollows();
 
   // Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isFollowModalOpen, setIsFollowModalOpen] = useState(false);
   const [editingPick, setEditingPick] = useState<Pick | undefined>(undefined);
+  const [followingPick, setFollowingPick] = useState<Pick | undefined>(undefined);
 
   // Filter state
   const [filters, setFilters] = useState<PickFilters>({
@@ -123,6 +128,11 @@ export function PicksListPage() {
     if (globalThis.confirm('¿Estás seguro de eliminar esta pick?')) {
       await deletePick(pick.id);
     }
+  };
+
+  const handleFollow = (pick: Pick) => {
+    setFollowingPick(pick);
+    setIsFollowModalOpen(true);
   };
 
   const handleAddSuccess = () => {
@@ -379,6 +389,8 @@ export function PicksListPage() {
                     tipsterName={getTipsterName(pick.tipsterId)}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                    onFollow={handleFollow}
+                    isFollowed={isPickFollowed(pick.id)}
                     showActions
                   />
                 ))}
@@ -421,6 +433,21 @@ export function PicksListPage() {
         pick={editingPick}
         onUpdate={handleUpdatePick}
       />
+
+      {followingPick && (
+        <AddFollowModal
+          isOpen={isFollowModalOpen}
+          onClose={() => {
+            setIsFollowModalOpen(false);
+            setFollowingPick(undefined);
+          }}
+          pick={followingPick}
+          onUpdate={() => {
+            setIsFollowModalOpen(false);
+            setFollowingPick(undefined);
+          }}
+        />
+      )}
     </div>
   );
 }

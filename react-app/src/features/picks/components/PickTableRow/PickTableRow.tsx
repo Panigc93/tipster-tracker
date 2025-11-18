@@ -3,7 +3,7 @@
  * @module features/picks/components/PickTableRow
  */
 
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, UserPlus, Check } from 'lucide-react';
 import { Badge, Button } from '@shared/components/ui';
 import { getSportIcon } from '../../utils/sport-icons';
 import type { PickTableRowProps } from './PickTableRow.types';
@@ -57,6 +57,8 @@ export function PickTableRow({
   tipsterName,
   onEdit,
   onDelete,
+  onFollow,
+  isFollowed = false,
   showActions = true,
 }: PickTableRowProps) {
   const profit = calculateProfit(pick.result, pick.odds, pick.stake);
@@ -68,6 +70,10 @@ export function PickTableRow({
 
   const handleDelete = () => {
     onDelete?.(pick);
+  };
+
+  const handleFollow = () => {
+    onFollow?.(pick);
   };
 
   return (
@@ -154,6 +160,28 @@ export function PickTableRow({
       {showActions && (
         <td className="px-4 py-3">
           <div className="flex items-center gap-2">
+            {onFollow && !isFollowed && (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<UserPlus className="h-3.5 w-3.5" />}
+                onClick={handleFollow}
+                aria-label="Seguir pick"
+              >
+                Seguir
+              </Button>
+            )}
+            {isFollowed && (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Check className="h-3.5 w-3.5" />}
+                disabled
+                aria-label="Pick ya seguida"
+              >
+                Seguida
+              </Button>
+            )}
             <Button
               variant="secondary"
               size="sm"
