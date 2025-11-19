@@ -4,7 +4,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { Button } from '@shared/components/ui';
 import { PickTableRow, AddPickModal } from '../../components';
 import { usePicks } from '../../hooks';
@@ -21,27 +21,69 @@ import { getSportIcon } from '../../utils/sport-icons';
  */
 const filterPicks = (picks: Pick[], filters: PickFilters): Pick[] => {
   return picks.filter((pick) => {
-    // Tipster filter
+    // Basic filters (single select - backward compatibility)
     if (filters.tipsterId && pick.tipsterId !== filters.tipsterId) {
       return false;
     }
 
-    // Sport filter
     if (filters.sport && pick.sport !== filters.sport) {
       return false;
     }
 
-    // Result filter
     if (filters.result && pick.result !== filters.result) {
       return false;
     }
 
-    // Bookmaker filter
     if (filters.bookmaker && pick.bookmaker !== filters.bookmaker) {
       return false;
     }
 
-    // Search query (match name)
+    // Advanced filters (multi-select)
+    if (filters.tipsterIds.length > 0 && !filters.tipsterIds.includes(pick.tipsterId)) {
+      return false;
+    }
+
+    if (filters.sports.length > 0 && !filters.sports.includes(pick.sport)) {
+      return false;
+    }
+
+    if (filters.bookmakers.length > 0 && !filters.bookmakers.includes(pick.bookmaker)) {
+      return false;
+    }
+
+    // Pick type filter
+    if (filters.pickType && pick.pickType !== filters.pickType) {
+      return false;
+    }
+
+    // Date range filter
+    if (filters.dateFrom && pick.date < filters.dateFrom) {
+      return false;
+    }
+
+    if (filters.dateTo && pick.date > filters.dateTo) {
+      return false;
+    }
+
+    // Odds range filter
+    if (filters.oddsMin !== null && pick.odds < filters.oddsMin) {
+      return false;
+    }
+
+    if (filters.oddsMax !== null && pick.odds > filters.oddsMax) {
+      return false;
+    }
+
+    // Stake range filter
+    if (filters.stakeMin !== null && pick.stake < filters.stakeMin) {
+      return false;
+    }
+
+    if (filters.stakeMax !== null && pick.stake > filters.stakeMax) {
+      return false;
+    }
+
+    // Search query (match and betType)
     if (filters.searchQuery) {
       const query = filters.searchQuery.toLowerCase();
       const matchLower = pick.match.toLowerCase();
@@ -74,11 +116,23 @@ export function PicksListPage() {
 
   // Filter state
   const [filters, setFilters] = useState<PickFilters>({
+    // Basic filters
     tipsterId: '',
     sport: '',
     result: '',
     bookmaker: '',
     searchQuery: '',
+    // Advanced filters
+    tipsterIds: [],
+    sports: [],
+    bookmakers: [],
+    pickType: '',
+    dateFrom: '',
+    dateTo: '',
+    oddsMin: null,
+    oddsMax: null,
+    stakeMin: null,
+    stakeMax: null,
   });
 
   // Filtered picks
@@ -104,6 +158,16 @@ export function PicksListPage() {
     return tipster?.name || 'Desconocido';
   };
 
+  // Detect active filters
+  const hasActiveFilters =
+    filters.tipsterId ||
+    filters.sport ||
+    filters.result ||
+    filters.bookmaker ||
+    filters.searchQuery ||
+    filters.dateFrom ||
+    filters.dateTo;
+
   // Handlers
   const handleFilterChange = (key: keyof PickFilters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -111,11 +175,23 @@ export function PicksListPage() {
 
   const handleResetFilters = () => {
     setFilters({
+      // Basic filters
       tipsterId: '',
       sport: '',
       result: '',
       bookmaker: '',
       searchQuery: '',
+      // Advanced filters
+      tipsterIds: [],
+      sports: [],
+      bookmakers: [],
+      pickType: '',
+      dateFrom: '',
+      dateTo: '',
+      oddsMin: null,
+      oddsMax: null,
+      stakeMin: null,
+      stakeMax: null,
     });
   };
 
@@ -168,13 +244,6 @@ export function PicksListPage() {
     );
   }
 
-  const hasActiveFilters =
-    filters.tipsterId ||
-    filters.sport ||
-    filters.result ||
-    filters.bookmaker ||
-    filters.searchQuery;
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -221,10 +290,7 @@ export function PicksListPage() {
       {/* Filters */}
       <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-slate-400" />
-            <h2 className="text-lg font-semibold text-slate-100">Filtros</h2>
-          </div>
+          <h2 className="text-lg font-semibold text-slate-100">Filtros</h2>
           {hasActiveFilters && (
             <Button variant="secondary" size="sm" onClick={handleResetFilters}>
               Limpiar filtros
@@ -232,7 +298,7 @@ export function PicksListPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* Search */}
           <div className="lg:col-span-2">
             <label htmlFor="search-picks" className="block text-sm font-medium text-slate-300 mb-2">
@@ -249,6 +315,34 @@ export function PicksListPage() {
                 className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+          </div>
+
+          {/* Date From */}
+          <div>
+            <label htmlFor="filter-date-from" className="block text-sm font-medium text-slate-300 mb-2">
+              Fecha desde
+            </label>
+            <input
+              id="filter-date-from"
+              type="date"
+              value={filters.dateFrom}
+              onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Date To */}
+          <div>
+            <label htmlFor="filter-date-to" className="block text-sm font-medium text-slate-300 mb-2">
+              Fecha hasta
+            </label>
+            <input
+              id="filter-date-to"
+              type="date"
+              value={filters.dateTo}
+              onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
 
           {/* Tipster */}
