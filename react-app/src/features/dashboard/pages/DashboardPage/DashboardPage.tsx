@@ -3,10 +3,18 @@
  * Main dashboard view with personal stats, filters, and tipster grid
  */
 
+import { useState } from 'react';
+import { Download } from 'lucide-react';
 import { PersonalStatsPanel, DashboardFilters, TipsterCard } from '../../components';
 import { useDashboardFilters } from '../../hooks';
+import { usePicks } from '@features/picks/hooks';
+import { useFollows } from '@features/follows/hooks';
+import { useTipsters } from '@features/tipsters/hooks';
+import { exportPicksToExcel } from '@/shared/utils/excelExport';
 
 export function DashboardPage() {
+  const [isHovered, setIsHovered] = useState(false);
+  
   const {
     tipsters: filteredTipsters,
     filters,
@@ -20,6 +28,28 @@ export function DashboardPage() {
     setSearchQuery,
     resetFilters,
   } = useDashboardFilters();
+  
+  const { picks } = usePicks();
+  const { follows } = useFollows();
+  const { tipsters: allTipsters } = useTipsters();
+
+  const handleExportToExcel = () => {
+    console.log('🔵 Exportando a Excel...');
+    console.log('📊 Datos disponibles:', {
+      picks: picks.length,
+      follows: follows.length,
+      tipsters: allTipsters.length,
+    });
+    
+    try {
+      exportPicksToExcel(picks, follows, allTipsters);
+      console.log('✅ Export completado');
+      alert('Excel generado correctamente. Revisa la carpeta react-app/');
+    } catch (error) {
+      console.error('❌ Error al exportar:', error);
+      alert('Error al generar Excel: ' + error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-900 p-6">
@@ -93,6 +123,31 @@ export function DashboardPage() {
           </>
         )}
       </div>
+
+      {/* Floating Action Button - Export to Excel */}
+      <button
+        type="button"
+        onClick={handleExportToExcel}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`
+          fixed bottom-8 right-8 z-50
+          flex items-center gap-2
+          bg-blue-600 hover:bg-blue-700 
+          text-white font-medium
+          rounded-full shadow-lg hover:shadow-xl
+          transition-all duration-300 ease-out
+          ${isHovered ? 'px-6 py-4' : 'p-4'}
+        `}
+        title="Exportar todos los datos a Excel"
+      >
+        <Download className={`${isHovered ? 'h-5 w-5' : 'h-6 w-6'} transition-all duration-300`} />
+        {isHovered && (
+          <span className="whitespace-nowrap animate-fade-in">
+            Exportar a Excel
+          </span>
+        )}
+      </button>
     </div>
   );
 }

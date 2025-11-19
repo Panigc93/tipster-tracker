@@ -4,12 +4,8 @@
  */
 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, BarChart3, Users, FileText, Download } from 'lucide-react';
+import { LogOut, BarChart3, Users, FileText } from 'lucide-react';
 import { useAuth } from '@features/auth/hooks';
-import { usePicks } from '@features/picks/hooks';
-import { useFollows } from '@features/follows/hooks';
-import { useTipsters } from '@features/tipsters/hooks';
-import { exportPicksToExcel } from '@/shared/utils/excelExport';
 import { Button } from '../ui';
 
 interface LayoutProps {
@@ -23,17 +19,10 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  const { picks } = usePicks();
-  const { follows } = useFollows();
-  const { tipsters } = useTipsters();
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
-  };
-
-  const handleExportToExcel = () => {
-    exportPicksToExcel(picks, follows, tipsters);
   };
 
   const navItems = [
@@ -99,19 +88,6 @@ export function Layout({ children }: LayoutProps) {
                   </Link>
                 );
               })}
-            </div>
-
-            {/* Export Button */}
-            <div className="flex items-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportToExcel}
-                icon={<Download className="h-4 w-4" />}
-                title="Exportar todos los datos a Excel"
-              >
-                Exportar a Excel
-              </Button>
             </div>
 
             {/* User Menu */}

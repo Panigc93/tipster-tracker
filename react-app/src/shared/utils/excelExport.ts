@@ -5,8 +5,9 @@ import type { Pick, UserFollow, Tipster } from '@/shared/types';
 /**
  * Genera un archivo Excel vacío con la estructura del template de picks
  * Compatible con el template existente del usuario
+ * @param customFilename - Nombre personalizado para el archivo (opcional)
  */
-export const generateEmptyTemplate = (): void => {
+export const generateEmptyTemplate = (customFilename?: string): void => {
   const workbook: WorkBook = XLSX.utils.book_new();
 
   // Sheet 1: Realizadas (PRIMERA HOJA)
@@ -35,7 +36,7 @@ export const generateEmptyTemplate = (): void => {
 
   // Generar archivo
   const timestamp = new Date().toISOString().split('T')[0];
-  const filename = `tipster-tracker-template-${timestamp}.xlsx`;
+  const filename = customFilename || `tipster-tracker-template-${timestamp}.xlsx`;
   XLSX.writeFile(workbook, filename);
 };
 
@@ -842,17 +843,18 @@ export const exportPicksToExcel = (
   const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
   const filename = `tipster-tracker-export-${dateStr}.xlsx`;
 
-  // Por ahora generamos el template vacío
+  // Por ahora generamos el template vacío con nombre personalizado
   // TODO: En siguiente iteración, poblar con datos reales
-  generateEmptyTemplate();
+  generateEmptyTemplate(filename);
 
   console.log(`✅ Archivo generado: ${filename}`);
   console.log('⚠️  Nota: Datos reales pendientes de implementar');
   console.log('   El archivo actual es un template vacío');
 };
 
-// Auto-ejecutar cuando se llama directamente con tsx
-if (process.argv[1]?.endsWith('excelExport.ts')) {
+// Auto-ejecutar cuando se llama directamente con tsx (solo en Node.js, no en browser)
+// @ts-expect-error - process solo existe en Node.js
+if (typeof process !== 'undefined' && process.argv?.[1]?.endsWith('excelExport.ts')) {
   console.log('🚀 Generando template Excel...');
   generateEmptyTemplate();
   console.log('✅ Template generado');
