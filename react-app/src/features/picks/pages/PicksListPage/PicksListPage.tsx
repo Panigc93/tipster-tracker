@@ -10,6 +10,7 @@ import { PickTableRow, AddPickModal } from '../../components';
 import { usePicks } from '../../hooks';
 import { useTipsters } from '@features/tipsters/hooks';
 import { useFollows } from '@features/follows/hooks';
+import { useSortableTable } from '@shared/hooks';
 import { AddFollowModal } from '@features/follows/components';
 import { Sport, PickResult } from '@shared/types/enums';
 import type { Pick } from '@shared/types';
@@ -139,6 +140,13 @@ export function PicksListPage() {
   const filteredPicks = useMemo(
     () => filterPicks(picks, filters),
     [picks, filters]
+  );
+
+  // Sorting (default: sort by date descending)
+  const { sortedData: sortedPicks, requestSort, getSortIndicator } = useSortableTable<Pick>(
+    filteredPicks,
+    'date',
+    'desc'
   );
 
   // Stats
@@ -437,8 +445,14 @@ export function PicksListPage() {
             <table className="w-full">
               <thead className="bg-blue-500/10 border-b border-slate-700">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Fecha
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                    onClick={() => requestSort('date')}
+                    title="Click para ordenar por fecha"
+                  >
+                    <span className="flex items-center gap-1">
+                      Fecha {getSortIndicator('date')}
+                    </span>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
                     Tipster
@@ -446,8 +460,14 @@ export function PicksListPage() {
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
                     Partido
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Deporte
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                    onClick={() => requestSort('sport')}
+                    title="Click para ordenar por deporte"
+                  >
+                    <span className="flex items-center gap-1">
+                      Deporte {getSortIndicator('sport')}
+                    </span>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
                     Tipo
@@ -455,17 +475,35 @@ export function PicksListPage() {
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
                     Apuesta
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Cuota
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                    onClick={() => requestSort('odds')}
+                    title="Click para ordenar por cuota"
+                  >
+                    <span className="flex items-center gap-1">
+                      Cuota {getSortIndicator('odds')}
+                    </span>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Stake
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                    onClick={() => requestSort('stake')}
+                    title="Click para ordenar por stake"
+                  >
+                    <span className="flex items-center gap-1">
+                      Stake {getSortIndicator('stake')}
+                    </span>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
                     Bookmaker
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Resultado
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                    onClick={() => requestSort('result')}
+                    title="Click para ordenar por resultado"
+                  >
+                    <span className="flex items-center gap-1">
+                      Resultado {getSortIndicator('result')}
+                    </span>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
                     Profit
@@ -476,7 +514,7 @@ export function PicksListPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700">
-                {filteredPicks.map((pick) => (
+                {sortedPicks.map((pick) => (
                   <PickTableRow
                     key={pick.id}
                     pick={pick}
@@ -495,8 +533,8 @@ export function PicksListPage() {
           {/* Results count */}
           <div className="px-6 py-4 border-t border-slate-700 bg-slate-900/50">
             <p className="text-sm text-slate-400">
-              Mostrando <span className="font-semibold text-slate-300">{filteredPicks.length}</span>{' '}
-              {filteredPicks.length === 1 ? 'pick' : 'picks'}
+              Mostrando <span className="font-semibold text-slate-300">{sortedPicks.length}</span>{' '}
+              {sortedPicks.length === 1 ? 'pick' : 'picks'}
               {hasActiveFilters && (
                 <span>
                   {' '}
