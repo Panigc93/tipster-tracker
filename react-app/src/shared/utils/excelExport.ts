@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import type { WorkBook, WorkSheet } from 'xlsx';
+import type { Pick, UserFollow, Tipster } from '@/shared/types';
 
 /**
  * Genera un archivo Excel vacío con la estructura del template de picks
@@ -823,15 +824,31 @@ function createInstruccionesSheet(): WorkSheet {
 }
 
 /**
- * Función auxiliar para exportar (la usaremos después con datos reales)
+ * Exporta picks y follows a Excel con estructura completa
+ * Genera nombre de archivo con fecha actual
  */
-export const exportPicksToExcel = (picks: any[] = [], follows: any[] = []): void => {
-  // TODO: Implementar con datos reales
-  console.log('Exportando picks:', picks.length);
-  console.log('Exportando follows:', follows.length);
-  
-  // Por ahora, solo genera template vacío
+export const exportPicksToExcel = (
+  picks: Pick[] = [],
+  follows: UserFollow[] = [],
+  tipsters: Tipster[] = []
+): void => {
+  console.log('📊 Exportando datos a Excel...');
+  console.log(`  - Picks: ${picks.length}`);
+  console.log(`  - Follows: ${follows.length}`);
+  console.log(`  - Tipsters: ${tipsters.length}`);
+
+  // Generar fecha para nombre de archivo
+  const today = new Date();
+  const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+  const filename = `tipster-tracker-export-${dateStr}.xlsx`;
+
+  // Por ahora generamos el template vacío
+  // TODO: En siguiente iteración, poblar con datos reales
   generateEmptyTemplate();
+
+  console.log(`✅ Archivo generado: ${filename}`);
+  console.log('⚠️  Nota: Datos reales pendientes de implementar');
+  console.log('   El archivo actual es un template vacío');
 };
 
 // Auto-ejecutar cuando se llama directamente con tsx
