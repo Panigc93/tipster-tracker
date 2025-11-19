@@ -199,6 +199,80 @@ export class TipsterRepository extends FirebaseRepository<Tipster> {
   async resetTipster(id: string): Promise<OperationResult> {
     return this.updateLastPickDate(id, null);
   }
+
+  /**
+   * Reset tipster completely - deletes all associated picks and follows
+   * Returns count of deleted items
+   *
+   * @param tipsterId - Tipster ID
+   * @param userId - User ID
+   * @param pickRepository - Pick repository instance
+   * @param followRepository - Follow repository instance
+   * @returns Operation result with deletion counts
+   */
+  async resetTipsterComplete(
+    tipsterId: string,
+    userId: string,
+    pickRepository: { 
+      getPicksByTipster: (userId: string, tipsterId: string) => Promise<OperationResult<Array<{ id: string }>>>; 
+      deletePick: (id: string) => Promise<OperationResult> 
+    },
+    followRepository: { 
+      getFollowsByTipster: (userId: string, tipsterId: string) => Promise<OperationResult<Array<{ id: string }>>>; 
+      deleteFollow: (id: string) => Promise<OperationResult> 
+    }
+  ): Promise<OperationResult<{ deletedPicks: number; deletedFollows: number }>> {
+    try {
+      // Get all picks for this tipster
+      const picksResult = await pickRepository.getPicksByTipster(userId, tipsterId);
+      if (!picksResult.success) {
+        return {
+          success: false,
+          error: picksResult.error || { code: 'FETCH_ERROR', message: 'Failed to fetch picks' }
+        };
+      }
+
+      const picks = picksResult.data || [];
+      
+      // Get all follows for this tipster
+      const followsResult = await followRepository.getFollowsByTipster(userId, tipsterId);
+      if (!followsResult.success) {
+        return {
+          success: false,
+          error: followsResult.error || { code: 'FETCH_ERROR', message: 'Failed to fetch follows' }
+        };
+      }
+
+      const follows = followsResult.data || [];
+
+      // Delete all follows first (they reference picks)
+      const followDeletePromises = follows.map(follow => followRepository.deleteFollow(follow.id));
+      await Promise.all(followDeletePromises);
+
+      // Delete all picks
+      const pickDeletePromises = picks.map(pick => pickRepository.deletePick(pick.id));
+      await Promise.all(pickDeletePromises);
+
+      // Reset lastPickDate on tipster
+      await this.updateLastPickDate(tipsterId, null);
+
+      return {
+        success: true,
+        data: {
+          deletedPicks: picks.length,
+          deletedFollows: follows.length
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          code: 'RESET_ERROR',
+          message: error instanceof Error ? error.message : 'Unknown error during reset'
+        }
+      };
+    }
+  }
 }
 
 // Export singleton instance

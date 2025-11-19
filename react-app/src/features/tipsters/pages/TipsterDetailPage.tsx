@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, Plus } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Plus, RefreshCcw } from 'lucide-react';
 import {
   Button,
   Spinner,
   Alert,
   Badge,
+  ConfirmDialog,
   OddsDistributionChart,
   StakeDistributionChart,
   SportDistributionChart,
@@ -19,6 +20,7 @@ import { PickTableRow, AddPickModal } from '@features/picks/components';
 import { useFollowsByTipster, useFollows } from '@features/follows/hooks';
 import { FollowTableRow, AddFollowModal } from '@features/follows/components';
 import { calculateTraceability } from '@features/follows/utils';
+import { auth } from '@core/config/firebase.config';
 import type { Pick, UserFollow } from '@shared/types';
 
 type TabType = 'stats' | 'my-stats';
@@ -45,6 +47,9 @@ export function TipsterDetailPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditFollowModalOpen, setIsEditFollowModalOpen] = useState(false);
   const [selectedFollow, setSelectedFollow] = useState<UserFollow | null>(null);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+  const [isSecondResetConfirmOpen, setIsSecondResetConfirmOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Calculate stats from picks
   const stats = useMemo(() => calculateTipsterStats(picks), [picks]);
@@ -82,6 +87,64 @@ export function TipsterDetailPage() {
       globalThis.alert('Error al eliminar el tipster');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // Reset tipster handler
+  const handleResetTipster = () => {
+    setIsResetConfirmOpen(true);
+  };
+
+  const handleFirstConfirmReset = () => {
+    setIsResetConfirmOpen(false);
+    setIsSecondResetConfirmOpen(true);
+  };
+
+  const handleFinalConfirmReset = async () => {
+    if (!tipster) return;
+
+    setIsResetting(true);
+    try {
+      // Import repositories dynamically to avoid circular dependencies
+      const { pickRepository } = await import('@features/picks/services/pick-repository');
+      const { followRepository } = await import('@features/follows/services/follow-repository');
+      const { tipsterRepository } = await import('../services/tipster-repository');
+      
+      // Get current user ID from auth
+      const userId = auth.currentUser?.uid;
+      
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+
+      // Reset tipster completely
+      const result = await tipsterRepository.resetTipsterComplete(
+        tipster.id,
+        userId,
+        pickRepository,
+        followRepository
+      );
+
+      if (!result.success) {
+        throw new Error(result.error?.message || 'Failed to reset tipster');
+      }
+
+      const { deletedPicks, deletedFollows } = result.data || { deletedPicks: 0, deletedFollows: 0 };
+
+      // Show success message
+      globalThis.alert(
+        `✅ Tipster "${tipster.name}" reseteado correctamente.\n\n` +
+        `Se eliminaron ${deletedPicks} picks y ${deletedFollows} follows.`
+      );
+
+      // Navigate back to dashboard
+      navigate('/');
+    } catch (err) {
+      console.error('Error resetting tipster:', err);
+      globalThis.alert('Error al resetear el tipster: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setIsResetting(false);
+      setIsSecondResetConfirmOpen(false);
     }
   };
 
@@ -200,6 +263,16 @@ export function TipsterDetailPage() {
                 onClick={() => setIsEditModalOpen(true)}
               >
                 Editar
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<RefreshCcw className="h-4 w-4" />}
+                onClick={handleResetTipster}
+                disabled={isResetting || picks.length === 0}
+                title={picks.length === 0 ? 'No hay picks para resetear' : 'Resetear tipster'}
+              >
+                {isResetting ? 'Reseteando...' : 'Resetear'}
               </Button>
               <Button
                 variant="danger"
@@ -761,6 +834,31 @@ export function TipsterDetailPage() {
             />
           );
         })()}
+
+        {/* Reset Tipster - First Confirmation */}
+        <ConfirmDialog
+          isOpen={isResetConfirmOpen}
+          onClose={() => setIsResetConfirmOpen(false)}
+          onConfirm={handleFirstConfirmReset}
+          title="⚠️ Resetear Tipster"
+          message={`Vas a resetear "${tipster.name}".\n\nEsto eliminará:\n• Todos los picks de este tipster (${picks.length} picks)\n• Todos tus follows de este tipster (${tipsterFollows.length} follows)\n\nEsta acción NO se puede deshacer.\n\n¿Estás seguro de continuar?`}
+          confirmText="Sí, continuar"
+          cancelText="Cancelar"
+          isDangerous={true}
+        />
+
+        {/* Reset Tipster - Second Confirmation */}
+        <ConfirmDialog
+          isOpen={isSecondResetConfirmOpen}
+          onClose={() => setIsSecondResetConfirmOpen(false)}
+          onConfirm={handleFinalConfirmReset}
+          title="⚠️ Última Confirmación"
+          message={`Última confirmación: ¿Seguro que quieres resetear "${tipster.name}"?\n\nSe eliminarán permanentemente ${picks.length} picks y ${tipsterFollows.length} follows.`}
+          confirmText="Sí, resetear definitivamente"
+          cancelText="No, cancelar"
+          isDangerous={true}
+          isLoading={isResetting}
+        />
     </>
   );
 }
