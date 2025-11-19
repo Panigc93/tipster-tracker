@@ -425,26 +425,38 @@ export const MyPicksPage = () => {
                 <tr className="border-b border-slate-700">
                   <th 
                     className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('dateTimeFollowed')}
-                    title="Click para ordenar por fecha"
+                    onClick={(e) => requestSort('dateTimeFollowed', e.shiftKey)}
+                    title="Click para ordenar por fecha (Shift+Click para multi-sort)"
                   >
                     <span className="flex items-center gap-1">
                       Fecha {getSortIndicator('dateTimeFollowed')}
                     </span>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                    Tipster
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                    onClick={(e) => requestSort('tipsterId', e.shiftKey)}
+                    title="Click para ordenar por tipster (Shift+Click para multi-sort)"
+                  >
+                    <span className="flex items-center gap-1">
+                      Tipster {getSortIndicator('tipsterId')}
+                    </span>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                     Match
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                    Deporte
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                    onClick={(e) => requestSort('sport', e.shiftKey)}
+                    title="Click para ordenar por deporte (Shift+Click para multi-sort)"
+                  >
+                    <span className="flex items-center gap-1">
+                      Deporte {getSortIndicator('sport')}
+                    </span>
                   </th>
                   <th 
                     className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('userOdds')}
-                    title="Click para ordenar por cuota"
+                    onClick={(e) => requestSort('userOdds', e.shiftKey)}
+                    title="Click para ordenar por cuota (Shift+Click para multi-sort)"
                   >
                     <span className="flex items-center gap-1">
                       Cuota {getSortIndicator('userOdds')}
@@ -452,30 +464,18 @@ export const MyPicksPage = () => {
                   </th>
                   <th 
                     className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('userStake')}
-                    title="Click para ordenar por stake"
+                    onClick={(e) => requestSort('userStake', e.shiftKey)}
+                    title="Click para ordenar por stake (Shift+Click para multi-sort)"
                   >
                     <span className="flex items-center gap-1">
                       Stake {getSortIndicator('userStake')}
                     </span>
                   </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('userResult')}
-                    title="Click para ordenar por resultado"
-                  >
-                    <span className="flex items-center gap-1">
-                      Resultado {getSortIndicator('userResult')}
-                    </span>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
+                    Resultado
                   </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('profitFromFollow')}
-                    title="Click para ordenar por profit"
-                  >
-                    <span className="flex items-center gap-1">
-                      Profit {getSortIndicator('profitFromFollow')}
-                    </span>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
+                    Profit
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                     Match
