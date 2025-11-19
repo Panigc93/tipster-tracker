@@ -15355,25 +15355,133 @@ Se creó un componente `AdvancedFilters` con filtros complejos (multi-select, ra
 - ✅ Filtro de rango de fechas (desde + hasta combinados)
 - ✅ Botón "Limpiar filtros" resetea fechas correctamente
 
-#### Mejoras Futuras Consideradas (No Implementadas)
-1. **Ordenación de columnas** - Sort ascendente/descendente en tablas
-2. **Export a Excel/CSV** - Exportar datos filtrados
-3. **Toast notifications** - Reemplazar alerts nativos
-4. **Skeleton loaders** - Loading states mejorados
-5. **Error boundaries** - Manejo de errores a nivel componente
-6. **Búsqueda avanzada** - Búsqueda por múltiples campos
-7. **Mejoras responsive** - Optimización móvil/tablet
-8. **Performance** - React.memo, code splitting
+---
 
-**Nota**: Estas mejoras pueden implementarse en una fase posterior o como parte del mantenimiento continuo post-deploy.
+### Tareas Pendientes de la Fase 8.5
+
+#### Task 4: Capacidades de Ordenación 🔄 PENDIENTE
+**Objetivo**: Añadir ordenación por columnas en tablas (picks, follows)
+
+**Características**:
+- Sort ascendente/descendente por: fecha, cuota, stake, resultado, tipster
+- Indicadores visuales de columna ordenada (↑↓)
+- Click en header de columna para ordenar
+- Estado de ordenación persistente durante la sesión
+
+#### Task 5A: Exportar a Excel - Template ✅ COMPLETADA (19/11/2025)
+**Objetivo**: Crear template Excel completo con formulas, estilos y dropdowns
+
+**Implementación** (commits 44c5340, 1f2a0ae):
+- **Estructura**: 6 hojas (Realizadas, Lanzadas Tipster, Mis_Picks_Dashboard, Tipster_Picks_Dashboard, Base datos, 📖 INSTRUCCIONES)
+- **Tecnologías**: 
+  * TypeScript + xlsx library → Estructura base
+  * Python + openpyxl → Post-processing (estilos, fórmulas, dropdowns)
+- **Dashboards expandidos**: 
+  * 7→16 deportes sincronizados con Base datos
+  * 29 columnas (A-AC): 13 stats + 16 sports
+  * Deportes: Badminton, Baloncesto, Balonmano, Beisbol, Boxeo, Ciclismo, Esports, Fútbol, Fútbol Americano, Golf, Hockey, MMA, Tenis, Tenis Mesa, Voleibol
+- **Fórmulas dinámicas**:
+  * Row 2: Totales con SUMIF/COUNTIFS
+  * Rows 3-100: Fórmulas copiadas automáticamente
+  * Pattern: `=IFERROR(((COUNTIFS(sheet!$B$,tipster,sheet!$E$,"W",sheet!$DEPORTE$,sport))/$H),0)`
+- **Estilos completos**:
+  * Arial font global
+  * Merged cells, conditional formatting (red/green)
+  * Yellow headers, borders, optimized column widths
+- **Dropdowns funcionales**:
+  * 7 dropdowns por sheet (LIVE/PRE, TIPSTER, W/L/V, COMBINADA, DEPORTE, Plataforma, BOOKIE)
+  * showDropDown=False para compatibilidad LibreOffice
+  * Dynamic TIPSTER dropdown synced with dashboards
+- **Workflow documentado**: Dashboard-first (añadir tipster en dashboard → aparece en dropdown)
+- **Archivo generado**: `EXCEL-TEMPLATE-16-SPORTS-ARIAL.xlsx` (50KB)
+
+**Pendiente - UI Integration**:
+- **Botón único "Export to Excel"**: 
+  * Ubicación: Navbar/Header (acceso global)
+  * Exporta TODOS los datos del usuario sin filtros
+  * Picks de todos tipsters → "Lanzadas Tipster"
+  * Follows del usuario → "Realizadas"
+  * Dashboards auto-generados con tipsters únicos
+  * Nombre archivo: `tipster-tracker-export-YYYY-MM-DD.xlsx`
+  * Función: `exportPicksToExcel(picks, follows)` en `excelExport.ts`
+  * UX: Un solo botón para exportar todo (análisis externo en Excel)
+
+#### Task 5B: Importar desde Excel 🔄 PENDIENTE
+**Objetivo**: Funcionalidad para importar picks desde Excel generado
+
+**Características**:
+- Parsear Excel con xlsx library
+- Validar datos antes de importar
+- Preview modal con datos a importar
+- Batch import a Firestore
+- Manejo de errores (filas inválidas)
+
+#### Task 6: Sistema de Notificaciones Toast 🔄 PENDIENTE
+**Objetivo**: Reemplazar alerts nativos con toast notifications
+
+**Características**:
+- Librería: `react-hot-toast` o `react-toastify`
+- Notificaciones de éxito, error, info, warning
+- Posición configurable (top-right por defecto)
+- Auto-dismiss con duración configurable
+- Reemplazar todos los `alert()` y `confirm()` nativos
+
+#### Task 7: Optimización de Estados de Carga 🔄 PENDIENTE
+**Objetivo**: Mejorar feedback visual durante operaciones
+
+**Características**:
+- Skeleton loaders para tablas y cards
+- Loading overlays específicos (no solo spinner global)
+- Estados de error mejorados con iconos y mensajes claros
+- Loading states en botones durante operaciones
+
+#### Task 8: Error Boundaries 🔄 PENDIENTE
+**Objetivo**: Implementar error boundaries de React
+
+**Características**:
+- Error boundaries a nivel de página y componente
+- Capturar errores de renderizado
+- Páginas de error amigables con opciones de recuperación
+- Logging de errores para debugging
+
+#### Task 9: Mejora de Funcionalidad de Búsqueda 🔄 PENDIENTE
+**Objetivo**: Mejorar búsqueda en tablas
+
+**Características**:
+- Búsqueda por múltiples campos (match, betType, tipster, etc.)
+- Resaltado de resultados en la tabla (highlight)
+- Historial de búsquedas recientes (localStorage)
+- Búsqueda con debounce para mejor performance
+
+#### Task 10: Mejoras Responsive 🔄 PENDIENTE
+**Objetivo**: Optimizar diseño para móviles y tablets
+
+**Características**:
+- Menú hamburguesa para móviles
+- Tablas scrollables horizontalmente con indicador visual
+- Filtros colapsables en móvil (accordion)
+- Optimizar spacing y tamaños de fuente
+- Touch-friendly (botones y controles más grandes)
+
+#### Task 11: Optimización de Rendimiento 🔄 PENDIENTE
+**Objetivo**: Mejorar performance de la aplicación
+
+**Características**:
+- `React.memo` estratégico en componentes que re-renderizan frecuentemente
+- `useMemo` y `useCallback` donde corresponda
+- Lazy loading de componentes pesados (Charts, modals)
+- Code splitting por rutas con React.lazy
+- Virtualización de listas largas (react-window o react-virtuoso)
 
 ---
 
-**Duración real**: ~8 horas (2 tareas implementadas y testeadas)
+**Duración real**: ~8 horas (3 tareas completadas: ConfirmDialog, Reset Tipster, Filtros de Fecha)
 
-**Estado**: ✅ **COMPLETADA** (19/11/2025)
+**Duración estimada restante**: 15-20 horas (8 tareas pendientes)
 
-**Próxima fase**: Fase 9 - Migración de Datos y Deploy 🚀
+**Estado**: 🔄 **EN PROGRESO** - 3/11 tareas completadas (27%)
+
+**Próxima tarea**: Task 4 - Capacidades de Ordenación
 
 ---
 

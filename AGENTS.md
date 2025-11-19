@@ -2254,14 +2254,49 @@ react-app/src/
   - Features: Auth, Tipsters, Picks
   - Todas las funcionalidades base migradas
 
-- 🔄 **Fase 6**: Feature Follows (en progreso - 95%)
+- ✅ **Fase 6**: Feature Follows (100% completada)
   - ✅ CRUD completo de follows
   - ✅ MyPicksPage con estadísticas y filtros
   - ✅ Integración en TipsterDetailPage
   - ✅ Botón "Seguir" en PickTableRow
   - ✅ Sección follow en AddPickModal
   - ✅ Sistema de comparación Match/Diverge
-  - 🔄 Testing en progreso (Sección 5 de 10)
+
+- 🔄 **Fase 8.5**: Tareas Adicionales (en progreso - 5/11)
+  - ✅ Task 1: Reset Tipster (commit 9007614)
+  - ✅ Task 2: Date Range Filters (commit 31a8575)
+  - ✅ Task 3: Documentation (commit 7591b0d)
+  - ✅ Task 4: Column Sorting (commits 1ec71f8, 2720629, 06b84fe)
+  - ✅ **Task 5A: Excel Export Template (commits 44c5340, 1f2a0ae - 19/11/2025) - COMPLETADA 100%**
+    * ✅ 6 sheets: Realizadas, Lanzadas Tipster, Mis_Picks_Dashboard, Tipster_Picks_Dashboard, Base datos, 📖 INSTRUCCIONES
+    * ✅ Dashboard sports expanded: 7→16 columns (N-AC) matching Base datos
+    * ✅ Sports synchronized: Badminton, Baloncesto, Balonmano, Beisbol, Boxeo, Ciclismo, Esports, Fútbol, Fútbol Americano, Golf, Hockey, MMA, Tenis, Tenis Mesa, Voleibol
+    * ✅ Arial font applied globally to all sheets
+    * ✅ All formulas: Row 2 stats, data rows, dashboard SUMIF/COUNTIFS (rows 3-100)
+    * ✅ Complete styling: Colors, fonts, borders, conditional formatting
+    * ✅ 7 working dropdowns per data sheet (showDropDown=False for LibreOffice compatibility)
+    * ✅ Dynamic TIPSTER dropdowns synced with dashboards
+    * ✅ Dashboard-first workflow documented in Instructions sheet
+    * ✅ **Technical Implementation**:
+      - TypeScript (excelExport.ts): Structure generation with xlsx library
+      - Python (add-excel-styles.py): Post-processing with openpyxl for styles/formulas/dropdowns
+      - 29 columns per dashboard (A-AC): 13 stats + 16 sports
+      - Formula pattern: `=IFERROR(((COUNTIFS(sheet!$B$,tipster,sheet!$E$,"W",sheet!$DEPORTE$,sport))/$H),0)`
+      - Merged cells: N1:AC1 "% Aciertos Segun deporte"
+      - Column widths optimized for each sport name length
+      - Conditional formatting: Red (<0), Green (>0) for profit columns
+    * ✅ **Files Generated**:
+      - `EXCEL-TEMPLATE-16-SPORTS-ARIAL.xlsx` (50KB, final version)
+      - `EXCEL-FINAL-CON-ARIAL.xlsx` (46KB, previous 7-sports version)
+      - Backup files with `.backup.xlsx` extension
+    * ⏳ **Pending UI Integration**:
+      - Add single "Export to Excel" button in navbar/header (global access)
+      - Button will export ALL data: picks from all tipsters + user follows
+      - Uses `generateEmptyTemplate()` + Python post-processing
+      - Downloads file with current date: `tipster-tracker-export-YYYY-MM-DD.xlsx`
+      - No filters applied - exports complete dataset for external analysis
+  - ⏳ Task 5B: Import from Excel (0%)
+  - ⏳ Tasks 6-11: Not started
 
 ### Decisiones de Diseño UX - Fase 6
 
@@ -2317,6 +2352,139 @@ react-app/src/
 - ✅ Comparación como resumen breve y visual
 - ✅ Layout más claro y organizado
 - ✅ Toda la información relevante accesible
+
+#### Expansión de Deportes en Dashboards - Task 5A (19/11/2025)
+
+**Contexto**: El usuario solicitó sincronizar las columnas de deportes entre Base datos (16 deportes) y los dashboards (7 deportes).
+
+**Problema identificado**:
+- Base datos tenía 16 deportes: Badminton, Baloncesto, Balonmano, Beisbol, Boxeo, Ciclismo, Esports, Fútbol, Fútbol Americano, Golf, Hockey, MMA, Tenis, Tenis Mesa, Voleibol
+- Dashboards solo tenían 7 deportes fijos: TENIS, BALONCESTO, TENIS MESA, FUTBOL, UFC, NFL, CABALLOS
+- Nombres inconsistentes: UFC vs MMA, NFL vs Fútbol Americano
+- Si usuario añadía pick de "Golf" → no aparecía en dashboard
+
+**Decisión de diseño**:
+- Mantener estructura de columnas A-M (13 stats) sin cambios
+- Expandir columnas N-AC (16 deportes) sincronizadas con Base datos
+- Actualizar nombres: UFC→MMA, NFL→Fútbol Americano
+- Eliminar: CABALLOS (no está en Base datos)
+- Añadir 9 deportes nuevos: Badminton, Balonmano, Beisbol, Boxeo, Ciclismo, Esports, Golf, Hockey, Voleibol
+
+**Implementación técnica**:
+
+1. **excelExport.ts** (TypeScript):
+   ```typescript
+   // Mis_Picks_Dashboard y Tipster_Picks_Dashboard
+   // Headers: 16 deportes en columnas N-AC
+   const sportHeaders = ['Badminton', 'Baloncesto', 'Balonmano', 'Beisbol', 
+                        'Boxeo', 'Ciclismo', 'Esports', 'Fútbol', 
+                        'Fútbol Americano', 'Golf', 'Hockey', 'MMA', 
+                        'Tenis', 'Tenis Mesa', 'Voleibol'];
+   
+   // Fórmulas N3-AC3: Porcentaje de aciertos por deporte
+   ws.N3 = { 
+     t: 'n', 
+     f: 'IFERROR(((COUNTIFS(Realizadas!$B$7:$B$2003,$A3,Realizadas!$E$7:$E$2003,"W",Realizadas!$R$7:$R$2003,N$2))/$H3),0)', 
+     v: 0 
+   };
+   // ... hasta AC3
+   
+   // Column widths: Optimizados por longitud de nombre
+   ws['!cols'] = [
+     // ... A-M sin cambios
+     { wch: 10 }, // N: Badminton
+     { wch: 12 }, // O: Baloncesto
+     { wch: 12 }, // P: Balonmano
+     { wch: 10 }, // Q: Beisbol
+     { wch: 8 },  // R: Boxeo
+     { wch: 10 }, // S: Ciclismo
+     { wch: 10 }, // T: Esports
+     { wch: 10 }, // U: Fútbol
+     { wch: 14 }, // V: Fútbol Americano
+     { wch: 8 },  // W: Golf
+     { wch: 10 }, // X: Hockey
+     { wch: 8 },  // Y: MMA
+     { wch: 10 }, // Z: Tenis
+     { wch: 12 }, // AA: Tenis Mesa
+     { wch: 10 }, // AB: Voleibol
+   ];
+   ```
+
+2. **add-excel-styles.py** (Python - openpyxl):
+   ```python
+   # Merged cell actualizada para 16 deportes
+   ws.merge_cells('N1:AC1')  # Antes: N1:W1
+   ws['N1'].value = '% Aciertos Segun deporte'
+   ws['N1'].fill = black_fill
+   ws['N1'].font = white_font
+   
+   # Aplicar estilos a todas las columnas N-AC
+   for col_letter in ['N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 
+                      'X', 'Y', 'Z', 'AA', 'AB', 'AC']:
+       # Headers (fila 2): amarillo
+       ws[f'{col_letter}2'].fill = yellow_fill
+       ws[f'{col_letter}2'].font = small_font
+       ws[f'{col_letter}2'].alignment = center_alignment
+       ws[f'{col_letter}2'].border = thin_border
+       
+       # Data cells (filas 3-100): bordes negros
+       for row in range(3, 101):
+           ws[f'{col_letter}{row}'].border = thin_border
+           ws[f'{col_letter}{row}'].font = small_font
+           ws[f'{col_letter}{row}'].alignment = center_alignment
+   ```
+
+3. **Fórmulas dinámicas**:
+   - Fila 3: Template con referencia relativa a header ($2)
+   - Filas 4-100: Copiadas automáticamente por Python
+   - Función `copy_dashboard_formulas()` extiende formulas N3-AC3 → N4:AC100
+   - Resultado: Al añadir tipster en fila 4, todas las 29 columnas se calculan
+
+**Testing realizado**:
+- ✅ Generación exitosa de Excel con 29 columnas
+- ✅ Fórmulas correctas en ambos dashboards
+- ✅ Merge cell N1:AC1 correcto
+- ✅ Estilos aplicados (yellow headers, borders)
+- ✅ Arial font en todas las celdas
+- ✅ Column widths optimizados
+- ✅ Archivo final: `EXCEL-TEMPLATE-16-SPORTS-ARIAL.xlsx` (50KB)
+
+**Resultado**:
+- Dashboards ahora soportan 16 deportes sincronizados con Base datos
+- Usuario puede añadir pick de cualquier deporte → aparece en dashboard
+- Fórmulas automáticas calculan winrate por deporte para cada tipster
+- Template extensible: si Base datos añade deporte 17, solo modificar arrays
+
+**Trabajo Pendiente - UI Integration**:
+
+1. **Botón "Export to Excel" (Único en toda la app)**:
+   - **Ubicación**: Navbar superior (acceso global desde cualquier vista)
+   - **Funcionalidad**: Exporta TODOS los datos del usuario
+     * Todas las picks de todos los tipsters → Sheet "Lanzadas Tipster"
+     * Todos los follows del usuario → Sheet "Realizadas"
+     * Dashboards con tipsters únicos y sus estadísticas calculadas
+   - **Comportamiento**:
+     * Click → Genera Excel en memoria
+     * Aplica Python post-processing (estilos + fórmulas + dropdowns)
+     * Descarga archivo: `tipster-tracker-export-YYYY-MM-DD.xlsx`
+   - **Sin filtros**: Exporta dataset completo para análisis externo en Excel
+   - **Implementación**: Usar función `exportPicksToExcel(picks, follows)` en `excelExport.ts`
+
+2. **Flujo técnico**:
+   ```typescript
+   // En Navbar.tsx o Header.tsx
+   const handleExportToExcel = async () => {
+     const picks = await pickRepository.findAll();
+     const follows = await followRepository.findAll();
+     exportPicksToExcel(picks, follows); // Genera y descarga
+   };
+   ```
+
+3. **Ventajas de un único botón**:
+   - UX simple y clara (no múltiples opciones que confundan)
+   - Export completo permite análisis personalizado en Excel
+   - Usuario puede filtrar/ordenar en Excel según necesite
+   - Botón siempre accesible desde cualquier página
 
 ### Documentación Adicional
 
