@@ -447,8 +447,8 @@ export function PicksListPage() {
                 <tr>
                   <th 
                     className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={(e) => requestSort('date', e.shiftKey)}
-                    title="Click para ordenar por fecha (Shift+Click para multi-sort)"
+                    onClick={() => requestSort('date')}
+                    title="Click para ordenar por fecha. Click en otra columna para multi-sort"
                   >
                     <span className="flex items-center gap-1">
                       Fecha {getSortIndicator('date')}
@@ -456,8 +456,8 @@ export function PicksListPage() {
                   </th>
                   <th 
                     className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={(e) => requestSort('tipsterId', e.shiftKey)}
-                    title="Click para ordenar por tipster (Shift+Click para multi-sort)"
+                    onClick={() => requestSort('tipsterId')}
+                    title="Click para ordenar por tipster. Click en otra columna para multi-sort"
                   >
                     <span className="flex items-center gap-1">
                       Tipster {getSortIndicator('tipsterId')}
@@ -468,8 +468,8 @@ export function PicksListPage() {
                   </th>
                   <th 
                     className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={(e) => requestSort('sport', e.shiftKey)}
-                    title="Click para ordenar por deporte (Shift+Click para multi-sort)"
+                    onClick={() => requestSort('sport')}
+                    title="Click para ordenar por deporte. Click en otra columna para multi-sort"
                   >
                     <span className="flex items-center gap-1">
                       Deporte {getSortIndicator('sport')}
@@ -483,8 +483,8 @@ export function PicksListPage() {
                   </th>
                   <th 
                     className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={(e) => requestSort('odds', e.shiftKey)}
-                    title="Click para ordenar por cuota (Shift+Click para multi-sort)"
+                    onClick={() => requestSort('odds')}
+                    title="Click para ordenar por cuota. Click en otra columna para multi-sort"
                   >
                     <span className="flex items-center gap-1">
                       Cuota {getSortIndicator('odds')}
@@ -492,8 +492,8 @@ export function PicksListPage() {
                   </th>
                   <th 
                     className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={(e) => requestSort('stake', e.shiftKey)}
-                    title="Click para ordenar por stake (Shift+Click para multi-sort)"
+                    onClick={() => requestSort('stake')}
+                    title="Click para ordenar por stake. Click en otra columna para multi-sort"
                   >
                     <span className="flex items-center gap-1">
                       Stake {getSortIndicator('stake')}

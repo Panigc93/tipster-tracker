@@ -59,12 +59,23 @@ export function TipsterDetailPage() {
     getSortIndicator: getPicksSortIndicator 
   } = useSortableTable<Pick>(picks, 'date', 'desc');
 
+  // Enrich follows with sport field from original pick for sorting
+  const enrichedFollows = useMemo(() => {
+    return tipsterFollows.map(follow => {
+      const originalPick = picks.find(p => p.id === follow.pickId);
+      return {
+        ...follow,
+        sport: originalPick?.sport || '',
+      };
+    });
+  }, [tipsterFollows, picks]);
+
   // Sorting for follows table
   const { 
     sortedData: sortedFollows, 
     requestSort: requestFollowsSort, 
     getSortIndicator: getFollowsSortIndicator 
-  } = useSortableTable<UserFollow>(tipsterFollows, 'dateTimeFollowed', 'desc');
+  } = useSortableTable(enrichedFollows, 'dateTimeFollowed', 'desc');
 
   // Calculate stats from picks
   const stats = useMemo(() => calculateTipsterStats(picks), [picks]);
@@ -468,8 +479,8 @@ export function TipsterDetailPage() {
                           <tr>
                             <th 
                               className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                              onClick={(e) => requestPicksSort('date', e.shiftKey)}
-                              title="Click para ordenar por fecha (Shift+Click para multi-sort)"
+                              onClick={() => requestPicksSort('date')}
+                              title="Click para ordenar por fecha. Click en otra columna para multi-sort"
                             >
                               <span className="flex items-center gap-1">
                                 Fecha {getPicksSortIndicator('date')}
@@ -483,8 +494,8 @@ export function TipsterDetailPage() {
                             </th>
                             <th 
                               className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                              onClick={(e) => requestPicksSort('sport', e.shiftKey)}
-                              title="Click para ordenar por deporte (Shift+Click para multi-sort)"
+                              onClick={() => requestPicksSort('sport')}
+                              title="Click para ordenar por deporte. Click en otra columna para multi-sort"
                             >
                               <span className="flex items-center gap-1">
                                 Deporte {getPicksSortIndicator('sport')}
@@ -498,8 +509,8 @@ export function TipsterDetailPage() {
                             </th>
                             <th 
                               className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                              onClick={(e) => requestPicksSort('odds', e.shiftKey)}
-                              title="Click para ordenar por cuota (Shift+Click para multi-sort)"
+                              onClick={() => requestPicksSort('odds')}
+                              title="Click para ordenar por cuota. Click en otra columna para multi-sort"
                             >
                               <span className="flex items-center gap-1">
                                 Cuota {getPicksSortIndicator('odds')}
@@ -507,8 +518,8 @@ export function TipsterDetailPage() {
                             </th>
                             <th 
                               className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                              onClick={(e) => requestPicksSort('stake', e.shiftKey)}
-                              title="Click para ordenar por stake (Shift+Click para multi-sort)"
+                              onClick={() => requestPicksSort('stake')}
+                              title="Click para ordenar por stake. Click en otra columna para multi-sort"
                             >
                               <span className="flex items-center gap-1">
                                 Stake {getPicksSortIndicator('stake')}
@@ -761,8 +772,8 @@ export function TipsterDetailPage() {
                             <tr>
                               <th 
                                 className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                                onClick={(e) => requestFollowsSort('dateTimeFollowed', e.shiftKey)}
-                                title="Click para ordenar por fecha (Shift+Click para multi-sort)"
+                                onClick={() => requestFollowsSort('dateTimeFollowed')}
+                                title="Click para ordenar por fecha. Click en otra columna para multi-sort"
                               >
                                 <span className="flex items-center gap-1">
                                   Fecha {getFollowsSortIndicator('dateTimeFollowed')}
@@ -776,8 +787,8 @@ export function TipsterDetailPage() {
                               </th>
                               <th 
                                 className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                                onClick={(e) => requestFollowsSort('sport', e.shiftKey)}
-                                title="Click para ordenar por deporte (Shift+Click para multi-sort)"
+                                onClick={() => requestFollowsSort('sport')}
+                                title="Click para ordenar por deporte. Click en otra columna para multi-sort"
                               >
                                 <span className="flex items-center gap-1">
                                   Deporte {getFollowsSortIndicator('sport')}
@@ -785,8 +796,8 @@ export function TipsterDetailPage() {
                               </th>
                               <th 
                                 className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                                onClick={(e) => requestFollowsSort('userOdds', e.shiftKey)}
-                                title="Click para ordenar por cuota (Shift+Click para multi-sort)"
+                                onClick={() => requestFollowsSort('userOdds')}
+                                title="Click para ordenar por cuota. Click en otra columna para multi-sort"
                               >
                                 <span className="flex items-center gap-1">
                                   Cuota {getFollowsSortIndicator('userOdds')}
@@ -794,8 +805,8 @@ export function TipsterDetailPage() {
                               </th>
                               <th 
                                 className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                                onClick={(e) => requestFollowsSort('userStake', e.shiftKey)}
-                                title="Click para ordenar por stake (Shift+Click para multi-sort)"
+                                onClick={() => requestFollowsSort('userStake')}
+                                title="Click para ordenar por stake. Click en otra columna para multi-sort"
                               >
                                 <span className="flex items-center gap-1">
                                   Stake {getFollowsSortIndicator('userStake')}

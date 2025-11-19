@@ -122,61 +122,52 @@ export function useSortableTable<T>(
   /**
    * Request sort by a specific column
    * @param key - Column key to sort by
-   * @param isMulti - If true (Shift key held), add to existing sorts. If false, replace sort.
    *
-   * Single column: toggles null -> asc -> desc -> null
-   * Multi column: adds/updates column in sort chain
+   * Behavior:
+   * - Click on same column: toggles asc -> desc -> null (removes from sort)
+   * - Click on different column: adds to multi-sort chain
+   * - To remove all sorting: click same column 3 times (asc -> desc -> null)
    */
-  const requestSort = (key: keyof T, isMulti = false) => {
-    if (!isMulti) {
-      // Single column sort - toggle through states
-      let direction: SortDirection = 'asc';
+  const requestSort = (key: keyof T) => {
+    const existingColumn = sortConfig.columns.find((col) => col.key === key);
 
-      if (sortConfig.key === key) {
-        if (sortConfig.direction === 'asc') {
-          direction = 'desc';
-        } else if (sortConfig.direction === 'desc') {
-          direction = null;
-        }
+    if (existingColumn) {
+      // Column already in sort - toggle through states: asc -> desc -> null
+      let newDirection: SortDirection = 'asc';
+      if (existingColumn.direction === 'asc') {
+        newDirection = 'desc';
+      } else if (existingColumn.direction === 'desc') {
+        newDirection = null; // Remove from sort
       }
 
-      setSortConfig({
-        key: direction ? key : null,
-        direction,
-        columns: direction ? [{ key, direction }] : [],
-      });
-    } else {
-      // Multi-column sort
-      const existingColumn = sortConfig.columns.find((col) => col.key === key);
-
-      if (existingColumn) {
-        // Toggle existing column
-        let newDirection: SortDirection = 'asc';
-        if (existingColumn.direction === 'asc') {
-          newDirection = 'desc';
-        } else if (existingColumn.direction === 'desc') {
-          newDirection = null;
-        }
-
-        const newColumns = newDirection
-          ? sortConfig.columns.map((col) => (col.key === key ? { key, direction: newDirection } : col))
-          : sortConfig.columns.filter((col) => col.key !== key);
-
+      if (newDirection === null) {
+        // Remove this column from sort
+        const newColumns = sortConfig.columns.filter((col) => col.key !== key);
         const primaryColumn = newColumns[0];
         setSortConfig({
           key: primaryColumn?.key ?? null,
           direction: primaryColumn?.direction ?? null,
-          columns: newColumns.filter((col) => col.direction !== null) as SortColumn<T>[],
+          columns: newColumns,
         });
       } else {
-        // Add new column to sort
-        const newColumns = [...sortConfig.columns, { key, direction: 'asc' as SortDirection }];
+        // Update direction of existing column
+        const newColumns = sortConfig.columns.map((col) =>
+          col.key === key ? { key, direction: newDirection } : col
+        );
         setSortConfig({
-          key: sortConfig.key ?? key,
-          direction: sortConfig.direction ?? 'asc',
+          key: sortConfig.key,
+          direction: sortConfig.key === key ? newDirection : sortConfig.direction,
           columns: newColumns,
         });
       }
+    } else {
+      // New column - add to multi-sort chain
+      const newColumns = [...sortConfig.columns, { key, direction: 'asc' as SortDirection }];
+      setSortConfig({
+        key: sortConfig.key ?? key,
+        direction: sortConfig.direction ?? 'asc',
+        columns: newColumns,
+      });
     }
   };
 

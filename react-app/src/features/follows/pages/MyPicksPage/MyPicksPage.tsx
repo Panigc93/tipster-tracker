@@ -147,9 +147,20 @@ export const MyPicksPage = () => {
     });
   }, [follows, picks, tipsters, filters]);
 
+  // Enrich follows with sport field from original pick for sorting
+  const enrichedFollows = useMemo(() => {
+    return filteredFollows.map(follow => {
+      const originalPick = picks.find(p => p.id === follow.pickId);
+      return {
+        ...follow,
+        sport: originalPick?.sport || '',
+      };
+    });
+  }, [filteredFollows, picks]);
+
   // Sorting (default: sort by dateTimeFollowed descending - most recent first)
-  const { sortedData: sortedFollows, requestSort, getSortIndicator } = useSortableTable<UserFollow>(
-    filteredFollows,
+  const { sortedData: sortedFollows, requestSort, getSortIndicator } = useSortableTable(
+    enrichedFollows,
     'dateTimeFollowed',
     'desc'
   );
@@ -425,8 +436,8 @@ export const MyPicksPage = () => {
                 <tr className="border-b border-slate-700">
                   <th 
                     className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={(e) => requestSort('dateTimeFollowed', e.shiftKey)}
-                    title="Click para ordenar por fecha (Shift+Click para multi-sort)"
+                    onClick={() => requestSort('dateTimeFollowed')}
+                    title="Click para ordenar por fecha. Click en otra columna para multi-sort"
                   >
                     <span className="flex items-center gap-1">
                       Fecha {getSortIndicator('dateTimeFollowed')}
@@ -434,8 +445,8 @@ export const MyPicksPage = () => {
                   </th>
                   <th 
                     className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={(e) => requestSort('tipsterId', e.shiftKey)}
-                    title="Click para ordenar por tipster (Shift+Click para multi-sort)"
+                    onClick={() => requestSort('tipsterId')}
+                    title="Click para ordenar por tipster. Click en otra columna para multi-sort"
                   >
                     <span className="flex items-center gap-1">
                       Tipster {getSortIndicator('tipsterId')}
@@ -446,8 +457,8 @@ export const MyPicksPage = () => {
                   </th>
                   <th 
                     className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={(e) => requestSort('sport', e.shiftKey)}
-                    title="Click para ordenar por deporte (Shift+Click para multi-sort)"
+                    onClick={() => requestSort('sport')}
+                    title="Click para ordenar por deporte. Click en otra columna para multi-sort"
                   >
                     <span className="flex items-center gap-1">
                       Deporte {getSortIndicator('sport')}
@@ -455,8 +466,8 @@ export const MyPicksPage = () => {
                   </th>
                   <th 
                     className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={(e) => requestSort('userOdds', e.shiftKey)}
-                    title="Click para ordenar por cuota (Shift+Click para multi-sort)"
+                    onClick={() => requestSort('userOdds')}
+                    title="Click para ordenar por cuota. Click en otra columna para multi-sort"
                   >
                     <span className="flex items-center gap-1">
                       Cuota {getSortIndicator('userOdds')}
@@ -464,8 +475,8 @@ export const MyPicksPage = () => {
                   </th>
                   <th 
                     className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={(e) => requestSort('userStake', e.shiftKey)}
-                    title="Click para ordenar por stake (Shift+Click para multi-sort)"
+                    onClick={() => requestSort('userStake')}
+                    title="Click para ordenar por stake. Click en otra columna para multi-sort"
                   >
                     <span className="flex items-center gap-1">
                       Stake {getSortIndicator('userStake')}
