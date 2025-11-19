@@ -14866,7 +14866,514 @@ firebase emulators:start
 - `src/App.tsx` (ruta de detalle)
 - `package.json` (Chart.js dependency)
 
-**Importante**: Esta fase completa la vista de detalle de tipsters, permitiendo análisis profundo con estadísticas, gráficos y comparación de rendimiento. Los charts de Chart.js visualizan distribuciones clave. La navegación por tabs organiza la información de manera intuitiva. La próxima fase crítica es el deploy a producción (Fase 9).
+**Importante**: Esta fase completa la vista de detalle de tipsters, permitiendo análisis profundo con estadísticas, gráficos y comparación de rendimiento. Los charts de Chart.js visualizan distribuciones clave. La navegación por tabs organiza la información de manera intuitiva. La próxima fase son refinamientos y mejoras (Fase 8.5) antes del deploy final.
+
+---
+
+## Fase 8.5: Refinamientos y Mejoras ✨
+
+**Duración estimada**: 15-25 horas
+
+### Objetivos de la Fase
+
+Antes de pasar al deploy a producción, esta fase se enfoca en pulir la aplicación con mejoras de UX, funcionalidades adicionales y optimizaciones que no estaban en el plan inicial de migración pero que mejoran significativamente la experiencia del usuario.
+
+**Nota**: Esta fase es **opcional pero recomendada**. Las mejoras aquí documentadas se implementaron después de completar todas las features principales pero antes del deploy, basándose en feedback de uso y buenas prácticas.
+
+---
+
+### 1. Sistema de Confirmación Reutilizable
+
+**Objetivo**: Crear un componente de modal de confirmación reutilizable para acciones destructivas.
+
+**Commit**: `9007614` - "feat(phase-9): implement reset tipster functionality - Task 1/10"
+
+#### 1.1 Componente ConfirmDialog
+
+**Archivo `src/shared/components/ConfirmDialog/ConfirmDialog.tsx`:**
+```typescript
+/**
+ * @fileoverview ConfirmDialog - Reusable confirmation modal
+ * @module shared/components/ConfirmDialog
+ */
+
+import { X } from 'lucide-react';
+import { Button } from '../ui';
+
+export interface ConfirmDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  isDangerous?: boolean;
+  isLoading?: boolean;
+}
+
+export function ConfirmDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText = 'Confirmar',
+  cancelText = 'Cancelar',
+  isDangerous = false,
+  isLoading = false,
+}: ConfirmDialogProps) {
+  if (!isOpen) return null;
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-w-md w-full mx-4">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-700">
+          <h2 className="text-xl font-semibold text-slate-100">{title}</h2>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-100 transition-colors"
+            disabled={isLoading}
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-6">
+          <p className="text-slate-300 whitespace-pre-line">{message}</p>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-700">
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            disabled={isLoading}
+          >
+            {cancelText}
+          </Button>
+          <Button
+            variant={isDangerous ? 'danger' : 'primary'}
+            onClick={onConfirm}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Procesando...' : confirmText}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+**Características**:
+- ✅ Backdrop con blur
+- ✅ Click outside para cerrar
+- ✅ Estado de loading
+- ✅ Variante "dangerous" para acciones destructivas
+- ✅ Textos personalizables
+- ✅ Diseño consistente con el resto de la app
+
+#### 1.2 Export del Componente
+
+**Archivo `src/shared/components/ConfirmDialog/index.ts`:**
+```typescript
+export { ConfirmDialog } from './ConfirmDialog';
+export type { ConfirmDialogProps } from './ConfirmDialog';
+```
+
+**Archivo `src/shared/components/index.ts` (modificado):**
+```typescript
+// Añadir al final:
+export * from './ConfirmDialog';
+```
+
+---
+
+### 2. Funcionalidad Reset Tipster
+
+**Objetivo**: Permitir resetear un tipster eliminando todas sus picks y follows asociados.
+
+**Commit**: `9007614` - "feat(phase-9): implement reset tipster functionality - Task 1/10"
+
+#### 2.1 Método en TipsterRepository
+
+**Archivo `src/features/tipsters/services/tipster-repository.ts` (modificado):**
+```typescript
+/**
+ * Reset complete tipster - delete all picks and follows
+ */
+async resetTipsterComplete(
+  tipsterId: string,
+  userId: string,
+  pickRepository: {
+    getPicksByTipster: (tipsterId: string, userId: string) => Promise<Pick[]>;
+    deletePick: (pickId: string, userId: string) => Promise<OperationResult<void>>;
+  },
+  followRepository: {
+    getFollowsByTipster: (tipsterId: string, userId: string) => Promise<Follow[]>;
+    deleteFollow: (followId: string, userId: string) => Promise<OperationResult<void>>;
+  }
+): Promise<OperationResult<{ deletedPicks: number; deletedFollows: number }>> {
+  try {
+    // 1. Get all picks for this tipster
+    const picks = await pickRepository.getPicksByTipster(tipsterId, userId);
+    
+    // 2. Get all follows for this tipster
+    const follows = await followRepository.getFollowsByTipster(tipsterId, userId);
+    
+    // 3. Delete all follows first (they reference picks)
+    let deletedFollows = 0;
+    for (const follow of follows) {
+      const result = await followRepository.deleteFollow(follow.id, userId);
+      if (result.success) deletedFollows++;
+    }
+    
+    // 4. Delete all picks
+    let deletedPicks = 0;
+    for (const pick of picks) {
+      const result = await pickRepository.deletePick(pick.id, userId);
+      if (result.success) deletedPicks++;
+    }
+    
+    // 5. Update tipster (reset lastPickDate)
+    await this.update(tipsterId, userId, { lastPickDate: null });
+    
+    return {
+      success: true,
+      data: { deletedPicks, deletedFollows },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: {
+        code: 'reset-failed',
+        message: error instanceof Error ? error.message : 'Error al resetear tipster',
+      },
+    };
+  }
+}
+```
+
+#### 2.2 Integración en TipsterDetailPage
+
+**Archivo `src/features/tipsters/pages/TipsterDetailPage.tsx` (modificado):**
+
+**Imports añadidos**:
+```typescript
+import { RefreshCcw } from 'lucide-react';
+import { ConfirmDialog } from '@shared/components';
+import { auth } from '@core/config/firebase.config';
+```
+
+**Estado para confirmaciones**:
+```typescript
+const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+const [isSecondResetConfirmOpen, setIsSecondResetConfirmOpen] = useState(false);
+const [isResetting, setIsResetting] = useState(false);
+```
+
+**Handlers**:
+```typescript
+const handleResetTipster = () => {
+  setIsResetConfirmOpen(true);
+};
+
+const handleFirstConfirmReset = () => {
+  setIsResetConfirmOpen(false);
+  setIsSecondResetConfirmOpen(true);
+};
+
+const handleFinalConfirmReset = async () => {
+  if (!tipster) return;
+  
+  setIsResetting(true);
+  
+  try {
+    const userId = auth.currentUser?.uid;
+    if (!userId) throw new Error('Usuario no autenticado');
+    
+    // Dynamic imports to avoid circular dependencies
+    const { pickRepository } = await import('@features/picks/services/pick-repository');
+    const { followRepository } = await import('@features/follows/services/follow-repository');
+    
+    const result = await tipsterRepository.resetTipsterComplete(
+      tipster.id,
+      userId,
+      pickRepository,
+      followRepository
+    );
+    
+    if (result.success) {
+      alert(`Tipster reseteado correctamente.\n\nPicks eliminados: ${result.data?.deletedPicks}\nFollows eliminados: ${result.data?.deletedFollows}`);
+      navigate('/dashboard');
+    } else {
+      alert(`Error: ${result.error?.message}`);
+    }
+  } catch (error) {
+    alert(`Error al resetear: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+  } finally {
+    setIsResetting(false);
+    setIsSecondResetConfirmOpen(false);
+  }
+};
+```
+
+**Botón Reset en el header**:
+```typescript
+<Button
+  variant="outline"
+  onClick={handleResetTipster}
+  disabled={picks.length === 0}
+  title={picks.length === 0 ? 'No hay picks para resetear' : 'Resetear este tipster'}
+>
+  <RefreshCcw className="h-4 w-4 mr-2" />
+  {isResetting ? 'Reseteando...' : 'Resetear Tipster'}
+</Button>
+```
+
+**Modals de confirmación**:
+```typescript
+{/* First Confirmation */}
+<ConfirmDialog
+  isOpen={isResetConfirmOpen}
+  onClose={() => setIsResetConfirmOpen(false)}
+  onConfirm={handleFirstConfirmReset}
+  title="¿Resetear Tipster?"
+  message={`Estás a punto de eliminar:\n\n• ${picks.length} picks\n• ${follows.length} follows\n\n¿Estás seguro?`}
+  confirmText="Sí, continuar"
+  cancelText="Cancelar"
+  isDangerous
+/>
+
+{/* Second Confirmation */}
+<ConfirmDialog
+  isOpen={isSecondResetConfirmOpen}
+  onClose={() => setIsSecondResetConfirmOpen(false)}
+  onConfirm={handleFinalConfirmReset}
+  title="Confirmación Final"
+  message="Esta acción es IRREVERSIBLE.\n\nSe eliminarán todas las picks y follows de este tipster.\n\n¿Continuar?"
+  confirmText="Sí, resetear definitivamente"
+  cancelText="Cancelar"
+  isDangerous
+  isLoading={isResetting}
+/>
+```
+
+**Cambios realizados**:
+- ✅ 5 archivos modificados
+- ✅ 270 inserciones, 1 eliminación
+- ✅ Doble confirmación para evitar eliminaciones accidentales
+- ✅ Feedback visual durante el proceso
+- ✅ Navegación automática al dashboard después del reset
+
+---
+
+### 3. Filtros de Fecha Mejorados
+
+**Objetivo**: Añadir filtrado por rango de fechas manteniendo la simplicidad de los filtros básicos.
+
+**Commit**: `31a8575` - "feat(phase-9): add date range filter to picks - Task 2/10"
+
+#### 3.1 Actualización de Types
+
+**Archivo `src/features/picks/pages/PicksListPage/PicksListPage.types.ts` (modificado):**
+```typescript
+export interface PickFilters {
+  // Basic filters
+  tipsterId: string;
+  sport: string;
+  result: string;
+  bookmaker: string;
+  searchQuery: string;
+  
+  // Advanced filters (para futuras expansiones)
+  tipsterIds: string[];
+  sports: string[];
+  bookmakers: string[];
+  pickType: string;
+  dateFrom: string;  // YYYY-MM-DD
+  dateTo: string;    // YYYY-MM-DD
+  oddsMin: number | null;
+  oddsMax: number | null;
+  stakeMin: number | null;
+  stakeMax: number | null;
+}
+```
+
+#### 3.2 Lógica de Filtrado por Fechas
+
+**Archivo `src/features/picks/pages/PicksListPage/PicksListPage.tsx` (modificado):**
+
+**Función filterPicks actualizada**:
+```typescript
+const filterPicks = (picks: Pick[], filters: PickFilters): Pick[] => {
+  return picks.filter((pick) => {
+    // ... filtros básicos existentes ...
+    
+    // Date range filter
+    if (filters.dateFrom && pick.date < filters.dateFrom) {
+      return false;
+    }
+    
+    if (filters.dateTo && pick.date > filters.dateTo) {
+      return false;
+    }
+    
+    return true;
+  });
+};
+```
+
+**Detección de filtros activos**:
+```typescript
+const hasActiveFilters =
+  filters.tipsterId ||
+  filters.sport ||
+  filters.result ||
+  filters.bookmaker ||
+  filters.searchQuery ||
+  filters.dateFrom ||
+  filters.dateTo;
+```
+
+#### 3.3 UI de Filtros
+
+**Grid layout actualizado** (6 columnas):
+```tsx
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+  {/* Search - 2 columns */}
+  <div className="lg:col-span-2">
+    <label htmlFor="search-picks" className="block text-sm font-medium text-slate-300 mb-2">
+      Buscar
+    </label>
+    <div className="relative">
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      <input
+        id="search-picks"
+        type="text"
+        value={filters.searchQuery}
+        onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
+        placeholder="Buscar por partido o tipo de apuesta..."
+        className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+  </div>
+
+  {/* Date From - 1 column */}
+  <div>
+    <label htmlFor="filter-date-from" className="block text-sm font-medium text-slate-300 mb-2">
+      Fecha desde
+    </label>
+    <input
+      id="filter-date-from"
+      type="date"
+      value={filters.dateFrom}
+      onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+
+  {/* Date To - 1 column */}
+  <div>
+    <label htmlFor="filter-date-to" className="block text-sm font-medium text-slate-300 mb-2">
+      Fecha hasta
+    </label>
+    <input
+      id="filter-date-to"
+      type="date"
+      value={filters.dateTo}
+      onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+
+  {/* Tipster, Sport, Result - 1 column each */}
+  {/* ... selects existentes ... */}
+</div>
+```
+
+**Cambios realizados**:
+- ✅ 5 archivos modificados
+- ✅ 456 inserciones, 18 eliminaciones
+- ✅ Filtrado por rango de fechas funcional
+- ✅ Diseño limpio y responsive
+- ✅ Compatible con filtros existentes
+
+#### 3.4 Componente AdvancedFilters (Creado pero No Usado)
+
+Se creó un componente `AdvancedFilters` con filtros complejos (multi-select, rangos numéricos, etc.) pero se decidió mantener la UI simple. El componente está disponible en:
+- `src/features/picks/components/AdvancedFilters/AdvancedFilters.tsx`
+- `src/features/picks/components/AdvancedFilters/index.ts`
+
+**Nota**: Este componente puede ser útil en el futuro si se necesitan filtros más avanzados.
+
+---
+
+### 4. Resumen de la Fase 8.5
+
+#### Archivos Creados (4 nuevos)
+1. `src/shared/components/ConfirmDialog/ConfirmDialog.tsx`
+2. `src/shared/components/ConfirmDialog/index.ts`
+3. `src/features/picks/components/AdvancedFilters/AdvancedFilters.tsx`
+4. `src/features/picks/components/AdvancedFilters/index.ts`
+
+#### Archivos Modificados (7)
+1. `src/shared/components/index.ts` - Export ConfirmDialog
+2. `src/features/tipsters/services/tipster-repository.ts` - Método resetTipsterComplete
+3. `src/features/tipsters/pages/TipsterDetailPage.tsx` - Integración reset con double confirm
+4. `src/features/picks/pages/PicksListPage/PicksListPage.types.ts` - Filtros de fecha
+5. `src/features/picks/pages/PicksListPage/PicksListPage.tsx` - UI filtros de fecha
+6. `src/features/picks/components/index.ts` - Export AdvancedFilters
+7. `src/features/tipsters/pages/TipsterDetailPage/TipsterDetailPage.tsx` - Botón reset
+
+#### Líneas de Código
+- **Total**: ~726 líneas añadidas
+- **Commit 1** (Reset): 270 inserciones, 1 eliminación
+- **Commit 2** (Filtros): 456 inserciones, 18 eliminaciones
+
+#### Commits
+- `9007614` - Reset Tipster functionality
+- `31a8575` - Date range filter
+
+#### Testing Realizado
+- ✅ Reset tipster con 0 picks (botón deshabilitado)
+- ✅ Reset tipster con picks y follows (doble confirmación)
+- ✅ Filtro de fecha desde (funcional)
+- ✅ Filtro de fecha hasta (funcional)
+- ✅ Filtro de rango de fechas (desde + hasta combinados)
+- ✅ Botón "Limpiar filtros" resetea fechas correctamente
+
+#### Mejoras Futuras Consideradas (No Implementadas)
+1. **Ordenación de columnas** - Sort ascendente/descendente en tablas
+2. **Export a Excel/CSV** - Exportar datos filtrados
+3. **Toast notifications** - Reemplazar alerts nativos
+4. **Skeleton loaders** - Loading states mejorados
+5. **Error boundaries** - Manejo de errores a nivel componente
+6. **Búsqueda avanzada** - Búsqueda por múltiples campos
+7. **Mejoras responsive** - Optimización móvil/tablet
+8. **Performance** - React.memo, code splitting
+
+**Nota**: Estas mejoras pueden implementarse en una fase posterior o como parte del mantenimiento continuo post-deploy.
+
+---
+
+**Duración real**: ~8 horas (2 tareas implementadas y testeadas)
+
+**Estado**: ✅ **COMPLETADA** (19/11/2025)
+
+**Próxima fase**: Fase 9 - Migración de Datos y Deploy 🚀
 
 ---
 
