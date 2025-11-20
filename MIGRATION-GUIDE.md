@@ -14872,13 +14872,34 @@ firebase emulators:start
 
 ## Fase 8.5: Refinamientos y Mejoras ✨
 
+
 **Duración estimada**: 15-25 horas
 
 ### Objetivos de la Fase
 
 Antes de pasar al deploy a producción, esta fase se enfoca en pulir la aplicación con mejoras de UX, funcionalidades adicionales y optimizaciones que no estaban en el plan inicial de migración pero que mejoran significativamente la experiencia del usuario.
 
-**Nota**: Esta fase es **opcional pero recomendada**. Las mejoras aquí documentadas se implementaron después de completar todas las features principales pero antes del deploy, basándose en feedback de uso y buenas prácticas.
+**Nota importante**: La funcionalidad de **importación de Excel** se pospone y NO se implementará en esta iteración. El exportador de Excel está finalizado y validado, pero la importación queda pendiente para una fase futura. Documentar este estado en AGENTS.md y aquí.
+
+**Estado actual de tareas Fase 8.5:**
+
+**Completadas:**
+1. ConfirmDialog reutilizable para acciones destructivas
+2. Reset Tipster con doble confirmación y feedback visual
+3. Filtros de fecha (rango) en picks
+5A. Exportar a Excel (template, dashboards, fórmulas, estilos, dropdowns)
+
+**Pendientes:**
+4. Ordenación por columnas en tablas (picks, follows)
+5B. Importar desde Excel (pospuesto, NO se implementa en esta fase)
+6. Sistema de notificaciones toast
+7. Optimización de estados de carga (skeleton loaders, overlays)
+8. Error boundaries
+9. Mejora de búsqueda en tablas
+10. Mejoras responsive (mobile/tablet)
+11. Optimización de rendimiento (memo, lazy, virtualización)
+
+**Decisión:** La importación de Excel se documenta como pospuesta y no bloquea el avance a las siguientes tareas ni el deploy.
 
 ---
 

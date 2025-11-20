@@ -1440,9 +1440,11 @@ npm run deploy       # Deploy a Firebase
    - Historial de follows y estadísticas están separados
    - Unificar en una vista cronológica completa
 
+
 ### ✨ Mejoras Planificadas
 
-#### Funcionalidades Faltantes
+#### Funcionalidades Faltantes y Estado Fase 8.5
+
 - **Subida de imágenes**: 
   - Upload de screenshots de picks
   - OCR para extraer datos automáticamente
@@ -1457,10 +1459,20 @@ npm run deploy       # Deploy a Firebase
   - Eliminación en cascada de picks asociadas
   - Funcionalidad "Remove Pick" con confirmación
 
-- **Import/Export Excel**:
-  - Exportar datos a Excel
-  - Importar picks desde Excel
-  - Templates predefinidos
+- **Exportar a Excel**: ✅ COMPLETADO (template, dashboards, fórmulas, estilos, dropdowns)
+- **Importar desde Excel**: ⏸️ POSPUESTO (NO se implementa en esta fase, queda documentado para futuro)
+
+#### Tareas pendientes Fase 8.5
+
+1. Ordenación por columnas en tablas (picks, follows)
+2. Sistema de notificaciones toast
+3. Optimización de estados de carga (skeleton loaders, overlays)
+4. Error boundaries
+5. Mejora de búsqueda en tablas
+6. Mejoras responsive (mobile/tablet)
+7. Optimización de rendimiento (memo, lazy, virtualización)
+
+**Decisión:** La importación de Excel se pospone y no bloquea el avance ni el deploy. El exportador está finalizado y validado.
 
 #### Mejoras de UX
 - **Notificaciones**:

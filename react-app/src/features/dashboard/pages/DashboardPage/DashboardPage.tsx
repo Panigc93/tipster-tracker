@@ -10,10 +10,10 @@ import { useDashboardFilters } from '../../hooks';
 import { usePicks } from '@features/picks/hooks';
 import { useFollows } from '@features/follows/hooks';
 import { useTipsters } from '@features/tipsters/hooks';
-import { exportPicksToExcel } from '@/shared/utils/excelExport';
 
 export function DashboardPage() {
   const [isHovered, setIsHovered] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   
   const {
     tipsters: filteredTipsters,
@@ -33,21 +33,68 @@ export function DashboardPage() {
   const { follows } = useFollows();
   const { tipsters: allTipsters } = useTipsters();
 
-  const handleExportToExcel = () => {
-    console.log('🔵 Exportando a Excel...');
-    console.log('📊 Datos disponibles:', {
+  /**
+   * 📊 Exportar a Excel usando backend API
+   * 
+   * Envía los datos al backend Express que:
+   * 1. Genera el Excel con xlsx
+   * 2. Aplica estilos con Python
+   * 3. Retorna el archivo completo
+   */
+  const handleExportToExcel = async () => {
+    console.log('🔵 [EXPORT] Iniciando exportación...');
+    console.log('📊 [DATA] Datos disponibles:', {
       picks: picks.length,
       follows: follows.length,
       tipsters: allTipsters.length,
     });
     
+    setIsExporting(true);
+    
     try {
-      exportPicksToExcel(picks, follows, allTipsters);
-      console.log('✅ Export completado');
-      alert('Excel generado correctamente. Revisa la carpeta react-app/');
+      // Llamar al backend
+      console.log('📡 [API] Llamando a /api/export-excel...');
+      
+      const response = await fetch('/api/export-excel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          picks,
+          follows,
+          tipsters: allTipsters,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      // Descargar archivo
+      console.log('💾 [DOWNLOAD] Descargando archivo...');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      // Nombre de archivo con fecha
+      const dateStr = new Date().toISOString().split('T')[0];
+      a.download = `tipster-tracker-export-${dateStr}.xlsx`;
+      
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      console.log('✅ [SUCCESS] Export completado correctamente');
+      alert('✅ Excel generado y descargado correctamente!');
+      
     } catch (error) {
-      console.error('❌ Error al exportar:', error);
-      alert('Error al generar Excel: ' + error);
+      console.error('❌ [ERROR] Error al exportar:', error);
+      alert(`❌ Error al generar Excel: ${error instanceof Error ? error.message : 'Error desconocido'}\n\n¿Está el backend corriendo en http://localhost:3001?`);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -130,21 +177,25 @@ export function DashboardPage() {
         onClick={handleExportToExcel}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        disabled={isExporting}
         className={`
           fixed bottom-8 right-8 z-50
           flex items-center gap-2
-          bg-blue-600 hover:bg-blue-700 
+          ${isExporting ? 'bg-slate-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}
           text-white font-medium
           rounded-full shadow-lg hover:shadow-xl
           transition-all duration-300 ease-out
-          ${isHovered ? 'px-6 py-4' : 'p-4'}
+          ${isHovered && !isExporting ? 'px-6 py-4' : 'p-4'}
+          disabled:opacity-75
         `}
-        title="Exportar todos los datos a Excel"
+        title={isExporting ? 'Generando Excel...' : 'Exportar todos los datos a Excel'}
       >
-        <Download className={`${isHovered ? 'h-5 w-5' : 'h-6 w-6'} transition-all duration-300`} />
-        {isHovered && (
+        <Download 
+          className={`${isHovered && !isExporting ? 'h-5 w-5' : 'h-6 w-6'} transition-all duration-300 ${isExporting ? 'animate-pulse' : ''}`} 
+        />
+        {(isHovered || isExporting) && (
           <span className="whitespace-nowrap animate-fade-in">
-            Exportar a Excel
+            {isExporting ? 'Generando Excel...' : 'Exportar a Excel'}
           </span>
         )}
       </button>

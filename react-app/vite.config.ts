@@ -19,4 +19,13 @@ export default defineConfig({
       '@dashboard': path.resolve(__dirname, './src/features/dashboard'),
     },
   },
+  // 🔄 Proxy para redirigir API calls al backend Express en desarrollo
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
+  },
 })
