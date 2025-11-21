@@ -6,6 +6,7 @@ import { TipsterListPage, TipsterDetailPage } from '@features/tipsters/pages';
 import { PicksListPage } from '@features/picks/pages';
 import { MyPicksPage } from '@features/follows/pages';
 import { Layout } from '@shared/components/layout';
+import { ErrorBoundary } from '@shared/components';
 
 /**
  * Application routes configuration
@@ -24,7 +25,9 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <Layout>
-          <DashboardPage />
+          <ErrorBoundary>
+            <DashboardPage />
+          </ErrorBoundary>
         </Layout>
       </PrivateRoute>
     ),
@@ -44,7 +47,9 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <Layout>
-          <TipsterDetailPage />
+          <ErrorBoundary>
+            <TipsterDetailPage />
+          </ErrorBoundary>
         </Layout>
       </PrivateRoute>
     ),
@@ -54,7 +59,9 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <Layout>
-          <PicksListPage />
+          <ErrorBoundary>
+            <PicksListPage />
+          </ErrorBoundary>
         </Layout>
       </PrivateRoute>
     ),
@@ -64,7 +71,9 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <Layout>
-          <MyPicksPage />
+          <ErrorBoundary>
+            <MyPicksPage />
+          </ErrorBoundary>
         </Layout>
       </PrivateRoute>
     ),
