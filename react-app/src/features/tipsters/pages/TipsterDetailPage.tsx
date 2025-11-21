@@ -4,7 +4,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Trash2, Plus, RefreshCcw } from 'lucide-react';
 import {
   Button,
-  Spinner,
   Alert,
   Badge,
   ConfirmDialog,
@@ -12,6 +11,10 @@ import {
   StakeDistributionChart,
   SportDistributionChart,
   PickTypeDistributionChart,
+  SkeletonText,
+  SkeletonCard,
+  SkeletonTable,
+  LoadingOverlay,
 } from '@/shared/components';
 import { useSortableTable } from '@shared/hooks';
 import { useTipsterDetail, useTipsters } from '../hooks';
@@ -246,8 +249,50 @@ export function TipsterDetailPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Spinner size="lg" />
+      <div className="space-y-6">
+        {/* Back Button Skeleton */}
+        <SkeletonText width="100px" height="36px" />
+
+        {/* Header Skeleton */}
+        <div className="flex justify-between items-start gap-4">
+          <div className="space-y-3">
+            <SkeletonText width="300px" height="36px" />
+            <div className="flex items-center gap-3">
+              <SkeletonText width="80px" height="24px" />
+              <SkeletonText width="150px" height="16px" />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <SkeletonText width="80px" height="36px" />
+            <SkeletonText width="90px" height="36px" />
+            <SkeletonText width="90px" height="36px" />
+          </div>
+        </div>
+
+        {/* Tabs Skeleton */}
+        <div className="border-b border-slate-700">
+          <div className="flex space-x-8">
+            <SkeletonText width="120px" height="40px" />
+            <SkeletonText width="140px" height="40px" />
+          </div>
+        </div>
+
+        {/* Stats Cards Skeleton */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} height="100px" />
+          ))}
+        </div>
+
+        {/* Charts Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} height="200px" />
+          ))}
+        </div>
+
+        {/* Table Skeleton */}
+        <SkeletonTable rows={8} columns={11} />
       </div>
     );
   }
@@ -268,8 +313,9 @@ export function TipsterDetailPage() {
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-8">
+      <LoadingOverlay isLoading={isResetting} message="Reseteando tipster...">
+        {/* Header */}
+        <div className="mb-8">
           <Button
             variant="secondary"
             size="sm"
@@ -994,6 +1040,7 @@ export function TipsterDetailPage() {
           cancelText="Cancelar"
           isDangerous
         />
+      </LoadingOverlay>
     </>
   );
 }

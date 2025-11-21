@@ -6,7 +6,7 @@
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { Plus, Search } from 'lucide-react';
-import { Button } from '@shared/components/ui';
+import { Button, SkeletonText, SkeletonCard, SkeletonTable } from '@shared/components/ui';
 import { ConfirmDialog } from '@shared/components';
 import { PickTableRow, AddPickModal } from '../../components';
 import { usePicks } from '../../hooks';
@@ -252,8 +252,28 @@ export function PicksListPage() {
   // Loading state
   if (loading || tipstersLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <SkeletonText width="250px" height="32px" />
+            <SkeletonText width="350px" height="16px" />
+          </div>
+          <SkeletonText width="120px" height="40px" />
+        </div>
+
+        {/* Stats Cards Skeleton */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonCard key={i} height="100px" />
+          ))}
+        </div>
+
+        {/* Filters Skeleton */}
+        <SkeletonCard height="180px" />
+
+        {/* Table Skeleton */}
+        <SkeletonTable rows={10} columns={12} />
       </div>
     );
   }

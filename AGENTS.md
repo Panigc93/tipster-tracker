@@ -1477,7 +1477,20 @@ npm run deploy       # Deploy a Firebase
 8. ⏳ Error boundaries
 9. ⏳ Mejora de búsqueda en tablas
 10. ⏳ Mejoras responsive (mobile/tablet)
-11. ⏳ Optimización de rendimiento (memo, lazy, virtualización)
+11. ⏳ Optimización de rendimiento
+   - React.memo para componentes pesados
+   - Lazy loading de componentes y rutas
+   - Virtualización de tablas largas (react-virtual/react-window)
+   - Code splitting por rutas
+   - **Optimización de carga en redes lentas (3G/4G)**
+     - Detectado en testing con throttling de red
+     - Bundle size analysis: Chart.js (~200KB), Firebase SDK (~100KB), Lucide (~50KB)
+     - Tree shaking de iconos (importar solo los necesarios)
+     - Lazy loading de charts (mayor impacto)
+     - Compresión gzip/brotli
+     - Drop console.logs en producción
+   - Métricas objetivo: FCP < 3s (3G), LCP < 5s (3G), TTI < 7s (3G)
+   - Bundle objetivo: < 200KB inicial (gzipped), < 500KB total
 
 **Decisión:** La importación de Excel se pospone y no bloquea el avance ni el deploy. El exportador está finalizado y validado.
 

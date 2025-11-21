@@ -14897,7 +14897,18 @@ Antes de pasar al deploy a producción, esta fase se enfoca en pulir la aplicaci
 8. ⏳ Error boundaries
 9. ⏳ Mejora de búsqueda en tablas
 10. ⏳ Mejoras responsive (mobile/tablet)
-11. ⏳ Optimización de rendimiento (memo, lazy, virtualización)
+11. ⏳ Optimización de rendimiento
+   - React.memo para componentes pesados
+   - Lazy loading de componentes y rutas
+   - Virtualización de tablas largas
+   - Code splitting
+   - **Optimización de carga en redes lentas (3G/4G)** ← Detectado en testing con throttling
+     - Bundle size analysis (Chart.js ~200KB, Firebase ~100KB)
+     - Tree shaking (especialmente iconos de Lucide)
+     - Compresión de assets
+     - Lazy loading de charts y componentes pesados
+     - Preloading crítico
+   - Objetivos: FCP < 3s (3G), LCP < 5s (3G), Bundle inicial < 200KB (gzipped)
 
 **Decisión:** La importación de Excel se documenta como pospuesta y no bloquea el avance a las siguientes tareas ni el deploy.
 

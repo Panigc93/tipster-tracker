@@ -11,6 +11,7 @@ import { usePicks } from '@/features/picks/hooks/usePicks';
 import { useSortableTable } from '@shared/hooks';
 import { FollowTableRow } from '../../components/FollowTableRow';
 import { AddFollowModal } from '../../components/AddFollowModal';
+import { SkeletonTable } from '@shared/components/ui';
 import type { MyPicksFilters, FollowStats } from './MyPicksPage.types';
 import type { UserFollow, Pick } from '@/shared/types';
 
@@ -405,12 +406,7 @@ export const MyPicksPage = () => {
       <div className="rounded-lg bg-slate-800 p-4">
         {(() => {
           if (loading) {
-            return (
-              <div className="py-12 text-center">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
-                <p className="mt-2 text-sm text-gray-400">Cargando follows...</p>
-              </div>
-            );
+            return <SkeletonTable rows={8} columns={10} />;
           }
 
           if (filteredFollows.length === 0) {

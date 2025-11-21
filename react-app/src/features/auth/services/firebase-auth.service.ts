@@ -48,7 +48,19 @@ export class FirebaseAuthService implements IAuthService {
       return this.mapFirebaseUser(userCredential.user);
     } catch (error: unknown) {
       const firebaseError = error as { code?: string };
-      throw new Error(firebaseError.code || 'Error al iniciar sesión');
+      
+      // Map Firebase error codes to user-friendly messages
+      const errorMessages: Record<string, string> = {
+        'auth/user-not-found': 'No existe una cuenta con este email. ¿Necesitas registrarte?',
+        'auth/wrong-password': 'Contraseña incorrecta. Inténtalo de nuevo.',
+        'auth/invalid-email': 'El formato del email no es válido.',
+        'auth/user-disabled': 'Esta cuenta ha sido deshabilitada.',
+        'auth/too-many-requests': 'Demasiados intentos fallidos. Intenta más tarde.',
+        'auth/network-request-failed': 'Error de conexión. Verifica tu internet.',
+      };
+      
+      const message = errorMessages[firebaseError.code || ''] || 'Error al iniciar sesión. Inténtalo de nuevo.';
+      throw new Error(message);
     }
   }
 
@@ -65,7 +77,17 @@ export class FirebaseAuthService implements IAuthService {
       return this.mapFirebaseUser(userCredential.user);
     } catch (error: unknown) {
       const firebaseError = error as { code?: string };
-      throw new Error(firebaseError.code || 'Error al registrar usuario');
+      
+      // Map Firebase error codes to user-friendly messages
+      const errorMessages: Record<string, string> = {
+        'auth/email-already-in-use': 'Ya existe una cuenta con este email.',
+        'auth/invalid-email': 'El formato del email no es válido.',
+        'auth/weak-password': 'La contraseña es demasiado débil. Usa al menos 6 caracteres.',
+        'auth/operation-not-allowed': 'El registro está deshabilitado temporalmente.',
+      };
+      
+      const message = errorMessages[firebaseError.code || ''] || 'Error al registrar usuario. Inténtalo de nuevo.';
+      throw new Error(message);
     }
   }
 

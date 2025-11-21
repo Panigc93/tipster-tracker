@@ -11,6 +11,7 @@ import { useDashboardFilters } from '../../hooks';
 import { usePicks } from '@features/picks/hooks';
 import { useFollows } from '@features/follows/hooks';
 import { useTipsters } from '@features/tipsters/hooks';
+import { SkeletonText, SkeletonCard } from '@shared/components/ui';
 
 export function DashboardPage() {
   const [isHovered, setIsHovered] = useState(false);
@@ -128,8 +129,18 @@ export function DashboardPage() {
 
         {/* Tipsters grid */}
         {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-slate-400">Cargando tipsters...</div>
+          <div className="space-y-6">
+            {/* Header Skeleton */}
+            <div className="flex items-center justify-between">
+              <SkeletonText width="200px" height="20px" />
+            </div>
+            
+            {/* Grid Skeleton */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <SkeletonCard key={i} height="280px" />
+              ))}
+            </div>
           </div>
         )}
 
