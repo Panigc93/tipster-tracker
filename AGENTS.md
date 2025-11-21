@@ -1464,13 +1464,20 @@ npm run deploy       # Deploy a Firebase
 
 #### Tareas pendientes Fase 8.5
 
-1. Ordenación por columnas en tablas (picks, follows)
-2. Sistema de notificaciones toast
-3. Optimización de estados de carga (skeleton loaders, overlays)
-4. Error boundaries
-5. Mejora de búsqueda en tablas
-6. Mejoras responsive (mobile/tablet)
-7. Optimización de rendimiento (memo, lazy, virtualización)
+**Completadas (6/11):**
+1. ✅ Ordenación por columnas en tablas (picks, follows)
+2. ✅ Sistema de notificaciones toast (Sonner) - 0 window.confirm/alert restantes
+3. ✅ ConfirmDialog reutilizable
+4. ✅ Reset Tipster con doble confirmación
+5. ✅ Filtros de fecha en picks
+6. ✅ Exportación a Excel completa
+
+**Pendientes (5/11):**
+7. ⏳ Optimización de estados de carga (skeleton loaders, overlays)
+8. ⏳ Error boundaries
+9. ⏳ Mejora de búsqueda en tablas
+10. ⏳ Mejoras responsive (mobile/tablet)
+11. ⏳ Optimización de rendimiento (memo, lazy, virtualización)
 
 **Decisión:** La importación de Excel se pospone y no bloquea el avance ni el deploy. El exportador está finalizado y validado.
 

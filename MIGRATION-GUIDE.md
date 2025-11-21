@@ -14883,21 +14883,21 @@ Antes de pasar al deploy a producción, esta fase se enfoca en pulir la aplicaci
 
 **Estado actual de tareas Fase 8.5:**
 
-**Completadas:**
-1. ConfirmDialog reutilizable para acciones destructivas
-2. Reset Tipster con doble confirmación y feedback visual
-3. Filtros de fecha (rango) en picks
-5A. Exportar a Excel (template, dashboards, fórmulas, estilos, dropdowns)
+**Completadas (6/11):**
+1. ✅ ConfirmDialog reutilizable para acciones destructivas
+2. ✅ Reset Tipster con doble confirmación y feedback visual
+3. ✅ Filtros de fecha (rango) en picks
+4. ✅ Ordenación por columnas en tablas (picks, follows)
+5A. ✅ Exportar a Excel (template, dashboards, fórmulas, estilos, dropdowns)
+6. ✅ Sistema de notificaciones toast (Sonner) - Migrados 4 window.confirm() a ConfirmDialog
 
-**Pendientes:**
- 4. Ordenación por columnas en tablas (picks, follows) ✅ COMPLETADA
-5B. Importar desde Excel (pospuesto, NO se implementa en esta fase)
-6. Sistema de notificaciones toast
-7. Optimización de estados de carga (skeleton loaders, overlays)
-8. Error boundaries
-9. Mejora de búsqueda en tablas
-10. Mejoras responsive (mobile/tablet)
-11. Optimización de rendimiento (memo, lazy, virtualización)
+**Pendientes (5/11):**
+5B. ⏳ Importar desde Excel (POSPUESTO - NO se implementa en esta fase)
+7. ⏳ Optimización de estados de carga (skeleton loaders, overlays)
+8. ⏳ Error boundaries
+9. ⏳ Mejora de búsqueda en tablas
+10. ⏳ Mejoras responsive (mobile/tablet)
+11. ⏳ Optimización de rendimiento (memo, lazy, virtualización)
 
 **Decisión:** La importación de Excel se documenta como pospuesta y no bloquea el avance a las siguientes tareas ni el deploy.
 
