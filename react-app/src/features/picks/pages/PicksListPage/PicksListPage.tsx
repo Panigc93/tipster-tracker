@@ -12,9 +12,9 @@ import { PickTableRow, AddPickModal } from '../../components';
 import { usePicks } from '../../hooks';
 import { useTipsters } from '@features/tipsters/hooks';
 import { useFollows } from '@features/follows/hooks';
-import { useSortableTable } from '@shared/hooks';
+import { useSortableTable, useDebounce } from '@shared/hooks';
 import { AddFollowModal } from '@features/follows/components';
-import { Sport, PickResult } from '@shared/types/enums';
+import { Sport, PickResult, Bookmaker } from '@shared/types/enums';
 import type { Pick } from '@shared/types';
 import type { PickFilters } from './PicksListPage.types';
 import { getSportIcon } from '../../utils/sport-icons';
@@ -22,7 +22,7 @@ import { getSportIcon } from '../../utils/sport-icons';
 /**
  * Filter picks based on current filter state
  */
-const filterPicks = (picks: Pick[], filters: PickFilters): Pick[] => {
+const filterPicks = (picks: Pick[], filters: PickFilters, debouncedSearchQuery: string): Pick[] => {
   return picks.filter((pick) => {
     // Basic filters (single select - backward compatibility)
     if (filters.tipsterId && pick.tipsterId !== filters.tipsterId) {
@@ -86,9 +86,9 @@ const filterPicks = (picks: Pick[], filters: PickFilters): Pick[] => {
       return false;
     }
 
-    // Search query (match and betType)
-    if (filters.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
+    // Search query (match and betType) - using debounced value
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
       const matchLower = pick.match.toLowerCase();
       const betTypeLower = pick.betType.toLowerCase();
       
@@ -114,8 +114,8 @@ export function PicksListPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFollowModalOpen, setIsFollowModalOpen] = useState(false);
-  const [editingPick, setEditingPick] = useState<Pick | undefined>(undefined);
   const [followingPick, setFollowingPick] = useState<Pick | undefined>(undefined);
+  const [editingPick, setEditingPick] = useState<Pick | undefined>(undefined);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [pickToDelete, setPickToDelete] = useState<Pick | null>(null);
 
@@ -139,11 +139,14 @@ export function PicksListPage() {
     stakeMin: null,
     stakeMax: null,
   });
+  
+  // Debounce search query to optimize performance
+  const debouncedSearchQuery = useDebounce(filters.searchQuery, 300);
 
   // Filtered picks
   const filteredPicks = useMemo(
-    () => filterPicks(picks, filters),
-    [picks, filters]
+    () => filterPicks(picks, filters, debouncedSearchQuery),
+    [picks, filters, debouncedSearchQuery]
   );
 
   // Sorting (default: sort by date descending)
@@ -450,8 +453,37 @@ export function PicksListPage() {
               ))}
             </select>
           </div>
+
+          {/* Bookmaker */}
+          <div>
+            <label htmlFor="filter-bookmaker" className="block text-sm font-medium text-slate-300 mb-2">
+              Casa de Apuestas
+            </label>
+            <select
+              id="filter-bookmaker"
+              value={filters.bookmaker}
+              onChange={(e) => handleFilterChange('bookmaker', e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todas</option>
+              {Object.values(Bookmaker).map((bookmaker) => (
+                <option key={bookmaker} value={bookmaker}>
+                  {bookmaker}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
+
+      {/* Results Indicator */}
+      {hasActiveFilters && (
+        <div className="text-sm text-slate-400 mb-4">
+          <span className="font-medium text-slate-300">{filteredPicks.length}</span>
+          {' '}{filteredPicks.length === 1 ? 'resultado encontrado' : 'resultados encontrados'}
+          {debouncedSearchQuery && ` para "${debouncedSearchQuery}"`}
+        </div>
+      )}
 
       {/* Picks Table */}
       {filteredPicks.length === 0 ? (

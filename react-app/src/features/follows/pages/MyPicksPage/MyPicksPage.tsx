@@ -8,7 +8,7 @@ import {
 import { useFollows } from '../../hooks/useFollows';
 import { useTipsters } from '@/features/tipsters/hooks/useTipsters';
 import { usePicks } from '@/features/picks/hooks/usePicks';
-import { useSortableTable } from '@shared/hooks';
+import { useSortableTable, useDebounce } from '@shared/hooks';
 import { FollowTableRow } from '../../components/FollowTableRow';
 import { AddFollowModal } from '../../components/AddFollowModal';
 import { SkeletonTable } from '@shared/components/ui';
@@ -34,6 +34,9 @@ export const MyPicksPage = () => {
     matchStatus: 'all',
     searchQuery: '',
   });
+  
+  // Debounce search query to optimize performance
+  const debouncedSearchQuery = useDebounce(filters.searchQuery, 300);
 
   // Calculate stats
   const stats = useMemo<FollowStats>(() => {
@@ -132,11 +135,12 @@ export const MyPicksPage = () => {
         if (filters.matchStatus === 'diverge' && isMatch) return false;
       }
 
-      // Filter by search query (match or tipster name)
-      if (filters.searchQuery) {
+      // Search filter (match and tipster name)
+      if (debouncedSearchQuery) {
+        console.log('🔍 Applying search filter:', debouncedSearchQuery);
         const originalPick = picks.find((p) => p.id === follow.pickId);
         const tipster = tipsters.find((t) => t.id === follow.tipsterId);
-        const query = filters.searchQuery.toLowerCase();
+        const query = debouncedSearchQuery.toLowerCase();
         const matchText = originalPick?.match?.toLowerCase() || '';
         const tipsterName = tipster?.name?.toLowerCase() || '';
 
@@ -147,7 +151,7 @@ export const MyPicksPage = () => {
 
       return true;
     });
-  }, [follows, picks, tipsters, filters]);
+  }, [follows, picks, tipsters, filters, debouncedSearchQuery]);
 
   // Enrich follows with sport field from original pick for sorting
   const enrichedFollows = useMemo(() => {
