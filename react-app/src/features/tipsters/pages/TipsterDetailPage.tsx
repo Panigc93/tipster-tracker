@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Trash2, Plus, RefreshCcw } from 'lucide-react';
 import {
@@ -51,6 +52,13 @@ export function TipsterDetailPage() {
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   const [isSecondResetConfirmOpen, setIsSecondResetConfirmOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  
+  // Delete confirmation states
+  const [isDeleteTipsterConfirmOpen, setIsDeleteTipsterConfirmOpen] = useState(false);
+  const [isDeletePickConfirmOpen, setIsDeletePickConfirmOpen] = useState(false);
+  const [pickToDelete, setPickToDelete] = useState<Pick | null>(null);
+  const [isDeleteFollowConfirmOpen, setIsDeleteFollowConfirmOpen] = useState(false);
+  const [followToDelete, setFollowToDelete] = useState<UserFollow | null>(null);
 
   // Sorting for picks table
   const { 
@@ -95,24 +103,24 @@ export function TipsterDetailPage() {
     void refreshTipster();
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
+    setIsDeleteTipsterConfirmOpen(true);
+  };
+
+  const handleConfirmDeleteTipster = async () => {
     if (!tipster) return;
-
-    const confirmed = globalThis.confirm(
-      `¿Estás seguro de que quieres eliminar al tipster "${tipster.name}"? Esta acción no se puede deshacer.`
-    );
-
-    if (!confirmed) return;
 
     setIsDeleting(true);
     try {
       await deleteTipster(tipster.id);
+      toast.success('Tipster eliminado correctamente');
       navigate('/tipsters');
     } catch (err) {
       console.error('Error deleting tipster:', err);
-      globalThis.alert('Error al eliminar el tipster');
+      toast.error('Error al eliminar el tipster');
     } finally {
       setIsDeleting(false);
+      setIsDeleteTipsterConfirmOpen(false);
     }
   };
 
@@ -158,7 +166,7 @@ export function TipsterDetailPage() {
       const { deletedPicks, deletedFollows } = result.data || { deletedPicks: 0, deletedFollows: 0 };
 
       // Show success message
-      globalThis.alert(
+      toast.success(
         `✅ Tipster "${tipster.name}" reseteado correctamente.\n\n` +
         `Se eliminaron ${deletedPicks} picks y ${deletedFollows} follows.`
       );
@@ -167,7 +175,7 @@ export function TipsterDetailPage() {
       navigate('/');
     } catch (err) {
       console.error('Error resetting tipster:', err);
-      globalThis.alert('Error al resetear el tipster: ' + (err instanceof Error ? err.message : 'Unknown error'));
+  toast.error('Error al resetear el tipster: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setIsResetting(false);
       setIsSecondResetConfirmOpen(false);
@@ -180,18 +188,23 @@ export function TipsterDetailPage() {
     setIsEditPickModalOpen(true);
   };
 
-  const handleDeletePick = async (pick: Pick) => {
-    const confirmed = globalThis.confirm(
-      `¿Estás seguro de que quieres eliminar esta pick? Esta acción no se puede deshacer.`
-    );
+  const handleDeletePick = (pick: Pick) => {
+    setPickToDelete(pick);
+    setIsDeletePickConfirmOpen(true);
+  };
 
-    if (!confirmed) return;
+  const handleConfirmDeletePick = async () => {
+    if (!pickToDelete) return;
 
     try {
-      await deletePick(pick.id);
+      await deletePick(pickToDelete.id);
+      toast.success('Pick eliminada correctamente');
     } catch (err) {
       console.error('Error deleting pick:', err);
-      globalThis.alert('Error al eliminar la pick');
+      toast.error('Error al eliminar la pick');
+    } finally {
+      setIsDeletePickConfirmOpen(false);
+      setPickToDelete(null);
     }
   };
 
@@ -205,18 +218,23 @@ export function TipsterDetailPage() {
     setIsEditFollowModalOpen(true);
   };
 
-  const handleDeleteFollow = async (follow: UserFollow) => {
-    const confirmed = globalThis.confirm(
-      `¿Estás seguro de que quieres eliminar este follow? Esta acción no se puede deshacer.`
-    );
+  const handleDeleteFollow = (follow: UserFollow) => {
+    setFollowToDelete(follow);
+    setIsDeleteFollowConfirmOpen(true);
+  };
 
-    if (!confirmed) return;
+  const handleConfirmDeleteFollow = async () => {
+    if (!followToDelete) return;
 
     try {
-      await deleteFollow(follow.id);
+      await deleteFollow(followToDelete.id);
+      toast.success('Follow eliminado correctamente');
     } catch (err) {
       console.error('Error deleting follow:', err);
-      globalThis.alert('Error al eliminar el follow');
+      toast.error('Error al eliminar el follow');
+    } finally {
+      setIsDeleteFollowConfirmOpen(false);
+      setFollowToDelete(null);
     }
   };
 
@@ -932,6 +950,49 @@ export function TipsterDetailPage() {
           cancelText="No, cancelar"
           isDangerous={true}
           isLoading={isResetting}
+        />
+
+        {/* Delete Tipster Confirmation */}
+        <ConfirmDialog
+          isOpen={isDeleteTipsterConfirmOpen}
+          onClose={() => setIsDeleteTipsterConfirmOpen(false)}
+          onConfirm={handleConfirmDeleteTipster}
+          title="¿Eliminar Tipster?"
+          message={`¿Estás seguro de que quieres eliminar al tipster "${tipster.name}"?\n\nEsta acción no se puede deshacer.`}
+          confirmText="Sí, eliminar"
+          cancelText="Cancelar"
+          isDangerous
+          isLoading={isDeleting}
+        />
+
+        {/* Delete Pick Confirmation */}
+        <ConfirmDialog
+          isOpen={isDeletePickConfirmOpen}
+          onClose={() => {
+            setIsDeletePickConfirmOpen(false);
+            setPickToDelete(null);
+          }}
+          onConfirm={handleConfirmDeletePick}
+          title="¿Eliminar Pick?"
+          message="¿Estás seguro de que quieres eliminar esta pick?\n\nEsta acción no se puede deshacer."
+          confirmText="Sí, eliminar"
+          cancelText="Cancelar"
+          isDangerous
+        />
+
+        {/* Delete Follow Confirmation */}
+        <ConfirmDialog
+          isOpen={isDeleteFollowConfirmOpen}
+          onClose={() => {
+            setIsDeleteFollowConfirmOpen(false);
+            setFollowToDelete(null);
+          }}
+          onConfirm={handleConfirmDeleteFollow}
+          title="¿Eliminar Follow?"
+          message="¿Estás seguro de que quieres eliminar este follow?\n\nEsta acción no se puede deshacer."
+          confirmText="Sí, eliminar"
+          cancelText="Cancelar"
+          isDangerous
         />
     </>
   );

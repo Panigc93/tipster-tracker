@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { Modal, Button, Input, Dropdown } from '@/shared/components/ui';
 import { ALL_CHANNELS } from '@/shared/constants';
 import { useAuth } from '@features/auth/hooks';
@@ -77,7 +78,7 @@ export function AddTipsterModal({
     }
 
     if (!user?.uid) {
-      alert('Usuario no autenticado');
+      toast.error('Usuario no autenticado');
       return;
     }
 
@@ -90,6 +91,7 @@ export function AddTipsterModal({
           name: formData.name.trim(),
           channel: formData.channel,
         });
+        toast.success('Tipster actualizado correctamente');
       } else if (onCreate) {
         // Create new tipster
         const today = new Date().toISOString().split('T')[0];
@@ -99,12 +101,13 @@ export function AddTipsterModal({
           channel: formData.channel,
           createdDate: today,
         });
+        toast.success('Tipster creado correctamente');
       }
 
       onSuccess();
     } catch (error) {
       console.error('Error saving tipster:', error);
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : 'Error al guardar el tipster'

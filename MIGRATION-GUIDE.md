@@ -157,12 +157,12 @@ feature/
 #### [📖 Ver detalle completo de Fase 1](#fase-1-fundamentos-y-abstracciones-detallado)
 
 ### **FASE 2: Shared Components y Design System**
-- Migración del design system CSS a Tailwind CSS
-- Creación de componentes UI base (Button, Input, Card, Modal, etc.)
-- Implementación de sistema de iconos (Lucide React)
-- Creación de layout components (Header, Sidebar, etc.)
-- Implementación de componentes de feedback (Loading, Toast, Alert)
-- Setup de Storybook para documentación de componentes
+  - Migración del design system CSS a Tailwind CSS
+  - Creación de componentes UI base (Button, Input, Card, Modal, etc.)
+  - Implementación de sistema de iconos (Lucide React)
+  - Creación de layout components (Header, Sidebar, etc.)
+  - Implementación de componentes de feedback (Loading, Toast, Alert)
+  - Setup de Storybook para documentación de componentes
 
 #### [📖 Ver detalle completo de Fase 2](#fase-2-shared-components-y-design-system-detallado)
 
@@ -14890,7 +14890,7 @@ Antes de pasar al deploy a producción, esta fase se enfoca en pulir la aplicaci
 5A. Exportar a Excel (template, dashboards, fórmulas, estilos, dropdowns)
 
 **Pendientes:**
-4. Ordenación por columnas en tablas (picks, follows)
+ 4. Ordenación por columnas en tablas (picks, follows) ✅ COMPLETADA
 5B. Importar desde Excel (pospuesto, NO se implementa en esta fase)
 6. Sistema de notificaciones toast
 7. Optimización de estados de carga (skeleton loaders, overlays)
@@ -15380,14 +15380,16 @@ Se creó un componente `AdvancedFilters` con filtros complejos (multi-select, ra
 
 ### Tareas Pendientes de la Fase 8.5
 
-#### Task 4: Capacidades de Ordenación 🔄 PENDIENTE
+#### Task 4: Capacidades de Ordenación ✅ COMPLETADA (20/11/2025)
 **Objetivo**: Añadir ordenación por columnas en tablas (picks, follows)
 
-**Características**:
+**Características implementadas**:
 - Sort ascendente/descendente por: fecha, cuota, stake, resultado, tipster
 - Indicadores visuales de columna ordenada (↑↓)
 - Click en header de columna para ordenar
 - Estado de ordenación persistente durante la sesión
+
+**Commit**: `1ec71f8` - "feat(phase-9): add column sorting to tables - Task 4/10"
 
 #### Task 5A: Exportar a Excel - Template ✅ COMPLETADA (19/11/2025)
 **Objetivo**: Crear template Excel completo con formulas, estilos y dropdowns
@@ -15430,7 +15432,9 @@ Se creó un componente `AdvancedFilters` con filtros complejos (multi-select, ra
 #### Task 5B: Importar desde Excel 🔄 PENDIENTE
 **Objetivo**: Funcionalidad para importar picks desde Excel generado
 
-**Características**:
+**Estado:** Esta tarea se pospone para futuras iteraciones. No se implementará en la Fase 8.5 y queda documentada para priorización futura.
+
+**Características (planificadas):**
 - Parsear Excel con xlsx library
 - Validar datos antes de importar
 - Preview modal con datos a importar
@@ -15440,13 +15444,25 @@ Se creó un componente `AdvancedFilters` con filtros complejos (multi-select, ra
 #### Task 6: Sistema de Notificaciones Toast 🔄 PENDIENTE
 **Objetivo**: Reemplazar alerts nativos con toast notifications
 
-**Características**:
-- Librería: `react-hot-toast` o `react-toastify`
+**Diagnóstico actual (20/11/2025):**
+- Sonner no está instalado en el proyecto React, se debe añadir como dependencia.
+- El sistema actual usa `alert()` y `confirm()` en múltiples puntos críticos (CRUD, dashboard, modals, etc.).
+- Hay componentes custom de `Alert` y `ConfirmDialog`, pero no existe un sistema global de toasts ni `<Toaster />` montado.
+- Existe un componente `ToastContainer.tsx` (custom), pero no es Sonner y podría ser redundante.
+
+**Plan de integración Sonner:**
+1. Instalar Sonner vía npm.
+2. Añadir `<Toaster />` en el layout principal (`App.tsx` o provider global).
+3. Migrar todos los usos de `alert()` y `confirm()` a Sonner (`toast.success`, `toast.error`, etc.).
+4. Refactorizar/eliminar el sistema custom de toasts si es redundante.
+5. Probar todos los flujos afectados y asegurar feedback visual coherente.
+6. Documentar la integración y los cambios realizados.
+
+**Características a implementar:**
 - Notificaciones de éxito, error, info, warning
 - Posición configurable (top-right por defecto)
 - Auto-dismiss con duración configurable
-- Reemplazar todos los `alert()` y `confirm()` nativos
-
+- Reemplazar todos los `alert()` y `confirm()` nativos por toasts Sonner
 #### Task 7: Optimización de Estados de Carga 🔄 PENDIENTE
 **Objetivo**: Mejorar feedback visual durante operaciones
 
@@ -17644,4 +17660,32 @@ picks/
 **Última actualización**: 17 de Noviembre de 2025  
 **Versión del documento**: 1.3.0  
 **Autor**: AI Assistant + Development Team
+**Cambios realizados (20/11/2025):**
+- Todos los usos de `alert()` y `confirm()` migrados a Sonner (`toast.success`, `toast.error`, etc.) en los principales features: AddTipsterModal, TipsterDetailPage, PicksListPage, MyPicksPage, DashboardPage.
+- ConfirmDialog se mantiene para acciones destructivas con doble confirmación y feedback visual.
+- Eliminado el sistema custom de toasts (`ToastContainer.tsx`, `ToastContext.tsx`), Sonner es ahora el único sistema global de notificaciones.
+- `<Toaster />` de Sonner montado en el entrypoint global (`main.tsx`) con posición `top-right`, colores ricos, botón de cierre y duración 3500ms.
+- Todos los flujos CRUD, errores y confirmaciones ahora muestran feedback visual consistente y moderno.
+
+**Recomendaciones de uso:**
+- Usar `toast.success`, `toast.error`, `toast.info`, `toast.warning` para notificaciones en cualquier feature.
+- Para confirmaciones destructivas, mantener el modal ConfirmDialog para mejor UX.
+- No crear sistemas custom de toasts, usar siempre Sonner para feedback global.
+
+**Ejemplo de uso:**
+```tsx
+import { toast } from 'sonner';
+
+// Éxito
+toast.success('Operación completada correctamente');
+
+// Error
+toast.error('Ha ocurrido un error');
+
+// Info
+toast.info('Este es un mensaje informativo');
+
+// Warning
+toast.warning('Atención: acción irreversible');
+```
 

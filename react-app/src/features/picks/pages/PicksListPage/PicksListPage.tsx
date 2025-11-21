@@ -4,8 +4,10 @@
  */
 
 import { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { Plus, Search } from 'lucide-react';
 import { Button } from '@shared/components/ui';
+import { ConfirmDialog } from '@shared/components';
 import { PickTableRow, AddPickModal } from '../../components';
 import { usePicks } from '../../hooks';
 import { useTipsters } from '@features/tipsters/hooks';
@@ -114,6 +116,8 @@ export function PicksListPage() {
   const [isFollowModalOpen, setIsFollowModalOpen] = useState(false);
   const [editingPick, setEditingPick] = useState<Pick | undefined>(undefined);
   const [followingPick, setFollowingPick] = useState<Pick | undefined>(undefined);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [pickToDelete, setPickToDelete] = useState<Pick | null>(null);
 
   // Filter state
   const [filters, setFilters] = useState<PickFilters>({
@@ -208,11 +212,25 @@ export function PicksListPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = async (pick: Pick) => {
-    if (globalThis.confirm('¿Estás seguro de eliminar esta pick?')) {
-      await deletePick(pick.id);
+  const handleDelete = (pick: Pick) => {
+    setPickToDelete(pick);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pickToDelete) return;
+
+    try {
+      await deletePick(pickToDelete.id);
+      toast.success('Pick eliminada correctamente');
+    } catch (error) {
+      toast.error('Error al eliminar la pick');
+    } finally {
+      setIsDeleteConfirmOpen(false);
+      setPickToDelete(null);
     }
   };
+
 
   const handleFollow = (pick: Pick) => {
     setFollowingPick(pick);
@@ -580,6 +598,21 @@ export function PicksListPage() {
           }}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isDeleteConfirmOpen}
+        onClose={() => {
+          setIsDeleteConfirmOpen(false);
+          setPickToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="¿Eliminar Pick?"
+        message="¿Estás seguro de que quieres eliminar esta pick?\n\nEsta acción no se puede deshacer."
+        confirmText="Sí, eliminar"
+        cancelText="Cancelar"
+        isDangerous
+      />
     </div>
   );
 }

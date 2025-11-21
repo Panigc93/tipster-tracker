@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "firebase emulators:start --import=./emulator-data --export-on-exit"
+  },
+  "dependencies": {
+    "sonner": "^2.0.7"
   }
 }

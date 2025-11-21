@@ -42,8 +42,7 @@ export { Spinner } from './Spinner';
 export type { SpinnerProps, SpinnerVariant, SpinnerSize } from './Spinner';
 
 // Toast
-export { ToastContainer, ToastProvider, useToast } from './Toast';
-export type { Toast, ToastVariant, ToastContainerProps } from './Toast';
+// Sonner reemplaza el sistema custom de Toast
 
 // Tabs
 export { Tabs, TabPanel } from './Tabs';

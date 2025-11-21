@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Download } from 'lucide-react';
 import { PersonalStatsPanel, DashboardFilters, TipsterCard } from '../../components';
 import { useDashboardFilters } from '../../hooks';
@@ -88,11 +89,11 @@ export function DashboardPage() {
       window.URL.revokeObjectURL(url);
       
       console.log('✅ [SUCCESS] Export completado correctamente');
-      alert('✅ Excel generado y descargado correctamente!');
+  toast.success('✅ Excel generado y descargado correctamente!');
       
     } catch (error) {
       console.error('❌ [ERROR] Error al exportar:', error);
-      alert(`❌ Error al generar Excel: ${error instanceof Error ? error.message : 'Error desconocido'}\n\n¿Está el backend corriendo en http://localhost:3001?`);
+  toast.error(`❌ Error al generar Excel: ${error instanceof Error ? error.message : 'Error desconocido'}\n\n¿Está el backend corriendo en http://localhost:3001?`);
     } finally {
       setIsExporting(false);
     }

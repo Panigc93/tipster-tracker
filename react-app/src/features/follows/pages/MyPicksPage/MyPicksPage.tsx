@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { Trash2, Filter, X, TrendingUp, Target, Percent, DollarSign } from 'lucide-react';
 import {
   OddsDistributionChart,
@@ -169,7 +170,7 @@ export const MyPicksPage = () => {
   const handleEdit = (follow: UserFollow) => {
     const originalPick = picks.find((p) => p.id === follow.pickId);
     if (!originalPick) {
-      alert('No se encontró la pick original');
+      toast.error('No se encontró la pick original');
       return;
     }
 
@@ -190,9 +191,10 @@ export const MyPicksPage = () => {
       await deleteFollow(selectedFollow.id);
       setIsDeleteModalOpen(false);
       setSelectedFollow(null);
+      toast.success('Seguimiento eliminado correctamente');
     } catch (error) {
       console.error('Error deleting follow:', error);
-      alert('Error al eliminar el seguimiento');
+      toast.error('Error al eliminar el seguimiento');
     }
   };
 
