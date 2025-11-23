@@ -1471,26 +1471,28 @@ npm run deploy       # Deploy a Firebase
 4. ✅ Reset Tipster con doble confirmación
 5. ✅ Filtros de fecha en picks
 6. ✅ Exportación a Excel completa
+7. ✅ Optimización de estados de carga (skeleton loaders, overlays)
+8. ✅ Error boundaries
+9. ✅ Mejora de búsqueda en tablas (debouncing, filtros avanzados)
+10. ✅ **Mejoras responsive (mobile/tablet)** - COMPLETADA
+    - Hamburger menu en mobile
+    - Tablas responsive con scroll horizontal
+    - Cards para vista mobile
+    - Filtros colapsables
+    - Navegación optimizada para touch
+11. ✅ **Optimización de rendimiento** - COMPLETADA (4 Fases)
+    - **Fase 1**: Route-based code splitting (7 páginas lazy-loaded)
+    - **Fase 2**: Component memoization (PickCard, FollowCard)
+    - **Fase 3**: Chart lazy loading (TipsterDetailPage)
+    - **Fase 4**: Bundle analysis (rollup-plugin-visualizer)
+    - **Resultados**: Bundle 1,012 kB → 842 kB (17% reducción, 269 kB gzipped)
+    - **Oportunidades futuras identificadas**:
+      - Chart.js tree-shaking (~100-150 kB adicionales)
+      - Firebase modular imports (~30-50 kB adicionales)
+      - Total potencial: ~35-40% reducción del bundle original
 
-**Pendientes (5/11):**
-7. ⏳ Optimización de estados de carga (skeleton loaders, overlays)
-8. ⏳ Error boundaries
-9. ⏳ Mejora de búsqueda en tablas
-10. ⏳ Mejoras responsive (mobile/tablet)
-11. ⏳ Optimización de rendimiento
-   - React.memo para componentes pesados
-   - Lazy loading de componentes y rutas
-   - Virtualización de tablas largas (react-virtual/react-window)
-   - Code splitting por rutas
-   - **Optimización de carga en redes lentas (3G/4G)**
-     - Detectado en testing con throttling de red
-     - Bundle size analysis: Chart.js (~200KB), Firebase SDK (~100KB), Lucide (~50KB)
-     - Tree shaking de iconos (importar solo los necesarios)
-     - Lazy loading de charts (mayor impacto)
-     - Compresión gzip/brotli
-     - Drop console.logs en producción
-   - Métricas objetivo: FCP < 3s (3G), LCP < 5s (3G), TTI < 7s (3G)
-   - Bundle objetivo: < 200KB inicial (gzipped), < 500KB total
+**Pendientes (1/12):**
+12. ⏳ Importación desde Excel (POSPUESTO - baja prioridad)
 
 **Decisión:** La importación de Excel se pospone y no bloquea el avance ni el deploy. El exportador está finalizado y validado.
 

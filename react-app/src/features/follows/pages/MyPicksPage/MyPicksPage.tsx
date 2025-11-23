@@ -9,9 +9,8 @@ import { useFollows } from '../../hooks/useFollows';
 import { useTipsters } from '@/features/tipsters/hooks/useTipsters';
 import { usePicks } from '@/features/picks/hooks/usePicks';
 import { useSortableTable, useDebounce } from '@shared/hooks';
-import { FollowTableRow } from '../../components/FollowTableRow';
-import { AddFollowModal } from '../../components/AddFollowModal';
-import { SkeletonTable } from '@shared/components/ui';
+import { FollowTableRow, FollowCard, AddFollowModal } from '../../components';
+import { SkeletonTable, CollapsibleSection } from '@shared/components/ui';
 import type { MyPicksFilters, FollowStats } from './MyPicksPage.types';
 import type { UserFollow, Pick } from '@/shared/types';
 
@@ -318,18 +317,12 @@ export const MyPicksPage = () => {
       )}
 
       {/* Filters */}
-      <div className="rounded-lg bg-slate-800 p-4">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-gray-400" />
-            <h2 className="text-lg font-semibold text-white">Filtros</h2>
-            {hasActiveFilters && (
-              <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-blue-400">
-                {activeFilterCount} {activeFilterCount === 1 ? 'filtro activo' : 'filtros activos'}
-              </span>
-            )}
-          </div>
-          {hasActiveFilters && (
+      <CollapsibleSection
+        title="Filtros"
+        icon={<Filter className="h-5 w-5" />}
+        badge={hasActiveFilters ? activeFilterCount : undefined}
+        actions={
+          hasActiveFilters ? (
             <button
               onClick={clearFilters}
               className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300"
@@ -337,9 +330,9 @@ export const MyPicksPage = () => {
               <X className="h-4 w-4" />
               Limpiar filtros
             </button>
-          )}
-        </div>
-
+          ) : undefined
+        }
+      >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Tipster filter */}
           <div>
@@ -404,7 +397,7 @@ export const MyPicksPage = () => {
             />
           </div>
         </div>
-      </div>
+      </CollapsibleSection>
 
       {/* Table */}
       <div className="rounded-lg bg-slate-800 p-4">
@@ -432,73 +425,9 @@ export const MyPicksPage = () => {
           }
 
           return (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-700">
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('dateTimeFollowed')}
-                    title="Click para ordenar por fecha. Click en otra columna para multi-sort"
-                  >
-                    <span className="flex items-center gap-1">
-                      Fecha {getSortIndicator('dateTimeFollowed')}
-                    </span>
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('tipsterId')}
-                    title="Click para ordenar por tipster. Click en otra columna para multi-sort"
-                  >
-                    <span className="flex items-center gap-1">
-                      Tipster {getSortIndicator('tipsterId')}
-                    </span>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                    Match
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('sport')}
-                    title="Click para ordenar por deporte. Click en otra columna para multi-sort"
-                  >
-                    <span className="flex items-center gap-1">
-                      Deporte {getSortIndicator('sport')}
-                    </span>
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('userOdds')}
-                    title="Click para ordenar por cuota. Click en otra columna para multi-sort"
-                  >
-                    <span className="flex items-center gap-1">
-                      Cuota {getSortIndicator('userOdds')}
-                    </span>
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('userStake')}
-                    title="Click para ordenar por stake. Click en otra columna para multi-sort"
-                  >
-                    <span className="flex items-center gap-1">
-                      Stake {getSortIndicator('userStake')}
-                    </span>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                    Resultado
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                    Profit
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                    Match
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-400 w-40">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-700">
+            <>
+              {/* Mobile: Cards */}
+              <div className="md:hidden space-y-4">
                 {sortedFollows.map((follow) => {
                   const originalPick = picks.find((p) => p.id === follow.pickId);
                   if (!originalPick) return null;
@@ -507,7 +436,7 @@ export const MyPicksPage = () => {
                   const tipsterName = tipster?.name || 'Desconocido';
 
                   return (
-                    <FollowTableRow
+                    <FollowCard
                       key={follow.id}
                       follow={follow}
                       pick={originalPick}
@@ -517,9 +446,98 @@ export const MyPicksPage = () => {
                     />
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
+              </div>
+
+              {/* Desktop: Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-700">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                        onClick={() => requestSort('dateTimeFollowed')}
+                        title="Click para ordenar por fecha. Click en otra columna para multi-sort"
+                      >
+                        <span className="flex items-center gap-1">
+                          Fecha {getSortIndicator('dateTimeFollowed')}
+                        </span>
+                      </th>
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                        onClick={() => requestSort('tipsterId')}
+                        title="Click para ordenar por tipster. Click en otra columna para multi-sort"
+                      >
+                        <span className="flex items-center gap-1">
+                          Tipster {getSortIndicator('tipsterId')}
+                        </span>
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
+                        Match
+                      </th>
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                        onClick={() => requestSort('sport')}
+                        title="Click para ordenar por deporte. Click en otra columna para multi-sort"
+                      >
+                        <span className="flex items-center gap-1">
+                          Deporte {getSortIndicator('sport')}
+                        </span>
+                      </th>
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                        onClick={() => requestSort('userOdds')}
+                        title="Click para ordenar por cuota. Click en otra columna para multi-sort"
+                      >
+                        <span className="flex items-center gap-1">
+                          Cuota {getSortIndicator('userOdds')}
+                        </span>
+                      </th>
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400 cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                        onClick={() => requestSort('userStake')}
+                        title="Click para ordenar por stake. Click en otra columna para multi-sort"
+                      >
+                        <span className="flex items-center gap-1">
+                          Stake {getSortIndicator('userStake')}
+                        </span>
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
+                        Resultado
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
+                        Profit
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
+                        Match
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-400 w-40">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-700">
+                    {sortedFollows.map((follow) => {
+                      const originalPick = picks.find((p) => p.id === follow.pickId);
+                      if (!originalPick) return null;
+
+                      const tipster = tipsters.find((t) => t.id === follow.tipsterId);
+                      const tipsterName = tipster?.name || 'Desconocido';
+
+                      return (
+                        <FollowTableRow
+                          key={follow.id}
+                          follow={follow}
+                          pick={originalPick}
+                          tipsterName={tipsterName}
+                          onEdit={() => handleEdit(follow)}
+                          onDelete={() => handleDelete(follow)}
+                        />
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           );
         })()}
       </div>

@@ -15501,35 +15501,74 @@ Se creó un componente `AdvancedFilters` con filtros complejos (multi-select, ra
 - Historial de búsquedas recientes (localStorage)
 - Búsqueda con debounce para mejor performance
 
-#### Task 10: Mejoras Responsive 🔄 PENDIENTE
+#### Task 10: Mejoras Responsive ✅ COMPLETADA (21/11/2025)
 **Objetivo**: Optimizar diseño para móviles y tablets
 
-**Características**:
-- Menú hamburguesa para móviles
-- Tablas scrollables horizontalmente con indicador visual
-- Filtros colapsables en móvil (accordion)
-- Optimizar spacing y tamaños de fuente
-- Touch-friendly (botones y controles más grandes)
+**Implementación completada**:
+- ✅ Menú hamburguesa para móviles (Header component)
+- ✅ Tablas scrollables horizontalmente con indicador visual
+- ✅ Vista de cards para móvil (PickCard, FollowCard)
+- ✅ Filtros colapsables en móvil (CollapsibleSection component)
+- ✅ Touch-friendly (botones y controles optimizados)
+- ✅ Navegación responsive en todas las páginas
+- ✅ Breakpoints: mobile (< 768px), tablet (768-1024px), desktop (> 1024px)
 
-#### Task 11: Optimización de Rendimiento 🔄 PENDIENTE
+**Testing realizado**:
+- ✅ Responsive en 375px, 768px, 1920px
+- ✅ Hamburger menu funcional
+- ✅ Tablas con scroll horizontal
+- ✅ Filtros colapsables
+- ✅ Cards en mobile view
+
+**Commits**: Ver walkthrough de Task 10 para detalles completos
+
+#### Task 11: Optimización de Rendimiento ✅ COMPLETADA (22/11/2025)
 **Objetivo**: Mejorar performance de la aplicación
 
-**Características**:
-- `React.memo` estratégico en componentes que re-renderizan frecuentemente
-- `useMemo` y `useCallback` donde corresponda
-- Lazy loading de componentes pesados (Charts, modals)
-- Code splitting por rutas con React.lazy
-- Virtualización de listas largas (react-window o react-virtuoso)
+**Implementación completada (4 Fases)**:
+
+**Fase 1: Route-Based Code Splitting**
+- ✅ Lazy loading de 7 páginas con React.lazy()
+- ✅ Suspense boundaries con PageLoadingFallback
+- ✅ Skeleton loaders durante carga
+- Páginas lazy-loaded: LoginPage, SignupPage, DashboardPage, TipsterListPage, TipsterDetailPage, PicksListPage, MyPicksPage
+
+**Fase 2: Component Memoization**
+- ✅ React.memo() en PickCard
+- ✅ React.memo() en FollowCard
+- Previene re-renders innecesarios en listas
+
+**Fase 3: Chart Lazy Loading**
+- ✅ Lazy loading de 4 chart components en TipsterDetailPage
+- ✅ Suspense con skeleton fallbacks
+- Charts: OddsDistributionChart, StakeDistributionChart, SportDistributionChart, PickTypeDistributionChart
+
+**Fase 4: Bundle Analysis**
+- ✅ Instalado rollup-plugin-visualizer
+- ✅ Generado stats.html con treemap interactivo
+- ✅ Identificadas oportunidades de optimización
+
+**Resultados alcanzados**:
+- Bundle principal: 1,012 kB → 842 kB (17% reducción)
+- Gzipped: 304 kB → 269 kB (11% reducción)
+- 7 páginas code-split en chunks separados
+- Charts lazy-loaded (solo cuando se necesitan)
+- Componentes de lista memoizados
+
+**Oportunidades futuras identificadas**:
+- Chart.js tree-shaking: ~100-150 kB adicionales
+- Firebase modular imports: ~30-50 kB adicionales
+- Potencial total: ~35-40% reducción del bundle original
+
+**Commits**: Ver performance_optimization_walkthrough.md y bundle_analysis_report.md
 
 ---
 
-**Duración real**: ~8 horas (3 tareas completadas: ConfirmDialog, Reset Tipster, Filtros de Fecha)
+**Duración real**: ~12 horas (11 tareas completadas)
 
-**Duración estimada restante**: 15-20 horas (8 tareas pendientes)
+**Estado**: ✅ **COMPLETADA** - 11/11 tareas completadas (100%)
 
-**Estado**: 🔄 **EN PROGRESO** - 3/11 tareas completadas (27%)
-
-**Próxima tarea**: Task 4 - Capacidades de Ordenación
+**Pendiente**: Task 5B - Importación desde Excel (POSPUESTO - baja prioridad)
 
 ---
 

@@ -6,9 +6,9 @@
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { Plus, Search } from 'lucide-react';
-import { Button, SkeletonText, SkeletonCard, SkeletonTable } from '@shared/components/ui';
+import { Button, SkeletonText, SkeletonCard, SkeletonTable, CollapsibleSection } from '@shared/components/ui';
 import { ConfirmDialog } from '@shared/components';
-import { PickTableRow, AddPickModal } from '../../components';
+import { PickTableRow, PickCard, AddPickModal } from '../../components';
 import { usePicks } from '../../hooks';
 import { useTipsters } from '@features/tipsters/hooks';
 import { useFollows } from '@features/follows/hooks';
@@ -266,7 +266,7 @@ export function PicksListPage() {
         </div>
 
         {/* Stats Cards Skeleton */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <SkeletonCard key={i} height="100px" />
           ))}
@@ -313,7 +313,7 @@ export function PicksListPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
           <p className="text-slate-400 text-sm">Total Picks</p>
           <p className="text-2xl font-bold text-slate-100 mt-1">{stats.total}</p>
@@ -337,16 +337,17 @@ export function PicksListPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-slate-100">Filtros</h2>
-          {hasActiveFilters && (
+      <CollapsibleSection
+        title="Filtros"
+        badge={hasActiveFilters ? Object.values(filters).filter(v => v !== '' && v !== null && (Array.isArray(v) ? v.length > 0 : true)).length : undefined}
+        actions={
+          hasActiveFilters ? (
             <Button variant="secondary" size="sm" onClick={handleResetFilters}>
               Limpiar filtros
             </Button>
-          )}
-        </div>
-
+          ) : undefined
+        }
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* Search */}
           <div className="lg:col-span-2">
@@ -474,7 +475,7 @@ export function PicksListPage() {
             </select>
           </div>
         </div>
-      </div>
+      </CollapsibleSection>
 
       {/* Results Indicator */}
       {hasActiveFilters && (
@@ -510,110 +511,143 @@ export function PicksListPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-blue-500/10 border-b border-slate-700">
-                <tr>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('date')}
-                    title="Click para ordenar por fecha. Click en otra columna para multi-sort"
-                  >
-                    <span className="flex items-center gap-1">
-                      Fecha {getSortIndicator('date')}
-                    </span>
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('tipsterId')}
-                    title="Click para ordenar por tipster. Click en otra columna para multi-sort"
-                  >
-                    <span className="flex items-center gap-1">
-                      Tipster {getSortIndicator('tipsterId')}
-                    </span>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Partido
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('sport')}
-                    title="Click para ordenar por deporte. Click en otra columna para multi-sort"
-                  >
-                    <span className="flex items-center gap-1">
-                      Deporte {getSortIndicator('sport')}
-                    </span>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Tipo
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Apuesta
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('odds')}
-                    title="Click para ordenar por cuota. Click en otra columna para multi-sort"
-                  >
-                    <span className="flex items-center gap-1">
-                      Cuota {getSortIndicator('odds')}
-                    </span>
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                    onClick={() => requestSort('stake')}
-                    title="Click para ordenar por stake. Click en otra columna para multi-sort"
-                  >
-                    <span className="flex items-center gap-1">
-                      Stake {getSortIndicator('stake')}
-                    </span>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Bookmaker
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Resultado
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Profit
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-700">
-                {sortedPicks.map((pick) => (
-                  <PickTableRow
-                    key={pick.id}
-                    pick={pick}
-                    tipsterName={getTipsterName(pick.tipsterId)}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onFollow={handleFollow}
-                    isFollowed={isPickFollowed(pick.id)}
-                    showActions
-                  />
-                ))}
-              </tbody>
-            </table>
+        <>
+          {/* Mobile: Cards */}
+          <div className="md:hidden space-y-4">
+            {sortedPicks.map((pick) => (
+              <PickCard
+                key={pick.id}
+                pick={pick}
+                tipsterName={getTipsterName(pick.tipsterId)}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onFollow={handleFollow}
+                isFollowed={isPickFollowed(pick.id)}
+                showActions
+              />
+            ))}
+            
+            {/* Results count - Mobile */}
+            <div className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg">
+              <p className="text-sm text-slate-400">
+                Mostrando <span className="font-semibold text-slate-300">{sortedPicks.length}</span>{' '}
+                {sortedPicks.length === 1 ? 'pick' : 'picks'}
+                {hasActiveFilters && (
+                  <span>
+                    {' '}
+                    de <span className="font-semibold text-slate-300">{picks.length}</span> totales
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
 
-          {/* Results count */}
-          <div className="px-6 py-4 border-t border-slate-700 bg-slate-900/50">
-            <p className="text-sm text-slate-400">
-              Mostrando <span className="font-semibold text-slate-300">{sortedPicks.length}</span>{' '}
-              {sortedPicks.length === 1 ? 'pick' : 'picks'}
-              {hasActiveFilters && (
-                <span>
-                  {' '}
-                  de <span className="font-semibold text-slate-300">{picks.length}</span> totales
-                </span>
-              )}
-            </p>
+          {/* Desktop: Table */}
+          <div className="hidden md:block bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-blue-500/10 border-b border-slate-700">
+                  <tr>
+                    <th 
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                      onClick={() => requestSort('date')}
+                      title="Click para ordenar por fecha. Click en otra columna para multi-sort"
+                    >
+                      <span className="flex items-center gap-1">
+                        Fecha {getSortIndicator('date')}
+                      </span>
+                    </th>
+                    <th 
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                      onClick={() => requestSort('tipsterId')}
+                      title="Click para ordenar por tipster. Click en otra columna para multi-sort"
+                    >
+                      <span className="flex items-center gap-1">
+                        Tipster {getSortIndicator('tipsterId')}
+                      </span>
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Partido
+                    </th>
+                    <th 
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                      onClick={() => requestSort('sport')}
+                      title="Click para ordenar por deporte. Click en otra columna para multi-sort"
+                    >
+                      <span className="flex items-center gap-1">
+                        Deporte {getSortIndicator('sport')}
+                      </span>
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Tipo
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Apuesta
+                    </th>
+                    <th 
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                      onClick={() => requestSort('odds')}
+                      title="Click para ordenar por cuota. Click en otra columna para multi-sort"
+                    >
+                      <span className="flex items-center gap-1">
+                        Cuota {getSortIndicator('odds')}
+                      </span>
+                    </th>
+                    <th 
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                      onClick={() => requestSort('stake')}
+                      title="Click para ordenar por stake. Click en otra columna para multi-sort"
+                    >
+                      <span className="flex items-center gap-1">
+                        Stake {getSortIndicator('stake')}
+                      </span>
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Bookmaker
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Resultado
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Profit
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-700">
+                  {sortedPicks.map((pick) => (
+                    <PickTableRow
+                      key={pick.id}
+                      pick={pick}
+                      tipsterName={getTipsterName(pick.tipsterId)}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onFollow={handleFollow}
+                      isFollowed={isPickFollowed(pick.id)}
+                      showActions
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Results count - Desktop */}
+            <div className="px-6 py-4 border-t border-slate-700 bg-slate-900/50">
+              <p className="text-sm text-slate-400">
+                Mostrando <span className="font-semibold text-slate-300">{sortedPicks.length}</span>{' '}
+                {sortedPicks.length === 1 ? 'pick' : 'picks'}
+                {hasActiveFilters && (
+                  <span>
+                    {' '}
+                    de <span className="font-semibold text-slate-300">{picks.length}</span> totales
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Modals */}

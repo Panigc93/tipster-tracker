@@ -1,24 +1,59 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { LoginPage, SignupPage } from '@features/auth/pages';
+import { lazy, Suspense } from 'react';
 import { PrivateRoute } from '@features/auth/components';
-import { DashboardPage } from '@features/dashboard/pages';
-import { TipsterListPage, TipsterDetailPage } from '@features/tipsters/pages';
-import { PicksListPage } from '@features/picks/pages';
-import { MyPicksPage } from '@features/follows/pages';
 import { Layout } from '@shared/components/layout';
-import { ErrorBoundary } from '@shared/components';
+import { ErrorBoundary, PageLoadingFallback } from '@shared/components';
 
+// Lazy load all page components for code splitting
+const LoginPage = lazy(() => 
+  import('@features/auth/pages/LoginPage').then(module => ({ default: module.LoginPage }))
+);
+const SignupPage = lazy(() => 
+  import('@features/auth/pages/SignupPage').then(module => ({ default: module.SignupPage }))
+);
+const DashboardPage = lazy(() => 
+  import('@features/dashboard/pages/DashboardPage').then(module => ({ default: module.DashboardPage }))
+);
+const TipsterListPage = lazy(() => 
+  import('@features/tipsters/pages/TipsterListPage').then(module => ({ default: module.TipsterListPage }))
+);
+const TipsterDetailPage = lazy(() => 
+  import('@features/tipsters/pages/TipsterDetailPage').then(module => ({ default: module.TipsterDetailPage }))
+);
+const PicksListPage = lazy(() => 
+  import('@features/picks/pages/PicksListPage').then(module => ({ default: module.PicksListPage }))
+);
+const MyPicksPage = lazy(() => 
+  import('@features/follows/pages/MyPicksPage').then(module => ({ default: module.MyPicksPage }))
+);
+
+/**
+ * Suspense wrapper for lazy-loaded pages
+ */
+const PageSuspense = ({ children }: { children: React.ReactNode }) => (
+  <Suspense fallback={<PageLoadingFallback />}>
+    {children}
+  </Suspense>
+);
 /**
  * Application routes configuration
  */
 export const router = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />,
+    element: (
+      <PageSuspense>
+        <LoginPage />
+      </PageSuspense>
+    ),
   },
   {
     path: '/signup',
-    element: <SignupPage />,
+    element: (
+      <PageSuspense>
+        <SignupPage />
+      </PageSuspense>
+    ),
   },
   {
     path: '/',
@@ -26,7 +61,9 @@ export const router = createBrowserRouter([
       <PrivateRoute>
         <Layout>
           <ErrorBoundary>
-            <DashboardPage />
+            <PageSuspense>
+              <DashboardPage />
+            </PageSuspense>
           </ErrorBoundary>
         </Layout>
       </PrivateRoute>
@@ -37,7 +74,9 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <Layout>
-          <TipsterListPage />
+          <PageSuspense>
+            <TipsterListPage />
+          </PageSuspense>
         </Layout>
       </PrivateRoute>
     ),
@@ -48,7 +87,9 @@ export const router = createBrowserRouter([
       <PrivateRoute>
         <Layout>
           <ErrorBoundary>
-            <TipsterDetailPage />
+            <PageSuspense>
+              <TipsterDetailPage />
+            </PageSuspense>
           </ErrorBoundary>
         </Layout>
       </PrivateRoute>
@@ -60,7 +101,9 @@ export const router = createBrowserRouter([
       <PrivateRoute>
         <Layout>
           <ErrorBoundary>
-            <PicksListPage />
+            <PageSuspense>
+              <PicksListPage />
+            </PageSuspense>
           </ErrorBoundary>
         </Layout>
       </PrivateRoute>
@@ -72,7 +115,9 @@ export const router = createBrowserRouter([
       <PrivateRoute>
         <Layout>
           <ErrorBoundary>
-            <MyPicksPage />
+            <PageSuspense>
+              <MyPicksPage />
+            </PageSuspense>
           </ErrorBoundary>
         </Layout>
       </PrivateRoute>

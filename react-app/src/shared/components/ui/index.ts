@@ -80,3 +80,11 @@ export type {
 // LoadingOverlay
 export { LoadingOverlay } from './LoadingOverlay';
 export type { LoadingOverlayProps } from './LoadingOverlay';
+
+// CollapsibleSection
+export { CollapsibleSection } from './CollapsibleSection';
+export type { CollapsibleSectionProps } from './CollapsibleSection';
+
+// PageLoadingFallback
+export { PageLoadingFallback } from './PageLoadingFallback';
+export type { PageLoadingFallbackProps } from './PageLoadingFallback';

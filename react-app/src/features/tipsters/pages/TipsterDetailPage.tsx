@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { toast } from 'sonner';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Trash2, Plus, RefreshCcw } from 'lucide-react';
@@ -7,23 +7,33 @@ import {
   Alert,
   Badge,
   ConfirmDialog,
-  OddsDistributionChart,
-  StakeDistributionChart,
-  SportDistributionChart,
-  PickTypeDistributionChart,
   SkeletonText,
   SkeletonCard,
   SkeletonTable,
   LoadingOverlay,
 } from '@/shared/components';
+
+// Lazy load chart components (only loaded when charts tab is active)
+const OddsDistributionChart = lazy(() => 
+  import('@/shared/components/charts/OddsDistributionChart').then(m => ({ default: m.OddsDistributionChart }))
+);
+const StakeDistributionChart = lazy(() => 
+  import('@/shared/components/charts/StakeDistributionChart').then(m => ({ default: m.StakeDistributionChart }))
+);
+const SportDistributionChart = lazy(() => 
+  import('@/shared/components/charts/SportDistributionChart').then(m => ({ default: m.SportDistributionChart }))
+);
+const PickTypeDistributionChart = lazy(() => 
+  import('@/shared/components/charts/PickTypeDistributionChart').then(m => ({ default: m.PickTypeDistributionChart }))
+);
 import { useSortableTable } from '@shared/hooks';
 import { useTipsterDetail, useTipsters } from '../hooks';
 import { AddTipsterModal } from '../components';
 import { calculateTipsterStats } from '../utils';
 import { usePicksByTipster, usePicks } from '@features/picks/hooks';
-import { PickTableRow, AddPickModal } from '@features/picks/components';
+import { PickTableRow, PickCard, AddPickModal } from '@features/picks/components';
 import { useFollowsByTipster, useFollows } from '@features/follows/hooks';
-import { FollowTableRow, AddFollowModal } from '@features/follows/components';
+import { FollowTableRow, FollowCard, AddFollowModal } from '@features/follows/components';
 import { calculateTraceability } from '@features/follows/utils';
 import { auth } from '@core/config/firebase.config';
 import type { Pick, UserFollow } from '@shared/types';
@@ -278,7 +288,7 @@ export function TipsterDetailPage() {
         </div>
 
         {/* Stats Cards Skeleton */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <SkeletonCard key={i} height="100px" />
           ))}
@@ -455,7 +465,7 @@ export function TipsterDetailPage() {
                   return (
                   <>
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
                       <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
                         <p className="text-slate-400 text-sm mb-1">Total Picks</p>
                         <p className="text-2xl font-bold text-slate-100">{stats.totalPicks}</p>
@@ -499,7 +509,7 @@ export function TipsterDetailPage() {
                     </div>
 
                     {/* Additional Stats */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                       <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
                         <p className="text-slate-400 text-sm mb-1">Pendientes</p>
                         <p className="text-lg font-semibold text-yellow-400">{stats.pendingPicks}</p>
@@ -519,11 +529,23 @@ export function TipsterDetailPage() {
                     </div>
 
                     {/* Charts */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                      <OddsDistributionChart picks={picks} height={180} />
-                      <StakeDistributionChart picks={picks} height={180} />
-                      <SportDistributionChart picks={picks} height={180} />
-                      <PickTypeDistributionChart picks={picks} height={180} />
+                    <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-slate-100 mb-4">Distribuciones</h3>
+                      <Suspense fallback={
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <SkeletonCard height="180px" />
+                          <SkeletonCard height="180px" />
+                          <SkeletonCard height="180px" />
+                          <SkeletonCard height="180px" />
+                        </div>
+                      }>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <OddsDistributionChart picks={picks} height={180} />
+                          <StakeDistributionChart picks={picks} height={180} />
+                          <SportDistributionChart picks={picks} height={180} />
+                          <PickTypeDistributionChart picks={picks} height={180} />
+                        </div>
+                      </Suspense>
                     </div>
                   </>
                   );
@@ -532,90 +554,106 @@ export function TipsterDetailPage() {
 
               {/* Historial de Picks */}
               {picks.length > 0 && (
-                <div>
-                  <h2 className="text-xl font-semibold text-slate-200 mb-4">
-                    Historial de Picks ({picks.length})
-                  </h2>
-                  <div className="bg-slate-900/50 border border-slate-700 rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-blue-500/10 border-b border-slate-700">
-                          <tr>
-                            <th 
-                              className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                              onClick={() => requestPicksSort('date')}
-                              title="Click para ordenar por fecha. Click en otra columna para multi-sort"
-                            >
-                              <span className="flex items-center gap-1">
-                                Fecha {getPicksSortIndicator('date')}
-                              </span>
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                              Tipster
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                              Partido
-                            </th>
-                            <th 
-                              className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                              onClick={() => requestPicksSort('sport')}
-                              title="Click para ordenar por deporte. Click en otra columna para multi-sort"
-                            >
-                              <span className="flex items-center gap-1">
-                                Deporte {getPicksSortIndicator('sport')}
-                              </span>
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                              Tipo
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                              Apuesta
-                            </th>
-                            <th 
-                              className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                              onClick={() => requestPicksSort('odds')}
-                              title="Click para ordenar por cuota. Click en otra columna para multi-sort"
-                            >
-                              <span className="flex items-center gap-1">
-                                Cuota {getPicksSortIndicator('odds')}
-                              </span>
-                            </th>
-                            <th 
-                              className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                              onClick={() => requestPicksSort('stake')}
-                              title="Click para ordenar por stake. Click en otra columna para multi-sort"
-                            >
-                              <span className="flex items-center gap-1">
-                                Stake {getPicksSortIndicator('stake')}
-                              </span>
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                              Bookmaker
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                              Resultado
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                              Profit
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-700">
-                          {sortedPicks.map((pick) => (
-                            <PickTableRow
-                              key={pick.id}
-                              pick={pick}
-                              tipsterName={tipster.name}
-                              showActions={true}
-                              onEdit={handleEditPick}
-                              onDelete={handleDeletePick}
-                            />
-                          ))}
-                        </tbody>
-                      </table>
+                  <div>
+                    <h2 className="text-xl font-semibold text-slate-200 mb-4">
+                      Historial de Picks ({picks.length})
+                    </h2>
+                    
+                    {/* Mobile: Cards */}
+                    <div className="md:hidden space-y-4">
+                      {sortedPicks.map((pick) => (
+                        <PickCard
+                          key={pick.id}
+                          pick={pick}
+                          tipsterName={tipster.name}
+                          showActions={true}
+                          onEdit={handleEditPick}
+                          onDelete={handleDeletePick}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Desktop: Table */}
+                    <div className="hidden md:block bg-slate-900/50 border border-slate-700 rounded-lg overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-blue-500/10 border-b border-slate-700">
+                            <tr>
+                              <th 
+                                className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                                onClick={() => requestPicksSort('date')}
+                                title="Click para ordenar por fecha. Click en otra columna para multi-sort"
+                              >
+                                <span className="flex items-center gap-1">
+                                  Fecha {getPicksSortIndicator('date')}
+                                </span>
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                                Tipster
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                                Partido
+                              </th>
+                              <th 
+                                className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                                onClick={() => requestPicksSort('sport')}
+                                title="Click para ordenar por deporte. Click en otra columna para multi-sort"
+                              >
+                                <span className="flex items-center gap-1">
+                                  Deporte {getPicksSortIndicator('sport')}
+                                </span>
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                                Tipo
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                                Apuesta
+                              </th>
+                              <th 
+                                className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                                onClick={() => requestPicksSort('odds')}
+                                title="Click para ordenar por cuota. Click en otra columna para multi-sort"
+                              >
+                                <span className="flex items-center gap-1">
+                                  Cuota {getPicksSortIndicator('odds')}
+                                </span>
+                              </th>
+                              <th 
+                                className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
+                                onClick={() => requestPicksSort('stake')}
+                                title="Click para ordenar por stake. Click en otra columna para multi-sort"
+                              >
+                                <span className="flex items-center gap-1">
+                                  Stake {getPicksSortIndicator('stake')}
+                                </span>
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                                Bookmaker
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                                Resultado
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                                Profit
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-700">
+                            {sortedPicks.map((pick) => (
+                              <PickTableRow
+                                key={pick.id}
+                                pick={pick}
+                                tipsterName={tipster.name}
+                                showActions={true}
+                                onEdit={handleEditPick}
+                                onDelete={handleDeletePick}
+                              />
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
-                </div>
               )}
             </div>
           )}
@@ -814,12 +852,21 @@ export function TipsterDetailPage() {
                         <h2 className="text-xl font-semibold text-slate-200 mb-4">
                           Distribuciones de tus Follows
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                          <OddsDistributionChart follows={tipsterFollows} height={180} title="Tus Cuotas" />
-                          <StakeDistributionChart follows={tipsterFollows} height={180} title="Tus Stakes" />
-                          <SportDistributionChart picks={followedPicks} height={180} title="Deportes Seguidos" />
-                          <PickTypeDistributionChart picks={followedPicks} height={180} title="Tipos de Pick Seguidos" />
-                        </div>
+                        <Suspense fallback={
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <SkeletonCard height="180px" />
+                            <SkeletonCard height="180px" />
+                            <SkeletonCard height="180px" />
+                            <SkeletonCard height="180px" />
+                          </div>
+                        }>
+                          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                            <OddsDistributionChart follows={tipsterFollows} height={180} title="Tus Cuotas" />
+                            <StakeDistributionChart follows={tipsterFollows} height={180} title="Tus Stakes" />
+                            <SportDistributionChart picks={followedPicks} height={180} title="Deportes Seguidos" />
+                            <PickTypeDistributionChart picks={followedPicks} height={180} title="Tipos de Pick Seguidos" />
+                          </div>
+                        </Suspense>
                       </div>
                     );
                   })()}
@@ -829,7 +876,28 @@ export function TipsterDetailPage() {
                     <h2 className="text-xl font-semibold text-slate-200 mb-4">
                       Historial de Picks Seguidas ({tipsterFollows.length})
                     </h2>
-                    <div className="bg-slate-900/50 border border-slate-700 rounded-lg overflow-hidden">
+                    
+                    {/* Mobile: Cards */}
+                    <div className="md:hidden space-y-4">
+                      {sortedFollows.map((follow) => {
+                        const originalPick = picks.find((p) => p.id === follow.pickId);
+                        if (!originalPick) return null;
+
+                        return (
+                          <FollowCard
+                            key={follow.id}
+                            follow={follow}
+                            pick={originalPick}
+                            tipsterName={tipster.name}
+                            onEdit={() => handleEditFollow(follow)}
+                            onDelete={() => handleDeleteFollow(follow)}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    {/* Desktop: Table */}
+                    <div className="hidden md:block bg-slate-900/50 border border-slate-700 rounded-lg overflow-hidden">
                       <div className="overflow-x-auto">
                         <table className="w-full">
                           <thead className="bg-blue-500/10 border-b border-slate-700">
@@ -847,7 +915,7 @@ export function TipsterDetailPage() {
                                 Tipster
                               </th>
                               <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                                Partido
+                                Match
                               </th>
                               <th 
                                 className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"

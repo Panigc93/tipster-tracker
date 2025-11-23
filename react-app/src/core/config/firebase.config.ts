@@ -19,8 +19,8 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Connect to emulators in development
-if (import.meta.env.DEV && typeof window !== 'undefined') {
+// Connect to emulators when running on localhost (dev or production build)
+if (typeof window !== 'undefined') {
   const hostname = window.location.hostname;
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
