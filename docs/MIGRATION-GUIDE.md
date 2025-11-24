@@ -16949,9 +16949,19 @@ npm run dev              # http://localhost:5173
 ### Fases Completadas
 - ✅ **Fase 0**: Setup inicial completo (14/11/2025)
 - ✅ **Fase 4**: Feature Tipsters completo (17/11/2025)
+- ✅ **Subfase 11.1**: Eliminación TipsterListPage (24/11/2025)
+- ✅ **Subfase 11.2 - Fase 1**: Settings Backend (24/11/2025)
+
+### Features Implementadas
+- ✅ **Auth**: Login, Signup, PrivateRoute
+- ✅ **Tipsters**: CRUD completo, búsqueda, filtros
+- ✅ **Picks**: CRUD completo, filtros, estadísticas
+- ✅ **Follows**: Seguimiento de picks, estadísticas personales
+- ✅ **Dashboard**: Vista general, filtros, estadísticas
+- ✅ **Settings**: Backend para configuración personalizada (sports, bookmakers, channels)
 
 ### Próxima Fase
-- 📋 **Fase 5**: Feature Picks
+- 📋 **Subfase 11.2 - Fase 2**: UI Components para Settings (ManageableDropdown, modals)
 
 ---
 
@@ -17738,4 +17748,1000 @@ toast.info('Este es un mensaje informativo');
 // Warning
 toast.warning('Atención: acción irreversible');
 ```
+
+
+---
+
+## FASE 9: MIGRACIÓN DE DATOS Y DEPLOY - COMPLETADA ✅
+
+### Estado: ✅ 100% Completada (6/6 subtareas)
+**Fecha de Completación**: 2025-11-24  
+**Duración**: 3 días  
+**Commits**: Pendiente de merge a main
+
+---
+
+### Resumen Ejecutivo
+
+La Fase 9 completa toda la infraestructura y configuración necesaria para desplegar la aplicación React a producción en Firebase Hosting. Incluye optimizaciones de build, pipeline de CI/CD, configuración de hosting, y procedimientos documentados de deployment y monitoring.
+
+**Resultado**: Aplicación lista para producción, esperando aprobación para deployment.
+
+---
+
+### 9.1: Verificación de Datos ✅
+
+**Duración**: 2 horas  
+**Objetivo**: Verificar compatibilidad de estructura de datos Firestore con interfaces TypeScript
+
+#### Trabajo Realizado
+
+1. **Análisis de Interfaces TypeScript**
+   - Revisión de `src/shared/types/index.ts`
+   - Interfaces: `Tipster`, `Pick`, `UserFollow`
+   - Validación de tipos de datos
+
+2. **Verificación de Firestore**
+   - Estructura de colecciones: `tipsters`, `picks`, `userFollows`
+   - Tipos de campos compatibles
+   - Relaciones entre documentos
+
+3. **Índices y Reglas**
+   - `firestore.indexes.json` - Índices compuestos (auto-creados)
+   - `firestore.rules` - Reglas de seguridad compatibles
+
+#### Resultado
+
+✅ **100% Compatible** - Sin migración de datos necesaria
+
+**Documentación**: `phase9_1_data_verification.md`
+
+---
+
+### 9.2: Configuración Build Producción ✅
+
+**Duración**: 4 horas  
+**Objetivo**: Optimizar configuración de Vite para builds de producción
+
+#### Configuración Aplicada
+
+**Archivo**: `react-app/vite.config.ts`
+
+```typescript
+build: {
+  outDir: 'dist',
+  sourcemap: false,              // Deshabilitado para reducir tamaño
+  minify: 'esbuild',             // Minificación rápida
+  target: 'es2015',              // Navegadores modernos
+  reportCompressedSize: true,    // Mostrar tamaños gzip
+  chunkSizeWarningLimit: 1000,   // 1MB límite
+  rollupOptions: {
+    output: {
+      manualChunks: {
+        'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+        'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+        'chart-vendor': ['chart.js', 'react-chartjs-2'],
+        'ui-vendor': ['lucide-react', 'sonner'],
+      },
+    },
+  },
+}
+```
+
+#### Resultados del Build
+
+| Métrica | Valor | Mejora |
+|---------|-------|--------|
+| Main bundle | 202.90 kB (63.89 kB gzipped) | 76% reducción |
+| React vendor | 96.67 kB (32.56 kB gzipped) | Separado |
+| Firebase vendor | 354.55 kB (108.57 kB gzipped) | Separado |
+| Chart vendor | 165.87 kB (57.66 kB gzipped) | Separado |
+| UI vendor | 42.33 kB (12.86 kB gzipped) | Separado |
+| **Total** | **907.31 kB (302.68 kB gzipped)** | Optimizado |
+| Build time | ~13s | Aceptable |
+
+#### Archivos Creados
+
+- `react-app/.env.production` - Variables de entorno producción
+- `react-app/.env.production.template` - Template para credenciales
+
+**Documentación**: `phase9_2_production_build.md`
+
+---
+
+### 9.3: Firebase Hosting Setup ✅
+
+**Duración**: 3 horas  
+**Objetivo**: Configurar Firebase Hosting para React SPA con routing client-side
+
+#### Configuración Implementada
+
+**Archivo**: `firebase.react.json`
+
+```json
+{
+  "hosting": {
+    "site": "tipstertracker",
+    "public": "react-app/dist",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [{
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }]
+      },
+      {
+        "source": "index.html",
+        "headers": [{
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }]
+      }
+    ]
+  }
+}
+```
+
+#### Features Implementadas
+
+1. **SPA Rewrites**
+   - Todas las rutas sirven `index.html`
+   - React Router maneja navegación client-side
+   - No 404 en page refresh
+
+2. **Caching Headers**
+   - Assets (JS/CSS): 1 año (immutable)
+   - index.html: no-cache (siempre fresco)
+   - Optimización de performance
+
+3. **Sistema de Cambio Legacy/React**
+   - `firebase.react.json` - Config React
+   - `firebase.legacy.json` - Config Legacy
+   - `switch-to-react.sh` - Script cambio a React
+   - `switch-to-legacy.sh` - Script cambio a Legacy
+
+#### Testing Local
+
+```bash
+# Build
+cd react-app && npm run build && cd ..
+
+# Test con emulators
+firebase emulators:start --only auth,firestore,hosting
+
+# Verificar en http://localhost:5000
+```
+
+**Resultado**: ✅ Testeado exitosamente con emulators
+
+**Documentación**: `phase9_3_hosting_setup.md`, `docs/DEPLOYMENT.md`
+
+---
+
+### 9.4: CI/CD Pipeline ✅
+
+**Duración**: 4 horas  
+**Objetivo**: Automatizar build y deployment con GitHub Actions
+
+#### Workflow Implementado
+
+**Archivo**: `.github/workflows/firebase-hosting-main.yml`
+
+```yaml
+name: Deploy to Firebase Hosting on push to main
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: react-app/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ./react-app
+        run: npm ci
+      
+      - name: Build React app
+        working-directory: ./react-app
+        run: npm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          # ... otros secrets
+      
+      - name: Deploy to Firebase Hosting
+        if: github.ref == 'refs/heads/main'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_TIPSTERTRACKER_B5E3C }}'
+          channelId: live
+          projectId: tipstertracker-b5e3c
+```
+
+#### GitHub Secrets Configurados
+
+1. `VITE_FIREBASE_API_KEY`
+2. `VITE_FIREBASE_AUTH_DOMAIN`
+3. `VITE_FIREBASE_PROJECT_ID`
+4. `VITE_FIREBASE_STORAGE_BUCKET`
+5. `VITE_FIREBASE_MESSAGING_SENDER_ID`
+6. `VITE_FIREBASE_APP_ID`
+7. `VITE_FIREBASE_MEASUREMENT_ID`
+8. `FIREBASE_SERVICE_ACCOUNT_TIPSTERTRACKER_B5E3C` (ya existía)
+
+#### Comportamiento
+
+- **Push a main**: Build + Deploy automático
+- **Pull Request**: Solo build (sin deploy)
+- **Build time estimado**: 3-5 minutos
+
+**Documentación**: `phase9_4_cicd_pipeline.md`
+
+---
+
+### 9.5: Deployment Procedures ✅
+
+**Duración**: 2 horas  
+**Objetivo**: Documentar procedimientos de deployment
+
+#### Opciones de Deployment
+
+**1. Deployment Manual**
+```bash
+# Asegurar firebase.json apunta a React
+cp firebase.react.json firebase.json
+
+# Build
+cd react-app && npm run build && cd ..
+
+# Deploy
+firebase deploy --only hosting
+```
+
+**2. Deployment Automático** (vía GitHub Actions)
+```bash
+# Crear Pull Request
+git checkout -b feature/my-feature
+git add .
+git commit -m "feat: my feature"
+git push origin feature/my-feature
+
+# Merge PR a main en GitHub
+# GitHub Actions despliega automáticamente
+```
+
+**3. Preview/Staging**
+```bash
+# Preview (7 días)
+firebase hosting:channel:deploy preview
+
+# Staging (7 días)
+firebase hosting:channel:deploy staging --expires 7d
+
+# Producción
+firebase deploy --only hosting
+```
+
+#### Rollback
+
+```bash
+# Ver releases
+firebase hosting:releases:list
+
+# Rollback a versión anterior
+firebase hosting:rollback
+```
+
+#### Checklist Pre-Deployment
+
+- [ ] Build exitoso (`npm run build`)
+- [ ] Bundle size < 1 MB
+- [ ] Test local con emulators
+- [ ] Login funciona
+- [ ] CRUD operations funcionan
+- [ ] Charts renderizan
+- [ ] Responsive funciona
+- [ ] No console errors
+
+**Documentación**: `phase9_5_deployment_procedures.md`
+
+---
+
+### 9.6: Monitoring Setup ✅
+
+**Duración**: 2 horas  
+**Objetivo**: Configurar analytics y monitoring (documentado, no implementado)
+
+#### Firebase Analytics
+
+**Configuración**:
+```typescript
+// firebase.config.ts
+import { getAnalytics } from 'firebase/analytics';
+
+export const analytics = import.meta.env.PROD 
+  ? getAnalytics(app) 
+  : null;
+```
+
+**Custom Events**:
+- `tipster_created`, `tipster_deleted`
+- `pick_created`, `pick_resolved`
+- `follow_created`
+- `data_exported`
+
+#### Performance Monitoring
+
+**Configuración**:
+```typescript
+import { getPerformance } from 'firebase/performance';
+
+export const perf = import.meta.env.PROD 
+  ? getPerformance(app) 
+  : null;
+```
+
+**Custom Traces**:
+- `load_tipsters`
+- `load_picks`
+- `export_data`
+
+#### Métricas a Trackear
+
+**User Metrics**:
+- Daily Active Users (DAU)
+- Monthly Active Users (MAU)
+- Session duration
+- User retention
+
+**Performance Metrics**:
+- First Contentful Paint (FCP) < 1.5s
+- First Input Delay (FID) < 100ms
+- Largest Contentful Paint (LCP) < 2.5s
+- Cumulative Layout Shift (CLS) < 0.1
+
+**Error Metrics**:
+- JavaScript errors
+- Failed API calls
+- Authentication errors
+
+**Documentación**: `phase9_6_monitoring_setup.md`
+
+---
+
+## Archivos Modificados/Creados en Fase 9
+
+### Configuración de Build
+- `react-app/vite.config.ts` - Build optimizado
+- `react-app/.env.production` - Variables producción
+- `react-app/.env.production.template` - Template
+- `react-app/src/core/config/firebase.config.ts` - Fix emulator detection
+
+### Configuración de Hosting
+- `firebase.json` - Config activa (apunta a React)
+- `firebase.react.json` - Config React SPA (nuevo)
+- `firebase.legacy.json` - Config app legacy (nuevo)
+- `switch-to-react.sh` - Script cambio a React (nuevo)
+- `switch-to-legacy.sh` - Script cambio a Legacy (nuevo)
+
+### CI/CD
+- `.github/workflows/firebase-hosting-main.yml` - Actualizado
+
+### Documentación
+- `.github/copilot-instructions.md` - Actualizado con Fase 9
+- `docs/MIGRATION-GUIDE.md` - Este documento
+- `docs/DEPLOYMENT.md` - Guía de deployment (nuevo)
+- `docs/REORGANIZATION.md` - Reorganización docs (nuevo)
+
+### Reorganización de Documentación
+- `AGENTS.md` → `.github/copilot-instructions.md`
+- `MIGRATION-GUIDE.md` → `docs/MIGRATION-GUIDE.md`
+- `EXCEL-EXPORT-VERIFICATION.md` → `docs/`
+- `EXPORT-SYSTEM-GUIDE.md` → `docs/`
+- `TASK-5-EXCEL-PLAN.md` → `docs/`
+
+---
+
+## Comandos Útiles Fase 9
+
+### Build y Testing
+```bash
+# Build producción
+cd react-app && npm run build
+
+# Preview build local
+npm run preview
+
+# Test con Firebase Hosting emulator
+cd .. && firebase emulators:start --only hosting
+```
+
+### Cambio Legacy/React
+```bash
+# Cambiar a React
+./switch-to-react.sh
+
+# Cambiar a Legacy
+./switch-to-legacy.sh
+
+# Reiniciar emulators (siempre necesario)
+pkill -9 -f "firebase.*emulator"
+firebase emulators:start --only auth,firestore,hosting
+```
+
+### Deployment
+```bash
+# Preview
+firebase hosting:channel:deploy preview
+
+# Staging
+firebase hosting:channel:deploy staging --expires 7d
+
+# Producción
+firebase deploy --only hosting
+
+# Rollback
+firebase hosting:rollback
+```
+
+---
+
+## Lecciones Aprendidas
+
+### Optimizaciones de Build
+
+1. **Vendor Chunks Manuales**
+   - Separar React, Firebase, Charts, UI
+   - Mejor caching en navegador
+   - Parallel downloads
+
+2. **Minificación con esbuild**
+   - Más rápido que terser
+   - Integrado en Vite
+   - Resultados similares
+
+3. **Source Maps Deshabilitados**
+   - Reduce tamaño del bundle
+   - No necesarios en producción
+   - Habilitar solo para debugging
+
+### Firebase Hosting
+
+1. **SPA Rewrites Críticos**
+   - Necesarios para React Router
+   - Evita 404 en page refresh
+   - Configuración simple
+
+2. **Caching Headers**
+   - Assets immutable (1 año)
+   - index.html no-cache
+   - Mejora performance significativa
+
+3. **Sistema de Cambio Legacy/React**
+   - Útil para comparación
+   - Facilita rollback
+   - Scripts simples y efectivos
+
+### CI/CD
+
+1. **npm ci vs npm install**
+   - `npm ci` más rápido
+   - Usa package-lock.json exacto
+   - Limpia node_modules antes
+
+2. **Secrets en GitHub**
+   - Separar credenciales de código
+   - Fácil rotación
+   - Seguro
+
+3. **Conditional Deployment**
+   - PRs solo build
+   - Main despliega automáticamente
+   - Evita deploys accidentales
+
+---
+
+## Próximos Pasos
+
+### Deployment a Producción
+
+1. **Crear Pull Request**
+   - De rama actual → `main`
+   - Revisar cambios
+   - Aprobar PR
+
+2. **Merge y Deploy**
+   - Merge PR a main
+   - GitHub Actions despliega automáticamente
+   - Monitorear workflow
+
+3. **Verificación Post-Deploy**
+   - Verificar URL producción
+   - Test funcionalidades críticas
+   - Monitorear errores
+
+### Implementar Monitoring
+
+1. **Firebase Analytics**
+   - Implementar custom events
+   - Configurar dashboards
+   - Analizar métricas
+
+2. **Performance Monitoring**
+   - Implementar custom traces
+   - Monitorear Web Vitals
+   - Optimizar según datos
+
+3. **Error Tracking**
+   - Configurar Sentry (opcional)
+   - Alertas de errores
+   - Análisis de crashes
+
+---
+
+## Conclusión Fase 9
+
+**Estado**: ✅ **COMPLETADA AL 100%**
+
+**Logros**:
+- ✅ Build de producción optimizado (76% reducción main bundle)
+- ✅ Firebase Hosting configurado para React SPA
+- ✅ CI/CD pipeline funcional con GitHub Actions
+- ✅ Procedimientos de deployment documentados
+- ✅ Monitoring configurado (listo para implementar)
+- ✅ Sistema de cambio Legacy/React
+- ✅ Documentación reorganizada y actualizada
+
+**Métricas**:
+- Bundle size: 907 KB (303 KB gzipped)
+- Build time: ~13s
+- Vendor chunks: 4 (React, Firebase, Charts, UI)
+- Lazy loading: Páginas y modals
+
+**Listo para**: Deployment a producción cuando se decida
+
+---
+
+**Completado**: 2025-11-24  
+**Siguiente Fase**: Deployment a producción y monitoring activo
+
+
+---
+
+## FASE 10: OPTIMIZACIÓN Y PERFORMANCE - PARCIALMENTE COMPLETADA ✅
+
+### Estado: ⚠️ 70% Completada
+**Fecha de Inicio**: 2025-11-22  
+**Duración**: 3 días (parcial)
+
+---
+
+### Resumen Ejecutivo
+
+La Fase 10 se enfoca en optimización de performance basándose en métricas reales. Gran parte del trabajo ya se completó en Task 11, pero quedan optimizaciones pendientes que se harán después del deployment a producción.
+
+---
+
+### Trabajo Completado ✅
+
+#### Route-Based Code Splitting
+- ✅ Lazy loading de todas las páginas
+- ✅ Suspense con PageLoadingFallback
+- ✅ 7 páginas con lazy loading
+
+#### Component Memoization
+- ✅ PickCard memoizado
+- ✅ FollowCard memoizado
+- ✅ Optimización de re-renders
+
+#### Lazy Loading de Charts
+- ✅ 4 charts con lazy loading en TipsterDetailPage
+- ✅ Suspense con SkeletonLoader
+
+#### Bundle Analysis
+- ✅ Visualizer configurado (stats.html)
+- ✅ Bundle principal: 842 kB (269 kB gzipped)
+- ✅ 4 vendor chunks configurados
+
+**Documentación**: `performance_optimization_walkthrough.md`, `bundle_analysis_report.md`
+
+---
+
+### Trabajo Pendiente ⏸️
+
+#### Optimización de Queries Firestore
+- [ ] Análisis de queries en producción
+- [ ] Implementar paginación si es necesario
+- [ ] Optimizar índices compuestos
+
+#### Caching Inteligente
+- [ ] Evaluar necesidad basándose en métricas
+- [ ] Implementar si es necesario
+
+#### Análisis de Métricas Reales
+- [ ] Monitorear performance en producción
+- [ ] Identificar bottlenecks
+- [ ] Optimizar según datos reales
+
+**Nota**: Esta fase se completa DESPUÉS del deployment a producción.
+
+---
+
+## FASE 11: REFINAMIENTO Y NUEVAS FUNCIONALIDADES - EN PROGRESO 🚧
+
+### Estado: ⏳ 0% Completada
+**Fecha de Inicio**: 2025-11-24  
+**Duración Estimada**: 15-19 horas
+
+---
+
+### Resumen Ejecutivo
+
+Fase de refinamiento UI/UX y nuevas funcionalidades basadas en feedback y necesidades identificadas. Incluye simplificación de navegación, gestión inline de configuración, y mejoras visuales pantalla por pantalla.
+
+---
+
+### Objetivos
+
+1. **Simplificar navegación** - Eliminar redundancias
+2. **Gestión inline de configuración** - CRUD de deportes, bookmakers, canales
+3. **Refinamiento UI** - Mejoras visuales en todas las pantallas
+
+---
+
+### Subfase 11.1: Análisis de Redundancias
+
+**Duración**: 1 hora  
+**Estado**: ⏳ Pendiente
+
+#### Objetivos
+
+- Analizar Dashboard vs Tipsters (posible redundancia)
+- Evaluar Picks vs Mis Picks (mantener separadas)
+- Decidir estructura final de navegación
+
+#### Navegación Actual
+
+```
+- Dashboard (stats personales + grid tipsters)
+- Tipsters (lista de tipsters)
+- Picks (todas las picks)
+- Mis Picks (picks seguidas)
+```
+
+#### Decisiones a Tomar
+
+1. **Dashboard vs Tipsters**: ¿Mantener ambas o unificar?
+2. **Estructura final**: Definir navegación óptima
+
+#### Entregables
+
+- [ ] Análisis de diferencias entre páginas
+- [ ] Decisión sobre navegación
+- [ ] Actualización de routes si es necesario
+
+---
+
+### Subfase 11.2: Gestión Inline de Configuración
+
+**Duración**: 6-8 horas  
+**Estado**: ⏳ Pendiente  
+**Prioridad**: Alta
+
+#### Objetivos
+
+Permitir a usuarios gestionar deportes, casas de apuestas y canales directamente desde dropdowns, sin página de configuración separada.
+
+#### Diseño UX
+
+**Dropdown con gestión inline**:
+```
+┌─────────────────────────────┐
+│ Fútbol              ✏️ 🗑️   │
+│ Baloncesto          ✏️ ��️   │
+│ Tenis               ✏️ 🗑️   │
+│ ───────────────────────────  │
+│ + Añadir nuevo deporte      │
+└─────────────────────────────┘
+```
+
+**Interacciones**:
+- Click en item → Selecciona
+- Click en ✏️ → Modal de edición
+- Click en 🗑️ → Confirmación de eliminación
+- Click en "+ Añadir" → Modal de creación
+
+#### Backend - Firestore
+
+**Nueva colección**: `userSettings/{uid}`
+
+```typescript
+interface UserSettings {
+  sports: string[];
+  bookmakers: string[];
+  channels: string[];
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+```
+
+#### Componentes Nuevos
+
+1. **ManageableDropdown**
+   - Dropdown con CRUD inline
+   - Iconos de editar/eliminar
+   - Opción "+ Añadir nuevo"
+
+2. **AddItemModal**
+   - Modal simple para añadir
+   - Validación de duplicados
+
+3. **EditItemModal**
+   - Modal para editar
+   - Validación
+
+4. **DeleteConfirmModal**
+   - Confirmación de eliminación
+   - Advertencia si está en uso
+
+#### Archivos a Crear
+
+**Types**:
+- `src/features/settings/types/settings.types.ts`
+
+**Services**:
+- `src/features/settings/services/SettingsRepository.ts`
+
+**Hooks**:
+- `src/features/settings/hooks/useSettings.ts`
+
+**Components**:
+- `src/shared/components/ui/ManageableDropdown/`
+- `src/shared/components/modals/AddItemModal/`
+- `src/shared/components/modals/EditItemModal/`
+- `src/shared/components/modals/DeleteConfirmModal/`
+
+#### Integración
+
+**Archivos a Modificar**:
+- `AddPickModal` - Dropdowns de Sport y Bookmaker
+- `EditPickModal` - Dropdowns de Sport y Bookmaker
+- `AddTipsterModal` - Dropdown de Channel
+- `PicksListPage` - Filtros de Sport y Bookmaker
+- `DashboardPage` - Multi-select de Sports y Channels
+
+#### Entregables
+
+- [ ] Colección Firestore configurada
+- [ ] SettingsRepository implementado
+- [ ] useSettings hook implementado
+- [ ] ManageableDropdown component
+- [ ] Modals de Add/Edit/Delete
+- [ ] Integración en modals
+- [ ] Integración en filtros
+- [ ] Testing completo
+
+---
+
+### Subfase 11.3: Refinamiento UI
+
+**Duración**: 6-8 horas  
+**Estado**: ⏳ Pendiente  
+**Prioridad**: Media
+
+#### Metodología
+
+Para cada pantalla:
+1. Revisar visualmente
+2. Identificar mejoras
+3. Implementar cambios
+4. Verificar responsive
+
+#### Pantallas a Refinar
+
+**1. Dashboard**
+- [ ] Layout de stats cards
+- [ ] Grid de tipster cards
+- [ ] Filtros (diseño y UX)
+- [ ] Espaciados y colores
+- [ ] Responsive
+
+**2. Tipsters** (si se mantiene)
+- [ ] Diferenciación con Dashboard
+- [ ] Layout
+- [ ] Filtros
+- [ ] Responsive
+
+**3. Picks**
+- [ ] Tabla en desktop
+- [ ] Cards en mobile
+- [ ] Filtros colapsables
+- [ ] Stats cards
+- [ ] Responsive
+
+**4. Mis Picks**
+- [ ] Tabla comparativa
+- [ ] Indicadores Match/Diverge
+- [ ] Stats de seguibilidad
+- [ ] Responsive
+
+**5. Tipster Detail**
+- [ ] Tabs (Stats, My Stats, Follows)
+- [ ] Stats cards
+- [ ] Charts
+- [ ] Tabla de picks
+- [ ] Responsive
+
+**6. Modals**
+- [ ] Todos los modals existentes
+- [ ] Nuevos modals de gestión
+- [ ] Validación visual
+- [ ] Responsive
+
+#### Aspectos a Revisar
+
+- Colores y contraste
+- Tipografía y tamaños
+- Espaciados y márgenes
+- Feedback visual
+- Loading states
+- Error states
+- Empty states
+
+#### Entregables
+
+- [ ] Lista detallada de cambios
+- [ ] Implementación de cambios
+- [ ] Testing en 3 breakpoints
+- [ ] Screenshots antes/después
+
+---
+
+### Subfase 11.4: Testing y Validación
+
+**Duración**: 2 horas  
+**Estado**: ⏳ Pendiente
+
+#### Testing Funcional
+
+**Gestión de Configuración**:
+- [ ] CRUD de deportes funciona
+- [ ] CRUD de bookmakers funciona
+- [ ] CRUD de canales funciona
+- [ ] Validación de items en uso
+- [ ] Sincronización en tiempo real
+
+**Integración**:
+- [ ] Dropdowns usan items personalizados
+- [ ] Filtros usan items personalizados
+- [ ] Picks usan deportes personalizados
+- [ ] Tipsters usan canales personalizados
+
+#### Testing UI/UX
+
+**Por pantalla**:
+- [ ] Dashboard
+- [ ] Tipsters (si existe)
+- [ ] Picks
+- [ ] Mis Picks
+- [ ] Tipster Detail
+
+**Breakpoints**:
+- [ ] Mobile (375px)
+- [ ] Tablet (768px)
+- [ ] Desktop (1920px)
+
+#### Testing de Performance
+
+- [ ] Bundle size controlado
+- [ ] Lazy loading funciona
+- [ ] No memory leaks
+- [ ] Queries optimizadas
+
+#### Entregables
+
+- [ ] Checklist de testing
+- [ ] Bugs corregidos
+- [ ] Screenshots de validación
+- [ ] Walkthrough actualizado
+
+---
+
+## Criterios de Éxito Fase 11
+
+### Funcionales
+
+- [ ] Gestión inline de configuración funcional
+- [ ] CRUD completo de deportes/bookmakers/canales
+- [ ] Validación de items en uso
+- [ ] Sincronización en tiempo real
+- [ ] Navegación simplificada
+
+### UX/UI
+
+- [ ] Interfaz visualmente mejorada
+- [ ] Consistencia visual
+- [ ] Responsive en todos los breakpoints
+- [ ] Feedback claro
+- [ ] Loading/error states apropiados
+
+### Técnicos
+
+- [ ] Código limpio y mantenible
+- [ ] TypeScript sin errores
+- [ ] ESLint sin warnings
+- [ ] Bundle size controlado
+- [ ] Performance mantenida
+
+---
+
+## Riesgos y Mitigaciones
+
+### Riesgo 1: Migración de datos
+
+**Problema**: Picks/Tipsters usan valores hardcodeados
+
+**Mitigación**: 
+- Valores por defecto desde constants
+- Migración automática al primer uso
+- Validación de integridad
+
+### Riesgo 2: Eliminación de items en uso
+
+**Problema**: Usuario elimina deporte usado en picks
+
+**Mitigación**:
+- Validación antes de eliminar
+- Mensaje claro
+- Opción de reemplazar
+
+### Riesgo 3: Sincronización
+
+**Problema**: Configuración por usuario, no global
+
+**Mitigación**:
+- Documentar claramente
+- Considerar valores sugeridos (futuro)
+
+---
+
+## Próximos Pasos Fase 11
+
+1. **Subfase 11.1**: Análisis de redundancias ✅ COMPLETADA (2024-11-24)
+2. **Subfase 11.2 - Fase 1**: Backend de Settings ✅ COMPLETADA (2024-11-24)
+3. **Subfase 11.2 - Fase 2**: UI Components ⏳ EN PROGRESO
+4. **Subfase 11.2 - Fase 3**: Integración ⏳ PENDIENTE
+5. **Subfase 11.2 - Fase 4**: Testing y Cleanup ⏳ PENDIENTE
+6. **Subfase 11.3**: Refinamiento UI ⏳ PENDIENTE
+7. **Subfase 11.4**: Testing final ⏳ PENDIENTE
+
+**Estimación total**: 15-19 horas  
+**Tiempo invertido**: ~4 horas  
+**Progreso**: 25% completado
+
+---
+
+**Changelog Detallado**: Ver `docs/SUBFASE_11_CHANGELOG.md`  
+**Estado Actual**: Subfase 11.2 Fase 1 completada  
+**Siguiente paso**: Crear ManageableDropdown component
 

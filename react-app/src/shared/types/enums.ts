@@ -48,6 +48,7 @@ export const Bookmaker = {
   ONE_XBET: '1xBet',
   BETFAIR: 'Betfair',
   BET365: 'Bet365',
+  BETUP: 'BetUp',
   WILLIAM_HILL: 'William Hill',
   MARATHONBET: 'Marathonbet',
   EIGHT_EIGHT_EIGHT: '888',

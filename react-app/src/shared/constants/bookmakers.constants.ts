@@ -13,6 +13,7 @@ export const ALL_BOOKMAKERS: readonly Bookmaker[] = [
   '1xBet',
   'Betfair',
   'Bet365',
+  'BetUp',
   'William Hill',
   'Marathonbet',
   '888',
