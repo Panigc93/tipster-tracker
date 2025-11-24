@@ -108,7 +108,7 @@ export function TipsterDetailPage() {
   );
 
   const handleBack = () => {
-    navigate('/tipsters');
+    navigate('/'); // Navigate to Dashboard
   };
 
   const handleEditSuccess = () => {
@@ -127,7 +127,7 @@ export function TipsterDetailPage() {
     try {
       await deleteTipster(tipster.id);
       toast.success('Tipster eliminado correctamente');
-      navigate('/tipsters');
+      navigate('/'); // Navigate to Dashboard
     } catch (err) {
       console.error('Error deleting tipster:', err);
       toast.error('Error al eliminar el tipster');

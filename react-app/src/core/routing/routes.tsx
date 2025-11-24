@@ -14,9 +14,7 @@ const SignupPage = lazy(() =>
 const DashboardPage = lazy(() => 
   import('@features/dashboard/pages/DashboardPage').then(module => ({ default: module.DashboardPage }))
 );
-const TipsterListPage = lazy(() => 
-  import('@features/tipsters/pages/TipsterListPage').then(module => ({ default: module.TipsterListPage }))
-);
+
 const TipsterDetailPage = lazy(() => 
   import('@features/tipsters/pages/TipsterDetailPage').then(module => ({ default: module.TipsterDetailPage }))
 );
@@ -69,18 +67,7 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
   },
-  {
-    path: '/tipsters',
-    element: (
-      <PrivateRoute>
-        <Layout>
-          <PageSuspense>
-            <TipsterListPage />
-          </PageSuspense>
-        </Layout>
-      </PrivateRoute>
-    ),
-  },
+
   {
     path: '/tipsters/:id',
     element: (

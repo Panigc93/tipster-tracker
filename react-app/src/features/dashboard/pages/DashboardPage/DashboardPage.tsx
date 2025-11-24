@@ -5,20 +5,23 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Download } from 'lucide-react';
+import { Download, Plus } from 'lucide-react';
 import { PersonalStatsPanel, DashboardFilters, TipsterCard } from '../../components';
+import { AddTipsterModal } from '@features/tipsters/components';
 import { useDashboardFilters } from '../../hooks';
 import { usePicks } from '@features/picks/hooks';
 import { useFollows } from '@features/follows/hooks';
-import { useTipsters } from '@features/tipsters/hooks';
 import { SkeletonText, SkeletonCard } from '@shared/components/ui';
 
 export function DashboardPage() {
   const [isHovered, setIsHovered] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isAddTipsterModalOpen, setIsAddTipsterModalOpen] = useState(false);
   
   const {
     tipsters: filteredTipsters,
+    allTipsters,
+    createTipster,
     filters,
     activeFiltersCount,
     isLoading,
@@ -33,7 +36,6 @@ export function DashboardPage() {
   
   const { picks } = usePicks();
   const { follows } = useFollows();
-  const { tipsters: allTipsters } = useTipsters();
 
   /**
    * 📊 Exportar a Excel usando backend API
@@ -104,11 +106,20 @@ export function DashboardPage() {
     <div className="min-h-screen bg-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Page header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-slate-100 mb-2">Dashboard</h1>
-          <p className="text-slate-400">
-            Gestiona y analiza el rendimiento de tus tipsters
-          </p>
+        <div className="mb-6 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-100 mb-2">Dashboard</h1>
+            <p className="text-slate-400">
+              Gestiona y analiza el rendimiento de tus tipsters
+            </p>
+          </div>
+          <button
+            onClick={() => setIsAddTipsterModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Añadir Tipster
+          </button>
         </div>
 
         {/* Personal stats */}
@@ -211,6 +222,14 @@ export function DashboardPage() {
           </span>
         )}
       </button>
+
+      {/* Add Tipster Modal */}
+      <AddTipsterModal
+        isOpen={isAddTipsterModalOpen}
+        onClose={() => setIsAddTipsterModalOpen(false)}
+        onCreate={async (data) => { await createTipster(data); }}
+        onSuccess={() => setIsAddTipsterModalOpen(false)}
+      />
     </div>
   );
 }

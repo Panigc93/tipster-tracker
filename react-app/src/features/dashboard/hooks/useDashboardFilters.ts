@@ -24,6 +24,12 @@ export interface UseDashboardFiltersReturn {
   // Filtered and sorted tipsters
   tipsters: TipsterWithStats[];
   
+  // All tipsters (unfiltered)
+  allTipsters: import('@features/tipsters/types').Tipster[];
+  
+  // Tipster actions
+  createTipster: (data: import('@features/tipsters/types').CreateTipsterDto) => Promise<import('@features/tipsters/types').Tipster>;
+  
   // Filter state
   filters: DashboardFiltersState;
   activeFiltersCount: number;
@@ -45,7 +51,7 @@ export interface UseDashboardFiltersReturn {
  * Hook to manage dashboard filters and get filtered tipsters
  */
 export function useDashboardFilters(): UseDashboardFiltersReturn {
-  const { tipsters: rawTipsters } = useTipsters();
+  const { tipsters: rawTipsters, createTipster } = useTipsters();
   const { picks } = usePicks();
   const { follows } = useFollows();
 
@@ -104,6 +110,8 @@ export function useDashboardFilters(): UseDashboardFiltersReturn {
 
   return {
     tipsters: filteredAndSortedTipsters,
+    allTipsters: rawTipsters,
+    createTipster,
     filters,
     activeFiltersCount,
     setSports,

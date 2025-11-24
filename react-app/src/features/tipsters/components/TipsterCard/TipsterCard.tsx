@@ -11,7 +11,7 @@ import type { TipsterCardProps } from './TipsterCard.types';
  * <TipsterCard
  *   tipster={tipster}
  *   stats={{ totalPicks: 50, winrate: 65, yield: 12.5, totalProfit: 25 }}
- *   onClick={(id) => navigate(`/tipsters/${id}`)}
+ *   onClick={() => navigate(`/tipsters/${tipster.id}`)}
  * />
  * ```
  */

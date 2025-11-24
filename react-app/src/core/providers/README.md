@@ -364,7 +364,7 @@ const handleSubmit = async (data: CreateTipsterDTO) => {
 
   if (result.success) {
     toast.success('Tipster created!');
-    navigate('/tipsters');
+    navigate('/'); // Navigate to Dashboard
   } else {
     toast.error(result.error?.message || 'Error creating tipster');
   }

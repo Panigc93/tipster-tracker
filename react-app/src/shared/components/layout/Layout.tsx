@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, BarChart3, Users, FileText, Menu, X } from 'lucide-react';
+import { LogOut, BarChart3, FileText, Menu, X } from 'lucide-react';
 import { useAuth } from '@features/auth/hooks';
 import { Button } from '../ui';
 
@@ -34,11 +34,6 @@ export function Layout({ children }: LayoutProps) {
       path: '/',
       label: 'Dashboard',
       icon: BarChart3,
-    },
-    {
-      path: '/tipsters',
-      label: 'Tipsters',
-      icon: Users,
     },
     {
       path: '/picks',
