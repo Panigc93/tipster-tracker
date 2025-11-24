@@ -25,6 +25,11 @@ const MyPicksPage = lazy(() =>
   import('@features/follows/pages/MyPicksPage').then(module => ({ default: module.MyPicksPage }))
 );
 
+// TEMPORARY: Demo page for settings components
+const SettingsDemo = lazy(() =>
+  import('@features/settings/pages').then(module => ({ default: module.SettingsDemo }))
+);
+
 /**
  * Suspense wrapper for lazy-loaded pages
  */
@@ -51,6 +56,19 @@ export const router = createBrowserRouter([
       <PageSuspense>
         <SignupPage />
       </PageSuspense>
+    ),
+  },
+  // TEMPORARY: Demo route for settings components
+  {
+    path: '/settings-demo',
+    element: (
+      <PrivateRoute>
+        <Layout>
+          <PageSuspense>
+            <SettingsDemo />
+          </PageSuspense>
+        </Layout>
+      </PrivateRoute>
     ),
   },
   {

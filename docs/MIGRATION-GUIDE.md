@@ -16951,6 +16951,7 @@ npm run dev              # http://localhost:5173
 - ✅ **Fase 4**: Feature Tipsters completo (17/11/2025)
 - ✅ **Subfase 11.1**: Eliminación TipsterListPage (24/11/2025)
 - ✅ **Subfase 11.2 - Fase 1**: Settings Backend (24/11/2025)
+- ✅ **Subfase 11.2 - Fase 2**: Settings UI Components (24/11/2025)
 
 ### Features Implementadas
 - ✅ **Auth**: Login, Signup, PrivateRoute
@@ -16958,10 +16959,10 @@ npm run dev              # http://localhost:5173
 - ✅ **Picks**: CRUD completo, filtros, estadísticas
 - ✅ **Follows**: Seguimiento de picks, estadísticas personales
 - ✅ **Dashboard**: Vista general, filtros, estadísticas
-- ✅ **Settings**: Backend para configuración personalizada (sports, bookmakers, channels)
+- ✅ **Settings**: Backend + UI Components para configuración personalizada
 
 ### Próxima Fase
-- 📋 **Subfase 11.2 - Fase 2**: UI Components para Settings (ManageableDropdown, modals)
+- 📋 **Subfase 11.2 - Fase 3**: Integración en modals y filtros
 
 ---
 
