@@ -3,10 +3,13 @@
  * Comprehensive filtering UI for dashboard tipsters
  */
 
+import { useState } from 'react';
 import { Search, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { useSettings } from '@features/settings/hooks';
-import { ManageableDropdown } from '@features/settings/components';
+import { ManageableDropdown, AddItemModal, EditItemModal } from '@features/settings/components';
 import type { DashboardFiltersState } from '../../utils/dashboard-filters.utils';
+import type { SettingsCategory } from '@features/settings/types';
 
 interface DashboardFiltersProps {
   readonly filters: DashboardFiltersState;
@@ -31,7 +34,68 @@ export function DashboardFilters({
   onSearchQueryChange,
   onResetFilters,
 }: Readonly<DashboardFiltersProps>) {
-  const { settings } = useSettings();
+  const { settings, addSport, updateSport, addChannel, updateChannel } = useSettings();
+  
+  // Modal state
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState<SettingsCategory>('sport');
+  const [itemToEdit, setItemToEdit] = useState('');
+
+  // Handle add
+  const handleAdd = (category: SettingsCategory) => {
+    setCurrentCategory(category);
+    setAddModalOpen(true);
+  };
+
+  // Handle edit
+  const handleEdit = (category: SettingsCategory, item: string) => {
+    setCurrentCategory(category);
+    setItemToEdit(item);
+    setEditModalOpen(true);
+  };
+
+  // Add item
+  const handleAddItem = async (item: string) => {
+    try {
+      switch (currentCategory) {
+        case 'sport':
+          await addSport(item);
+          toast.success(`Deporte "${item}" añadido`);
+          break;
+        case 'channel':
+          await addChannel(item);
+          toast.success(`Canal "${item}" añadido`);
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error');
+      throw error;
+    }
+  };
+
+  // Edit item
+  const handleEditItem = async (oldItem: string, newItem: string) => {
+    try {
+      switch (currentCategory) {
+        case 'sport':
+          await updateSport(oldItem, newItem);
+          toast.success(`Deporte actualizado`);
+          break;
+        case 'channel':
+          await updateChannel(oldItem, newItem);
+          toast.success(`Canal actualizado`);
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error');
+      throw error;
+    }
+  };
 
   return (
     <div className="bg-slate-800 rounded-md p-3 border border-slate-700 shadow-md">
@@ -83,6 +147,8 @@ export function DashboardFilters({
             items={settings?.sports || []}
             category="sport"
             onChange={(value) => onSportsChange(value ? [value] : [])}
+            onAdd={() => handleAdd('sport')}
+            onEdit={(item) => handleEdit('sport', item)}
             placeholder="Todos los deportes"
           />
         </div>
@@ -94,6 +160,8 @@ export function DashboardFilters({
             items={settings?.channels || []}
             category="channel"
             onChange={(value) => onChannelsChange(value ? [value] : [])}
+            onAdd={() => handleAdd('channel')}
+            onEdit={(item) => handleEdit('channel', item)}
             placeholder="Todos los canales"
           />
         </div>
@@ -111,7 +179,7 @@ export function DashboardFilters({
               onYieldMinChange(value);
             }}
             placeholder="Sin filtro"
-            className={`w-full h-[42px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent ${
+            className={`w-full h-[35px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent ${
               filters.yieldMin !== -1000 && filters.yieldMin !== null
                 ? 'ring-1 ring-blue-500 border-blue-500'
                 : ''
@@ -131,7 +199,7 @@ export function DashboardFilters({
               onChange={(e) =>
                 onLastPickDaysChange(e.target.value as DashboardFiltersState['lastPickDays'])
               }
-              className={`w-full h-[42px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent ${
+              className={`w-full h-[35px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent ${
                 filters.lastPickDays === 'all' ? 'text-slate-500' : 'text-slate-100 ring-1 ring-blue-500 border-blue-500'
               }`}
               style={{
@@ -158,7 +226,7 @@ export function DashboardFilters({
               id="sort-by-select"
               value={filters.sortBy}
               onChange={(e) => onSortByChange(e.target.value as DashboardFiltersState['sortBy'])}
-              className="w-full h-[42px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md text-slate-100 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+              className="w-full h-[35px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md text-slate-100 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
                 backgroundRepeat: 'no-repeat',
@@ -175,6 +243,32 @@ export function DashboardFilters({
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <AddItemModal
+        isOpen={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onAdd={handleAddItem}
+        category={currentCategory}
+        existingItems={
+          currentCategory === 'sport'
+            ? settings?.sports || []
+            : settings?.channels || []
+        }
+      />
+
+      <EditItemModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onEdit={handleEditItem}
+        category={currentCategory}
+        currentItem={itemToEdit}
+        existingItems={
+          currentCategory === 'sport'
+            ? settings?.sports || []
+            : settings?.channels || []
+        }
+      />
     </div>
   );
 }
