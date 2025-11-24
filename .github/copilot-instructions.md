@@ -2525,3 +2525,344 @@ react-app/src/
 - **MIGRATION-GUIDE.md**: Guía completa de todas las fases de migración
 - **react-app/README.md**: Documentación específica del proyecto React
 - **AGENTS.md**: Este documento (proyecto original + migración)
+
+---
+
+## 🚀 FASE 9: DEPLOYMENT Y PRODUCCIÓN - COMPLETADA
+
+### Estado: ✅ 100% Completada (6/6 subtareas)
+
+**Fecha de Completación**: 2025-11-24  
+**Commit**: Pendiente de merge a main
+
+### Resumen de Fase 9
+
+La Fase 9 completa toda la configuración necesaria para desplegar la aplicación React a producción en Firebase Hosting, incluyendo optimizaciones de build, CI/CD pipeline, y procedimientos de deployment.
+
+---
+
+### 9.1: Verificación de Datos ✅
+
+**Objetivo**: Verificar compatibilidad de datos Firestore con interfaces TypeScript
+
+**Resultado**: 
+- ✅ 100% compatible
+- ✅ Sin migración necesaria
+- ✅ Índices se crean automáticamente
+- ✅ Reglas de seguridad compatibles
+
+**Archivos Verificados**:
+- `src/shared/types/index.ts` - Interfaces TypeScript
+- `firestore.rules` - Reglas de seguridad
+- `firestore.indexes.json` - Configuración de índices
+
+---
+
+### 9.2: Configuración Build Producción ✅
+
+**Objetivo**: Optimizar build de producción con Vite
+
+**Configuración Aplicada** (`vite.config.ts`):
+```typescript
+build: {
+  outDir: 'dist',
+  sourcemap: false,
+  minify: 'esbuild',
+  target: 'es2015',
+  rollupOptions: {
+    output: {
+      manualChunks: {
+        'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+        'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+        'chart-vendor': ['chart.js', 'react-chartjs-2'],
+        'ui-vendor': ['lucide-react', 'sonner'],
+      },
+    },
+  },
+}
+```
+
+**Resultados del Build**:
+- Main bundle: 202.90 kB (63.89 kB gzipped) - **76% reducción**
+- Total con vendors: 907.31 kB (302.68 kB gzipped)
+- Build time: ~13s
+- 4 vendor chunks para mejor caching
+
+**Archivos Creados**:
+- `react-app/.env.production` - Variables de entorno producción
+- `react-app/.env.production.template` - Template para credenciales
+
+---
+
+### 9.3: Firebase Hosting Setup ✅
+
+**Objetivo**: Configurar Firebase Hosting para React SPA
+
+**Configuración** (`firebase.react.json`):
+```json
+{
+  "hosting": {
+    "public": "react-app/dist",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [{
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }]
+      },
+      {
+        "source": "index.html",
+        "headers": [{
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }]
+      }
+    ]
+  }
+}
+```
+
+**Features**:
+- ✅ SPA rewrites (client-side routing)
+- ✅ Caching headers optimizados
+- ✅ Sistema de cambio Legacy/React
+- ✅ Scripts: `switch-to-react.sh`, `switch-to-legacy.sh`
+
+**Testing Local**:
+```bash
+# Build React app
+cd react-app && npm run build && cd ..
+
+# Test con Firebase Hosting emulator
+firebase emulators:start --only hosting
+
+# Verificar en http://localhost:5000
+```
+
+---
+
+### 9.4: CI/CD Pipeline ✅
+
+**Objetivo**: Automatizar build y deployment con GitHub Actions
+
+**Workflow** (`.github/workflows/firebase-hosting-main.yml`):
+```yaml
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build_and_deploy:
+    steps:
+      - Checkout code
+      - Setup Node.js 20 con npm cache
+      - Install dependencies (npm ci)
+      - Build React app con env vars
+      - Deploy to Firebase Hosting (solo main)
+```
+
+**GitHub Secrets Configurados**:
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_MEASUREMENT_ID`
+- `FIREBASE_SERVICE_ACCOUNT_TIPSTERTRACKER_B5E3C` (ya existía)
+
+**Comportamiento**:
+- Push a `main` → Build + Deploy automático
+- Pull Request → Solo build (sin deploy)
+
+---
+
+### 9.5: Deployment Procedures ✅
+
+**Objetivo**: Documentar procedimientos de deployment
+
+**Opciones de Deployment**:
+
+1. **Manual**:
+```bash
+cd react-app && npm run build && cd ..
+firebase deploy --only hosting
+```
+
+2. **Automático** (vía GitHub Actions):
+- Crear PR → main
+- Merge PR
+- GitHub Actions despliega automáticamente
+
+3. **Preview/Staging**:
+```bash
+firebase hosting:channel:deploy preview
+firebase hosting:channel:deploy staging --expires 7d
+```
+
+**Rollback**:
+```bash
+firebase hosting:rollback
+```
+
+**Documentación**: `docs/DEPLOYMENT.md`
+
+---
+
+### 9.6: Monitoring Setup ✅
+
+**Objetivo**: Configurar analytics y monitoring
+
+**Firebase Analytics**:
+```typescript
+// firebase.config.ts
+export const analytics = import.meta.env.PROD 
+  ? getAnalytics(app) 
+  : null;
+```
+
+**Custom Events**:
+- `tipster_created`, `tipster_deleted`
+- `pick_created`, `pick_resolved`
+- `follow_created`
+- `data_exported`
+
+**Performance Monitoring**:
+```typescript
+export const perf = import.meta.env.PROD 
+  ? getPerformance(app) 
+  : null;
+```
+
+**Métricas a Trackear**:
+- User: DAU, MAU, session duration
+- Performance: FCP, FID, LCP, CLS
+- Errors: JS errors, API failures
+
+**Documentación**: Ver artifact `phase9_6_monitoring_setup.md`
+
+---
+
+## 📁 Archivos de Configuración Fase 9
+
+### Configuración de Build
+- `react-app/vite.config.ts` - Build optimizado
+- `react-app/.env.production` - Variables producción
+- `react-app/.env.production.template` - Template
+
+### Configuración de Hosting
+- `firebase.json` - Config activa
+- `firebase.react.json` - Config React SPA
+- `firebase.legacy.json` - Config app legacy
+- `switch-to-react.sh` - Script cambio a React
+- `switch-to-legacy.sh` - Script cambio a Legacy
+
+### CI/CD
+- `.github/workflows/firebase-hosting-main.yml` - GitHub Actions
+
+### Documentación
+- `docs/DEPLOYMENT.md` - Guía de deployment
+- `docs/REORGANIZATION.md` - Reorganización docs
+
+---
+
+## 🎯 Comandos Importantes Fase 9
+
+### Build Local
+```bash
+cd react-app
+npm run build
+```
+
+### Test Build Localmente
+```bash
+# Opción 1: Firebase Hosting emulator
+firebase emulators:start --only hosting
+
+# Opción 2: Preview local
+cd react-app && npm run preview
+```
+
+### Cambiar entre Legacy y React
+```bash
+# Cambiar a React
+./switch-to-react.sh
+
+# Cambiar a Legacy
+./switch-to-legacy.sh
+
+# Reiniciar emuladores (siempre necesario después de cambiar)
+pkill -9 -f "firebase.*emulator"
+firebase emulators:start --only auth,firestore,hosting
+```
+
+### Deployment
+```bash
+# Preview
+firebase hosting:channel:deploy preview
+
+# Staging
+firebase hosting:channel:deploy staging --expires 7d
+
+# Producción
+firebase deploy --only hosting
+
+# Rollback
+firebase hosting:rollback
+```
+
+---
+
+## ✅ Checklist Pre-Deployment
+
+### Build
+- [ ] `npm run build` exitoso
+- [ ] Bundle size < 1 MB
+- [ ] Gzipped size < 350 KB
+- [ ] No console errors
+
+### Configuración
+- [ ] `firebase.json` apunta a `react-app/dist`
+- [ ] `.env.production` configurado
+- [ ] GitHub Secrets configurados
+- [ ] Service account configurado
+
+### Testing
+- [ ] Test local con emulators
+- [ ] Login funciona
+- [ ] CRUD operations funcionan
+- [ ] Charts renderizan
+- [ ] Responsive funciona
+
+### CI/CD
+- [ ] Workflow de GitHub Actions funciona
+- [ ] Build automático exitoso
+- [ ] Deploy solo en main branch
+
+---
+
+## 🚀 Estado Actual del Proyecto
+
+**Progreso General**: 11/12 tareas (92%)
+- ✅ Tasks 1-11: Completadas
+- ⏸️ Task 5B: Importación Excel (pospuesta)
+
+**Fase 9**: ✅ 100% Completada
+- ✅ Todas las configuraciones listas
+- ✅ Testing local exitoso
+- ✅ Documentación completa
+- ⏸️ Deploy a producción (pendiente aprobación usuario)
+
+**Listo para**: Deployment a producción cuando se decida
+
+---
+

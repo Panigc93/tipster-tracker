@@ -3,14 +3,17 @@
  * @module features/picks/components/AddPickModal
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MessageSquare } from 'lucide-react';
 import { Modal, Button, Input } from '@shared/components/ui';
-import { Sport, PickType, PickResult, Bookmaker } from '@shared/types/enums';
+import { PickType, PickResult } from '@shared/types/enums';
 import { usePicks } from '../../hooks';
 import { useFollows } from '@features/follows/hooks';
 import type { AddPickModalProps } from './AddPickModal.types';
 import type { CreatePickDTO, UpdatePickDTO, CreateFollowDTO, UpdateFollowDTO } from '@shared/types';
+import { useSettings } from '@features/settings/hooks';
+import { ManageableDropdown, AddItemModal, EditItemModal } from '@features/settings/components';
+import type { SettingsCategory } from '@features/settings/types';
 
 /**
  * Combine date and time into ISO datetime string
@@ -64,6 +67,20 @@ export function AddPickModal({
   const [result, setResult] = useState('Pendiente');
   const [comments, setComments] = useState('');
 
+  // Settings hook
+  const { 
+    settings, 
+    addSport, updateSport, 
+    addBookmaker, updateBookmaker,
+    ensureSportExists, ensureBookmakerExists 
+  } = useSettings();
+
+  // Modal states
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState<SettingsCategory>('sport');
+  const [itemToEdit, setItemToEdit] = useState('');
+
   // Form state - Follow data
   const [shouldFollow, setShouldFollow] = useState(false);
   const [userOdds, setUserOdds] = useState('');
@@ -80,6 +97,38 @@ export function AddPickModal({
   const [error, setError] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [showFollowComments, setShowFollowComments] = useState(false);
+
+  const resetForm = useCallback(() => {
+    // Reset pick fields
+    setTipsterId('');
+    setMatch('');
+    setSport('');
+    setPickType('');
+    setBetType('');
+    setBookmaker('');
+    setOdds('');
+    setStake('');
+    setDate(new Date().toISOString().split('T')[0]); // Today's date
+    setTime('');
+    setResult('Pendiente');
+    setComments('');
+    
+    // Reset follow fields
+    setShouldFollow(false);
+    setUserOdds('');
+    setUserStake('');
+    setUserBookmaker('');
+    setUserBetType('');
+    setUserResult('Pendiente');
+    setDateFollowed(new Date().toISOString().split('T')[0]);
+    setTimeFollowed(new Date().toTimeString().slice(0, 5));
+    setUserComments('');
+    
+    // Reset UI states
+    setShowComments(false);
+    setShowFollowComments(false);
+    setError(null);
+  }, []);
 
   // Initialize form with pick data in edit mode or initialTipsterId in create mode
   useEffect(() => {
@@ -119,6 +168,11 @@ export function AddPickModal({
           setShowFollowComments(true);
         }
       }
+
+      // Ensure sport and bookmaker exist in settings
+      if (pick.sport) ensureSportExists(pick.sport);
+      if (pick.bookmaker) ensureBookmakerExists(pick.bookmaker);
+      if (existingFollow?.userBookmaker) ensureBookmakerExists(existingFollow.userBookmaker);
     } else {
       // Reset form for create mode
       resetForm();
@@ -127,39 +181,7 @@ export function AddPickModal({
         setTipsterId(initialTipsterId);
       }
     }
-  }, [isEditMode, pick, initialTipsterId, getFollowByPickId]);
-
-  const resetForm = () => {
-    // Reset pick fields
-    setTipsterId('');
-    setMatch('');
-    setSport('');
-    setPickType('');
-    setBetType('');
-    setBookmaker('');
-    setOdds('');
-    setStake('');
-    setDate(new Date().toISOString().split('T')[0]); // Today's date
-    setTime('');
-    setResult('Pendiente');
-    setComments('');
-    
-    // Reset follow fields
-    setShouldFollow(false);
-    setUserOdds('');
-    setUserStake('');
-    setUserBookmaker('');
-    setUserBetType('');
-    setUserResult('Pendiente');
-    setDateFollowed(new Date().toISOString().split('T')[0]);
-    setTimeFollowed(new Date().toTimeString().slice(0, 5));
-    setUserComments('');
-    
-    // Reset UI states
-    setShowComments(false);
-    setShowFollowComments(false);
-    setError(null);
-  };
+  }, [isEditMode, pick, initialTipsterId, getFollowByPickId, ensureSportExists, ensureBookmakerExists, resetForm]);
 
   const validateForm = (): boolean => {
     if (!tipsterId) {
@@ -401,6 +423,27 @@ export function AddPickModal({
     }
   };
 
+  const handleOpenAdd = (category: SettingsCategory) => {
+    setCurrentCategory(category);
+    setAddModalOpen(true);
+  };
+
+  const handleOpenEdit = (category: SettingsCategory, item: string) => {
+    setCurrentCategory(category);
+    setItemToEdit(item);
+    setEditModalOpen(true);
+  };
+
+  const handleAddItem = async (item: string) => {
+    if (currentCategory === 'sport') await addSport(item);
+    else if (currentCategory === 'bookmaker') await addBookmaker(item);
+  };
+
+  const handleEditItem = async (oldItem: string, newItem: string) => {
+    if (currentCategory === 'sport') await updateSport(oldItem, newItem);
+    else if (currentCategory === 'bookmaker') await updateBookmaker(oldItem, newItem);
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -457,24 +500,17 @@ export function AddPickModal({
         {/* Sport and Pick Type - Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="sport" className="block text-sm font-medium text-slate-300 mb-2">
-              Deporte <span className="text-red-400">*</span>
-            </label>
-            <select
-              id="sport"
+            <ManageableDropdown
+              label="Deporte"
               value={sport}
-              onChange={(e) => setSport(e.target.value)}
-              className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
+              items={settings?.sports || []}
+              category="sport"
+              onChange={setSport}
+              onAdd={() => handleOpenAdd('sport')}
+              onEdit={(item) => handleOpenEdit('sport', item)}
               disabled={loading}
-            >
-              <option value="">Selecciona deporte</option>
-              {Object.values(Sport).map((sportValue) => (
-                <option key={sportValue} value={sportValue}>
-                  {sportValue}
-                </option>
-              ))}
-            </select>
+              placeholder="Selecciona deporte"
+            />
           </div>
 
           <div>
@@ -518,23 +554,17 @@ export function AddPickModal({
         {/* Bookmaker, Odds and Stake - Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="bookmaker" className="block text-sm font-medium text-slate-300 mb-2">
-              Bookmaker
-            </label>
-            <select
-              id="bookmaker"
+            <ManageableDropdown
+              label="Bookmaker"
               value={bookmaker}
-              onChange={(e) => setBookmaker(e.target.value)}
-              className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              items={settings?.bookmakers || []}
+              category="bookmaker"
+              onChange={setBookmaker}
+              onAdd={() => handleOpenAdd('bookmaker')}
+              onEdit={(item) => handleOpenEdit('bookmaker', item)}
               disabled={loading}
-            >
-              <option value="">Selecciona</option>
-              {Object.values(Bookmaker).map((bookie) => (
-                <option key={bookie} value={bookie}>
-                  {bookie}
-                </option>
-              ))}
-            </select>
+              placeholder="Selecciona"
+            />
           </div>
 
           <div>
@@ -733,24 +763,17 @@ export function AddPickModal({
 
               {/* User Bookmaker */}
               <div>
-                <label htmlFor="userBookmaker" className="block text-sm font-medium text-slate-300 mb-2">
-                  Tu Bookmaker <span className="text-red-400">*</span>
-                </label>
-                <select
-                  id="userBookmaker"
+                <ManageableDropdown
+                  label="Tu Bookmaker"
                   value={userBookmaker}
-                  onChange={(e) => setUserBookmaker(e.target.value)}
-                  className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required={shouldFollow}
+                  items={settings?.bookmakers || []}
+                  category="bookmaker"
+                  onChange={setUserBookmaker}
+                  onAdd={() => handleOpenAdd('bookmaker')}
+                  onEdit={(item) => handleOpenEdit('bookmaker', item)}
                   disabled={loading}
-                >
-                  <option value="">Selecciona</option>
-                  {Object.values(Bookmaker).map((bookie) => (
-                    <option key={bookie} value={bookie}>
-                      {bookie}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Selecciona"
+                />
               </div>
 
               {/* User Bet Type */}
@@ -888,6 +911,23 @@ export function AddPickModal({
           </Button>
         </div>
       </form>
+
+      <AddItemModal
+        isOpen={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onAdd={handleAddItem}
+        category={currentCategory}
+        existingItems={currentCategory === 'sport' ? settings?.sports || [] : settings?.bookmakers || []}
+      />
+      
+      <EditItemModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onEdit={handleEditItem}
+        category={currentCategory}
+        currentItem={itemToEdit}
+        existingItems={currentCategory === 'sport' ? settings?.sports || [] : settings?.bookmakers || []}
+      />
     </Modal>
   );
 }

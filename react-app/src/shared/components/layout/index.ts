@@ -1,6 +1,7 @@
 /**
  * @fileoverview Layout components exports
- * @module shared/components/layout
+ * @module/**
+ * Layout components barrel export
  */
-
 export { Layout } from './Layout';
+export { Header } from './Header';

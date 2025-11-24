@@ -1,13 +1,16 @@
 /**
- * @fileoverview Main application layout with navbar
+ * @fileoverview Main application layout with header and mobile sidebar
  * @module shared/components/layout
  */
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, BarChart3, FileText, Menu, X } from 'lucide-react';
+import { LogOut, BarChart3, FileText, Menu, X, Plus, UserPlus } from 'lucide-react';
 import { useAuth } from '@features/auth/hooks';
+import { AddPickModal } from '@features/picks/components';
+import { useTipsters } from '@features/tipsters/hooks';
 import { Button } from '../ui';
+import { Header } from './Header';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -16,17 +19,24 @@ interface LayoutProps {
 /**
  * Main application layout with navigation
  */
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children }: Readonly<LayoutProps>) {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const { tipsters } = useTipsters(); // Only for AddPickModal
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isAddPickModalOpen, setIsAddPickModalOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
+  };
+
+  const handleAddTipster = () => {
+    // Dispatch custom event that DashboardPage will listen to
+    window.dispatchEvent(new CustomEvent('openAddTipsterModal'));
   };
 
   const navItems = [
@@ -37,7 +47,7 @@ export function Layout({ children }: LayoutProps) {
     },
     {
       path: '/picks',
-      label: 'Picks',
+      label: 'Todas las Picks',
       icon: FileText,
     },
     {
@@ -83,76 +93,48 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-slate-900">
-      {/* Navbar */}
-      <nav className="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            {/* Mobile Menu Button */}
-            <div className="flex items-center md:hidden">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-lg text-slate-400 hover:text-slate-300 hover:bg-slate-700 transition-colors"
-                aria-label="Toggle menu"
-              >
-                <Menu className="h-6 w-6" />
-              </button>
-            </div>
+      <div className="hidden md:block">
+        <Header 
+          onAddTipster={handleAddTipster}
+          onAddPick={() => setIsAddPickModalOpen(true)}
+        />
+      </div>
 
-            {/* Logo */}
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-2">
-                <BarChart3 className="h-8 w-8 text-blue-500" />
-                <span className="text-xl font-bold text-slate-100">
-                  Tipster Tracker
-                </span>
-              </Link>
-            </div>
+      <div className="md:hidden bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
+        <div className="flex items-center justify-between h-16 px-4">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-300 hover:bg-slate-700 transition-colors"
+            aria-label="Toggle menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
 
-            {/* Desktop Navigation Links */}
-            <div className="hidden md:flex items-center space-x-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+          <Link to="/" className="flex items-center space-x-2">
+            <BarChart3 className="h-8 w-8 text-blue-500" />
+            <span className="text-xl font-bold text-slate-100">
+              Tipster Tracker
+            </span>
+          </Link>
 
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`
-                      flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
-                      ${
-                        isActive
-                          ? 'bg-blue-500/10 text-blue-400'
-                          : 'text-slate-400 hover:text-slate-300 hover:bg-slate-700'
-                      }
-                    `}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-
-            {/* Desktop User Menu */}
-            <div className="hidden md:flex items-center space-x-4">
-              {user?.email && (
-                <span className="text-sm text-slate-400">
-                  {user.email}
-                </span>
-              )}
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleLogout}
-                icon={<LogOut className="h-4 w-4" />}
-              >
-                Salir
-              </Button>
-            </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleAddTipster}
+              className="p-2 text-slate-400 hover:text-slate-300 hover:bg-slate-700 rounded transition-colors"
+              title="Añadir Tipster"
+            >
+              <UserPlus className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => setIsAddPickModalOpen(true)}
+              className="p-2 text-slate-400 hover:text-slate-300 hover:bg-slate-700 rounded transition-colors"
+              title="Añadir Pick"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
           </div>
         </div>
-      </nav>
+      </div>
 
       {/* Mobile Menu Drawer */}
       {isMounted && (
@@ -236,10 +218,16 @@ export function Layout({ children }: LayoutProps) {
         </>
       )}
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
         {children}
       </main>
+
+      <AddPickModal
+        isOpen={isAddPickModalOpen}
+        onClose={() => setIsAddPickModalOpen(false)}
+        onSuccess={() => setIsAddPickModalOpen(false)}
+        tipsters={tipsters}
+      />
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Modal, Button, Input, Dropdown } from '@/shared/components/ui';
-import { ALL_CHANNELS } from '@/shared/constants';
+import { Modal, Button, Input } from '@/shared/components/ui';
 import { useAuth } from '@features/auth/hooks';
 import type { AddTipsterModalProps, TipsterFormData } from './AddTipsterModal.types';
+import { useSettings } from '@features/settings/hooks';
+import { ManageableDropdown, AddItemModal, EditItemModal } from '@features/settings/components';
 
 /**
  * AddTipsterModal component
@@ -28,12 +29,19 @@ export function AddTipsterModal({
   onUpdate,
 }: Readonly<AddTipsterModalProps>) {
   const { user } = useAuth();
+  const { settings, addChannel, updateChannel, ensureChannelExists } = useSettings();
+  
   const [formData, setFormData] = useState<TipsterFormData>({
     name: '',
     channel: '',
   });
   const [errors, setErrors] = useState<Partial<TipsterFormData>>({});
   const [loading, setLoading] = useState(false);
+
+  // Modal states
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState('');
 
   const isEditMode = Boolean(tipster);
 
@@ -44,6 +52,8 @@ export function AddTipsterModal({
         name: tipster.name,
         channel: tipster.channel,
       });
+      // Ensure channel exists in settings
+      if (tipster.channel) ensureChannelExists(tipster.channel);
     } else {
       setFormData({
         name: '',
@@ -51,7 +61,7 @@ export function AddTipsterModal({
       });
     }
     setErrors({});
-  }, [tipster, isOpen]);
+  }, [tipster, isOpen, ensureChannelExists]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<TipsterFormData> = {};
@@ -125,6 +135,19 @@ export function AddTipsterModal({
     }
   };
 
+  const handleAddItem = async (item: string) => {
+    await addChannel(item);
+  };
+
+  const handleEditItem = async (oldItem: string, newItem: string) => {
+    await updateChannel(oldItem, newItem);
+  };
+
+  const handleOpenEdit = (item: string) => {
+    setItemToEdit(item);
+    setEditModalOpen(true);
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -152,18 +175,16 @@ export function AddTipsterModal({
 
         {/* Channel Dropdown */}
         <div>
-          <label htmlFor="tipster-channel" className="block text-sm font-medium text-slate-200 mb-2">
-            Canal <span className="text-red-400">*</span>
-          </label>
-          <Dropdown
-            options={ALL_CHANNELS.map((channel) => ({
-              value: channel,
-              label: channel,
-            }))}
+          <ManageableDropdown
+            label="Canal"
             value={formData.channel}
-            onChange={(value) => setFormData({ ...formData, channel: value as string })}
-            placeholder="Selecciona un canal"
+            items={settings?.channels || []}
+            category="channel"
+            onChange={(value) => setFormData({ ...formData, channel: value })}
+            onAdd={() => setAddModalOpen(true)}
+            onEdit={handleOpenEdit}
             disabled={loading}
+            placeholder="Selecciona un canal"
           />
           {errors.channel && (
             <p className="mt-1 text-sm text-red-400">{errors.channel}</p>
@@ -185,6 +206,23 @@ export function AddTipsterModal({
           </Button>
         </div>
       </form>
+
+      <AddItemModal
+        isOpen={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onAdd={handleAddItem}
+        category="channel"
+        existingItems={settings?.channels || []}
+      />
+
+      <EditItemModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onEdit={handleEditItem}
+        category="channel"
+        currentItem={itemToEdit}
+        existingItems={settings?.channels || []}
+      />
     </Modal>
   );
 }

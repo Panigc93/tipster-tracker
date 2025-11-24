@@ -14,10 +14,11 @@ import { useTipsters } from '@features/tipsters/hooks';
 import { useFollows } from '@features/follows/hooks';
 import { useSortableTable, useDebounce } from '@shared/hooks';
 import { AddFollowModal } from '@features/follows/components';
-import { Sport, PickResult, Bookmaker } from '@shared/types/enums';
+import { PickResult } from '@shared/types/enums';
+import { useSettings } from '@features/settings/hooks';
+import { ManageableDropdown } from '@features/settings/components';
 import type { Pick } from '@shared/types';
 import type { PickFilters } from './PicksListPage.types';
-import { getSportIcon } from '../../utils/sport-icons';
 
 /**
  * Filter picks based on current filter state
@@ -109,6 +110,7 @@ export function PicksListPage() {
   const { picks, loading, error, deletePick, updatePick } = usePicks();
   const { tipsters, loading: tipstersLoading } = useTipsters();
   const { isPickFollowed } = useFollows();
+  const { settings } = useSettings();
 
   // Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -226,7 +228,7 @@ export function PicksListPage() {
     try {
       await deletePick(pickToDelete.id);
       toast.success('Pick eliminada correctamente');
-    } catch (error) {
+    } catch {
       toast.error('Error al eliminar la pick');
     } finally {
       setIsDeleteConfirmOpen(false);
@@ -417,22 +419,14 @@ export function PicksListPage() {
 
           {/* Sport */}
           <div>
-            <label htmlFor="filter-sport" className="block text-sm font-medium text-slate-300 mb-2">
-              Deporte
-            </label>
-            <select
-              id="filter-sport"
+            <ManageableDropdown
+              label="Deporte"
               value={filters.sport}
-              onChange={(e) => handleFilterChange('sport', e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Todos</option>
-              {Object.values(Sport).map((sport) => (
-                <option key={sport} value={sport}>
-                  {getSportIcon(sport)} {sport}
-                </option>
-              ))}
-            </select>
+              items={settings?.sports || []}
+              category="sport"
+              onChange={(value) => handleFilterChange('sport', value)}
+              placeholder="Todos"
+            />
           </div>
 
           {/* Result */}
@@ -457,22 +451,14 @@ export function PicksListPage() {
 
           {/* Bookmaker */}
           <div>
-            <label htmlFor="filter-bookmaker" className="block text-sm font-medium text-slate-300 mb-2">
-              Casa de Apuestas
-            </label>
-            <select
-              id="filter-bookmaker"
+            <ManageableDropdown
+              label="Casa de Apuestas"
               value={filters.bookmaker}
-              onChange={(e) => handleFilterChange('bookmaker', e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Todas</option>
-              {Object.values(Bookmaker).map((bookmaker) => (
-                <option key={bookmaker} value={bookmaker}>
-                  {bookmaker}
-                </option>
-              ))}
-            </select>
+              items={settings?.bookmakers || []}
+              category="bookmaker"
+              onChange={(value) => handleFilterChange('bookmaker', value)}
+              placeholder="Todas"
+            />
           </div>
         </div>
       </CollapsibleSection>
