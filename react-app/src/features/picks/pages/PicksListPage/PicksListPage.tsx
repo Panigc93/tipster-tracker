@@ -7,12 +7,12 @@ import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { Plus, Search } from 'lucide-react';
 import { Button, SkeletonText, SkeletonCard, SkeletonTable, CollapsibleSection } from '@shared/components/ui';
-import { ConfirmDialog } from '@shared/components';
-import { PickTableRow, PickCard, AddPickModal } from '../../components';
+import { ConfirmDialog, PicksTable } from '@shared/components';
+import { AddPickModal } from '../../components';
 import { usePicks } from '../../hooks';
 import { useTipsters } from '@features/tipsters/hooks';
 import { useFollows } from '@features/follows/hooks';
-import { useSortableTable, useDebounce } from '@shared/hooks';
+import { useDebounce } from '@shared/hooks';
 import { AddFollowModal } from '@features/follows/components';
 import { PickResult } from '@shared/types/enums';
 import { useSettings } from '@features/settings/hooks';
@@ -151,12 +151,7 @@ export function PicksListPage() {
     [picks, filters, debouncedSearchQuery]
   );
 
-  // Sorting (default: sort by date descending)
-  const { sortedData: sortedPicks, requestSort, getSortIndicator } = useSortableTable<Pick>(
-    filteredPicks,
-    'date',
-    'desc'
-  );
+
 
   // Stats
   const stats = useMemo(() => {
@@ -498,141 +493,18 @@ export function PicksListPage() {
         </div>
       ) : (
         <>
-          {/* Mobile: Cards */}
-          <div className="md:hidden space-y-4">
-            {sortedPicks.map((pick) => (
-              <PickCard
-                key={pick.id}
-                pick={pick}
-                tipsterName={getTipsterName(pick.tipsterId)}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onFollow={handleFollow}
-                isFollowed={isPickFollowed(pick.id)}
-                showActions
-              />
-            ))}
-            
-            {/* Results count - Mobile */}
-            <div className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg">
-              <p className="text-sm text-slate-400">
-                Mostrando <span className="font-semibold text-slate-300">{sortedPicks.length}</span>{' '}
-                {sortedPicks.length === 1 ? 'pick' : 'picks'}
-                {hasActiveFilters && (
-                  <span>
-                    {' '}
-                    de <span className="font-semibold text-slate-300">{picks.length}</span> totales
-                  </span>
-                )}
-              </p>
-            </div>
-          </div>
 
-          {/* Desktop: Table */}
-          <div className="hidden md:block bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-blue-500/10 border-b border-slate-700">
-                  <tr>
-                    <th 
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                      onClick={() => requestSort('date')}
-                      title="Click para ordenar por fecha. Click en otra columna para multi-sort"
-                    >
-                      <span className="flex items-center gap-1">
-                        Fecha {getSortIndicator('date')}
-                      </span>
-                    </th>
-                    <th 
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                      onClick={() => requestSort('tipsterId')}
-                      title="Click para ordenar por tipster. Click en otra columna para multi-sort"
-                    >
-                      <span className="flex items-center gap-1">
-                        Tipster {getSortIndicator('tipsterId')}
-                      </span>
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Partido
-                    </th>
-                    <th 
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                      onClick={() => requestSort('sport')}
-                      title="Click para ordenar por deporte. Click en otra columna para multi-sort"
-                    >
-                      <span className="flex items-center gap-1">
-                        Deporte {getSortIndicator('sport')}
-                      </span>
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Tipo
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Apuesta
-                    </th>
-                    <th 
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                      onClick={() => requestSort('odds')}
-                      title="Click para ordenar por cuota. Click en otra columna para multi-sort"
-                    >
-                      <span className="flex items-center gap-1">
-                        Cuota {getSortIndicator('odds')}
-                      </span>
-                    </th>
-                    <th 
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none"
-                      onClick={() => requestSort('stake')}
-                      title="Click para ordenar por stake. Click en otra columna para multi-sort"
-                    >
-                      <span className="flex items-center gap-1">
-                        Stake {getSortIndicator('stake')}
-                      </span>
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Bookmaker
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Resultado
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Profit
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-700">
-                  {sortedPicks.map((pick) => (
-                    <PickTableRow
-                      key={pick.id}
-                      pick={pick}
-                      tipsterName={getTipsterName(pick.tipsterId)}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      onFollow={handleFollow}
-                      isFollowed={isPickFollowed(pick.id)}
-                      showActions
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Results count - Desktop */}
-            <div className="px-6 py-4 border-t border-slate-700 bg-slate-900/50">
-              <p className="text-sm text-slate-400">
-                Mostrando <span className="font-semibold text-slate-300">{sortedPicks.length}</span>{' '}
-                {sortedPicks.length === 1 ? 'pick' : 'picks'}
-                {hasActiveFilters && (
-                  <span>
-                    {' '}
-                    de <span className="font-semibold text-slate-300">{picks.length}</span> totales
-                  </span>
-                )}
-              </p>
-            </div>
-          </div>
+          <PicksTable
+            mode="picks"
+            data={filteredPicks}
+            getTipsterName={getTipsterName}
+            showActions={true}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onFollow={handleFollow}
+            isFollowed={isPickFollowed}
+            emptyMessage="No hay picks disponibles"
+          />
         </>
       )}
 
