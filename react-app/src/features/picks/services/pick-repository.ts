@@ -6,6 +6,8 @@
 import { FirebaseRepository } from '@shared/services/firebase-repository';
 import type { Pick, CreatePickDTO, UpdatePickDTO, OperationResult } from '@shared/types';
 import type { PickResult } from '@shared/types/enums';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@core/config/firebase.config';
 
 /**
  * Repository for managing Pick entities in Firestore
@@ -28,7 +30,15 @@ export class PickRepository extends FirebaseRepository<Pick> {
       comments: data.comments ?? '',
       status: data.status,
     };
-    return this.create(pickData, userId);
+    
+    const result = await this.create(pickData, userId);
+    
+    // Update tipster's lastPickDate if pick was created successfully
+    if (result.success && data.tipsterId) {
+      await this.updateTipsterLastPickDate(data.tipsterId, data.date);
+    }
+    
+    return result;
   }
 
   /**
@@ -39,7 +49,37 @@ export class PickRepository extends FirebaseRepository<Pick> {
    * @returns Operation result
    */
   async updatePick(id: string, data: UpdatePickDTO): Promise<OperationResult> {
-    return this.update(id, data);
+    console.log('🔵 [updatePick] Starting update for pick:', id);
+    
+    // Get the existing pick first to access tipsterId
+    const existingPick = await this.getById(id);
+    console.log('🔵 [updatePick] Existing pick:', existingPick.data);
+    
+    const result = await this.update(id, data);
+    console.log('🔵 [updatePick] Update result:', result.success);
+    
+    // Update tipster's lastPickDate if date was changed or if this is a new pick
+    if (result.success && existingPick.success && existingPick.data) {
+      const tipsterId = data.tipsterId || existingPick.data.tipsterId;
+      console.log('🔵 [updatePick] Tipster ID:', tipsterId);
+      
+      // Get all picks for this tipster to find the actual latest date
+      const tipsterPicks = await this.getPicksByTipster(existingPick.data.uid, tipsterId);
+      console.log('🔵 [updatePick] Tipster picks count:', tipsterPicks.data?.length);
+      
+      if (tipsterPicks.success && tipsterPicks.data && tipsterPicks.data.length > 0) {
+        // Find the most recent pick date
+        const latestDate = tipsterPicks.data.reduce((latest, p) => {
+          return p.date > latest ? p.date : latest;
+        }, tipsterPicks.data[0].date);
+        
+        console.log('🔵 [updatePick] Latest date calculated:', latestDate);
+        await this.updateTipsterLastPickDate(tipsterId, latestDate);
+        console.log('✅ [updatePick] Tipster lastPickDate updated successfully');
+      }
+    }
+    
+    return result;
   }
 
   /**
@@ -49,7 +89,37 @@ export class PickRepository extends FirebaseRepository<Pick> {
    * @returns Operation result
    */
   async deletePick(id: string): Promise<OperationResult> {
-    return this.delete(id);
+    // Get pick data before deleting to know which tipster to update
+    const pickResult = await this.getById(id);
+    
+    const result = await this.delete(id);
+    
+    // Recalculate tipster's lastPickDate after deletion
+    if (result.success && pickResult.success && pickResult.data) {
+      const { tipsterId, uid } = pickResult.data;
+      
+      // Get remaining picks for this tipster
+      const tipsterPicks = await this.getPicksByTipster(uid, tipsterId);
+      
+      if (tipsterPicks.success && tipsterPicks.data) {
+        if (tipsterPicks.data.length > 0) {
+          // Find the most recent pick date from remaining picks
+          const latestDate = tipsterPicks.data.reduce((latest, p) => {
+            return p.date > latest ? p.date : latest;
+          }, tipsterPicks.data[0].date);
+          
+          await this.updateTipsterLastPickDate(tipsterId, latestDate);
+        } else {
+          // No more picks, set lastPickDate to null
+          const tipsterRef = doc(db, 'tipsters', tipsterId);
+          await updateDoc(tipsterRef, {
+            lastPickDate: null,
+          });
+        }
+      }
+    }
+    
+    return result;
   }
 
   /**
@@ -291,6 +361,27 @@ export class PickRepository extends FirebaseRepository<Pick> {
       success: true,
       data: filtered,
     };
+  }
+
+  /**
+   * Update tipster's lastPickDate field
+   * Private helper method to keep tipster data in sync
+   *
+   * @param tipsterId - Tipster ID
+   * @param pickDate - Pick date (YYYY-MM-DD)
+   */
+  private async updateTipsterLastPickDate(tipsterId: string, pickDate: string): Promise<void> {
+    try {
+      console.log('🔵 [updateTipsterLastPickDate] Updating tipster:', tipsterId, 'with date:', pickDate);
+      const tipsterRef = doc(db, 'tipsters', tipsterId);
+      await updateDoc(tipsterRef, {
+        lastPickDate: pickDate,
+      });
+      console.log('✅ [updateTipsterLastPickDate] Successfully updated');
+    } catch (error) {
+      console.error('❌ [updateTipsterLastPickDate] Error updating tipster lastPickDate:', error);
+      // Don't throw - this is a secondary operation
+    }
   }
 }
 

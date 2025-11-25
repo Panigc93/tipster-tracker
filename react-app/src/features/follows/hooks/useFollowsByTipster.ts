@@ -3,7 +3,7 @@ import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestor
 import { db } from '@core/config/firebase.config';
 import { useAuth } from '@features/auth/hooks';
 import { FollowRepository } from '../services/follow-repository';
-import type { UserFollow } from '@shared/types';
+import type { UserFollow } from '@/shared/types';
 
 interface UseFollowsByTipsterReturn {
   follows: UserFollow[];

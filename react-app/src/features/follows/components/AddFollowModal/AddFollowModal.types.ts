@@ -1,4 +1,4 @@
-import type { Pick, UserFollow, UpdateFollowDTO } from '@shared/types';
+import type { Pick, UserFollow, UpdateFollowDTO } from '@/shared/types';
 
 /**
  * Props for AddFollowModal component

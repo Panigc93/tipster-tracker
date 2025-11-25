@@ -3,25 +3,8 @@
  * Displays user's global statistics in 8 stat cards
  */
 
+import { StatCard } from '@/shared/components';
 import { useDashboardStats } from '../../hooks';
-
-interface StatCardProps {
-  readonly label: string;
-  readonly value: string | number;
-  readonly valueClassName?: string;
-  readonly title?: string;
-}
-
-function StatCard({ label, value, valueClassName = 'text-slate-100', title }: Readonly<StatCardProps>) {
-  return (
-    <div className="bg-slate-800 rounded p-2 border border-slate-700">
-      <div className="text-sm text-slate-400 mb-1 text-center">{label}</div>
-      <div className={`text-lg text-center font-bold ${valueClassName} ${title ? 'text-lg truncate' : ''}`} title={title}>
-        {value}
-      </div>
-    </div>
-  );
-}
 
 export function PersonalStatsPanel() {
   const stats = useDashboardStats();

@@ -3,7 +3,7 @@ import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestor
 import { db } from '@core/config/firebase.config';
 import { useAuth } from '@features/auth/hooks';
 import { PickRepository } from '../services/pick-repository';
-import type { Pick } from '@shared/types';
+import type { Pick } from '@/shared/types';
 
 interface UsePicksByTipsterReturn {
   picks: Pick[];

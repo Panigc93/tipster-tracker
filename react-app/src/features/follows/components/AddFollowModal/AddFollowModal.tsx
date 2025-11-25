@@ -5,13 +5,13 @@
 
 import { useState, useEffect } from 'react';
 import { MessageSquare } from 'lucide-react';
-import { Modal, Button, Input, Badge } from '@shared/components/ui';
-import { PickResult, Bookmaker } from '@shared/types/enums';
+import { Modal, Button, Input, Badge } from '@/shared/components/ui';
+import { PickResult, Bookmaker } from '@/shared/types/enums';
 import { useFollows } from '../../hooks';
-import { formatDate } from '@shared/utils/date.utils';
+import { formatDate } from '@/shared/utils/date.utils';
 import { getSportIcon } from '@features/picks/utils/sport-icons';
 import type { AddFollowModalProps, FollowFormData } from './AddFollowModal.types';
-import type { CreateFollowDTO, UpdateFollowDTO } from '@shared/types';
+import type { CreateFollowDTO, UpdateFollowDTO } from '@/shared/types';
 
 /**
  * Combine date and time into ISO datetime string

@@ -3,7 +3,7 @@
  * @module features/tipsters/utils/calculate-stats
  */
 
-import type { Pick } from '@shared/types';
+import type { Pick } from '@/shared/types';
 
 export interface TipsterStats {
   totalPicks: number;

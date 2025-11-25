@@ -3,7 +3,7 @@
  * @module features/picks/components/AddPickModal
  */
 
-import type { Pick, Tipster } from '@shared/types';
+import type { Pick, Tipster } from '@/shared/types';
 
 export interface AddPickModalProps {
   /**

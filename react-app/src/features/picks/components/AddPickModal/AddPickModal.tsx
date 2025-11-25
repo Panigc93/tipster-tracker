@@ -5,12 +5,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { MessageSquare } from 'lucide-react';
-import { Modal, Button, Input } from '@shared/components/ui';
-import { PickType, PickResult } from '@shared/types/enums';
+import { Modal, Button, Input } from '@/shared/components/ui';
+import { PickType, PickResult } from '@/shared/types/enums';
 import { usePicks } from '../../hooks';
 import { useFollows } from '@features/follows/hooks';
 import type { AddPickModalProps } from './AddPickModal.types';
-import type { CreatePickDTO, UpdatePickDTO, CreateFollowDTO, UpdateFollowDTO } from '@shared/types';
+import type { CreatePickDTO, UpdatePickDTO, CreateFollowDTO, UpdateFollowDTO } from '@/shared/types';
 import { useSettings } from '@features/settings/hooks';
 import { ManageableDropdown, AddItemModal, EditItemModal } from '@features/settings/components';
 import type { SettingsCategory } from '@features/settings/types';

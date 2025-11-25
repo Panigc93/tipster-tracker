@@ -43,7 +43,7 @@ export function PickTypeDistributionChart({
   }
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
+    <div className="rounded-lg border border-slate-700 bg-slate-900/50 p-3">
       <h3 className="mb-3 text-sm font-medium text-slate-200">{title}</h3>
       <div style={{ height: `${height}px` }}>
         <Doughnut data={chartData} options={DOUGHNUT_CHART_OPTIONS} />
