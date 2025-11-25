@@ -385,7 +385,7 @@ export const MyPicksPage = () => {
       </CollapsibleSection>
 
       {/* Table */}
-      <div className="rounded-lg bg-slate-800 p-4">
+      <div>
         {(() => {
           if (loading) {
             return <SkeletonTable rows={8} columns={10} />;

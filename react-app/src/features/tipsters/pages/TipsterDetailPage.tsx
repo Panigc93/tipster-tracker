@@ -314,7 +314,7 @@ export function TipsterDetailPage() {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-slate-800 rounded-lg border border-slate-700 py-2 px-4">
+      <div>
         {activeTab === 'stats' && (
           <div className="space-y-8">
             {/* Estadísticas Generales */}

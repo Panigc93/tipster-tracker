@@ -23,7 +23,7 @@ export function PicksTableHeader({
   const normalClass = "px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider";
 
   return (
-    <thead className="bg-blue-500/10 border-b border-slate-700">
+    <thead className="bg-slate-700/50 border-b border-slate-600">
       <tr>
         {/* Date */}
         {columns.date && (

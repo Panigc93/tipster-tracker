@@ -89,7 +89,7 @@ export function FollowTableRow({
   const userProfitClass = userProfit > 0 ? 'text-green-400' : userProfit < 0 ? 'text-red-400' : 'text-slate-400';
 
   return (
-    <tr className="hover:bg-slate-700/50 transition-colors">
+    <tr className="bg-slate-800/30 border-b border-slate-700 hover:bg-slate-700/40 transition-colors">
       {/* Fecha */}
       <td className="px-4 py-3 text-sm text-slate-300 whitespace-nowrap">
         {formatDate(follow.dateFollowed)}

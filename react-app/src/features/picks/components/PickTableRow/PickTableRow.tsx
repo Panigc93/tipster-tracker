@@ -77,7 +77,7 @@ export function PickTableRow({
   };
 
   return (
-    <tr className="border-b border-slate-700 hover:bg-slate-800/50 transition-colors">
+    <tr className="bg-slate-800/30 border-b border-slate-700 hover:bg-slate-700/40 transition-colors">
       {/* Fecha */}
       <td className="px-4 py-3 text-sm text-slate-300">
         {formatDate(pick.date)}
