@@ -64,8 +64,8 @@ export function TipsterCharts({ picks, follows, title = 'Distribuciones' }: Tips
           <StakeDistributionChart {...dataProps} height={180} title={follows ? "Tus Stakes" : undefined} />
           {picks && (
             <>
-              <SportDistributionChart picks={picks} height={180} title={follows ? "Deportes Seguidos" : undefined} />
-              <PickTypeDistributionChart picks={picks} height={180} title={follows ? "Tipos de Pick Seguidos" : undefined} />
+              <SportDistributionChart picks={picks} height={140} title={follows ? "Deportes Seguidos" : undefined} />
+              <PickTypeDistributionChart picks={picks} height={140} title={follows ? "Tipos de Pick Seguidos" : undefined} />
             </>
           )}
         </div>

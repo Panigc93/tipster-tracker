@@ -18,7 +18,7 @@ const ODDS_RANGES = [
 ] as const;
 
 /**
- * Prepare odds distribution data for bar chart
+ * Prepare odds distribution data for bar chart with gradient
  */
 export function prepareOddsDistribution(picks: Pick[]) {
   const distribution = ODDS_RANGES.map((range) => ({
@@ -32,16 +32,25 @@ export function prepareOddsDistribution(picks: Pick[]) {
       {
         label: 'Picks por Cuota',
         data: distribution.map((d) => d.count),
-        backgroundColor: CHART_COLORS[0],
-        borderColor: CHART_COLORS[0],
-        borderWidth: 1,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        backgroundColor: (context: any) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return CHART_COLORS[0];
+          
+          const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+          gradient.addColorStop(0, CHART_COLORS[0] + '80'); // 50% opacity at bottom
+          gradient.addColorStop(1, CHART_COLORS[0]); // Full opacity at top
+          return gradient;
+        },
+        borderWidth: 0,
       },
     ],
   };
 }
 
 /**
- * Prepare stake distribution data for bar chart
+ * Prepare stake distribution data for bar chart with gradient
  */
 export function prepareStakeDistribution(picks: Pick[]) {
   const stakes = Array.from({ length: 10 }, (_, i) => i + 1);
@@ -56,9 +65,18 @@ export function prepareStakeDistribution(picks: Pick[]) {
       {
         label: 'Picks por Stake',
         data: distribution.map((d) => d.count),
-        backgroundColor: CHART_COLORS[1],
-        borderColor: CHART_COLORS[1],
-        borderWidth: 1,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        backgroundColor: (context: any) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return CHART_COLORS[1];
+          
+          const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+          gradient.addColorStop(0, CHART_COLORS[1] + '80'); // 50% opacity at bottom
+          gradient.addColorStop(1, CHART_COLORS[1]); // Full opacity at top
+          return gradient;
+        },
+        borderWidth: 0,
       },
     ],
   };
@@ -87,8 +105,7 @@ export function prepareSportDistribution(picks: Pick[]) {
       {
         data: sorted.map(([, count]) => count),
         backgroundColor: sorted.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
-        borderColor: '#1E293B', // slate-800
-        borderWidth: 2,
+        borderWidth: 0,
       },
     ],
   };
@@ -117,15 +134,14 @@ export function preparePickTypeDistribution(picks: Pick[]) {
       {
         data: sorted.map(([, count]) => count),
         backgroundColor: sorted.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
-        borderColor: '#1E293B', // slate-800
-        borderWidth: 2,
+        borderWidth: 0,
       },
     ],
   };
 }
 
 /**
- * Prepare odds distribution for follows (user data)
+ * Prepare odds distribution for follows (user data) with gradient
  */
 export function prepareFollowOddsDistribution(follows: UserFollow[]) {
   const distribution = ODDS_RANGES.map((range) => ({
@@ -141,16 +157,25 @@ export function prepareFollowOddsDistribution(follows: UserFollow[]) {
       {
         label: 'Follows por Cuota',
         data: distribution.map((d) => d.count),
-        backgroundColor: CHART_COLORS[2],
-        borderColor: CHART_COLORS[2],
-        borderWidth: 1,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        backgroundColor: (context: any) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return CHART_COLORS[2];
+          
+          const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+          gradient.addColorStop(0, CHART_COLORS[2] + '80'); // 50% opacity at bottom
+          gradient.addColorStop(1, CHART_COLORS[2]); // Full opacity at top
+          return gradient;
+        },
+        borderWidth: 0,
       },
     ],
   };
 }
 
 /**
- * Prepare stake distribution for follows (user data)
+ * Prepare stake distribution for follows (user data) with gradient
  */
 export function prepareFollowStakeDistribution(follows: UserFollow[]) {
   const stakes = Array.from({ length: 10 }, (_, i) => i + 1);
@@ -165,9 +190,18 @@ export function prepareFollowStakeDistribution(follows: UserFollow[]) {
       {
         label: 'Follows por Stake',
         data: distribution.map((d) => d.count),
-        backgroundColor: CHART_COLORS[3],
-        borderColor: CHART_COLORS[3],
-        borderWidth: 1,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        backgroundColor: (context: any) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return CHART_COLORS[3];
+          
+          const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+          gradient.addColorStop(0, CHART_COLORS[3] + '80'); // 50% opacity at bottom
+          gradient.addColorStop(1, CHART_COLORS[3]); // Full opacity at top
+          return gradient;
+        },
+        borderWidth: 0,
       },
     ],
   };

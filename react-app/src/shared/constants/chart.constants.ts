@@ -5,19 +5,23 @@
 
 /**
  * Paleta de colores para gráficos Chart.js
+ * Paleta industrial moderna optimizada - solo colores muy distintos
  * @constant
  */
 export const CHART_COLORS: readonly string[] = [
-  '#1FB8CD', // Cyan
-  '#FFC185', // Peach
-  '#B4413C', // Red
-  '#ECEBD5', // Beige
-  '#5D878F', // Teal
-  '#DB4545', // Bright Red
-  '#D2BA4C', // Yellow
-  '#964325', // Brown
-  '#944454', // Maroon
-  '#13343B', // Dark Blue
+  '#1C768F', // Azul petróleo
+  '#FA991C', // Naranja vibrante
+  '#8B5CF6', // Morado moderno
+  '#00E5A0', // Verde neón
+  '#FF5757', // Rojo claro
+  '#023246', // Azul marino oscuro
+  '#A8B2B8', // Gris plata
+  '#A78BFA', // Lavanda vibrante
+  '#10B981', // Verde esmeralda
+  '#6BB6D0', // Azul claro
+  '#FF8C42', // Naranja suave
+  '#7C3AED', // Púrpura intenso
+  '#C5CDD3', // Plata claro
 ] as const;
 
 /**
@@ -129,29 +133,16 @@ export const BAR_CHART_OPTIONS = {
 export const DOUGHNUT_CHART_OPTIONS = {
   responsive: true,
   maintainAspectRatio: false,
-  cutout: '65%',
+  cutout: '70%',
   plugins: {
     legend: {
-      display: true,
-      position: 'right' as const,
-      labels: {
-        color: '#E0E0E0', // slate-300
-        padding: 8,
-        font: {
-          size: 10,
-          weight: 500,
-        },
-        usePointStyle: true,
-        pointStyle: 'circle',
-        boxWidth: 10,
-        boxHeight: 10,
-      },
+      display: false, // Disabled - will use external legend
     },
     tooltip: {
       enabled: true,
       backgroundColor: '#1E293B', // slate-800
       titleColor: '#F1F5F9', // slate-100
-      bodyColor: '#E2E8F0', // slate-200
+      bodyColor: '#CBD5E1', // slate-300
       borderColor: '#475569', // slate-600
       borderWidth: 1,
       padding: 12,

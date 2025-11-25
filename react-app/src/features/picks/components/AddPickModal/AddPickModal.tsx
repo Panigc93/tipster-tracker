@@ -98,9 +98,9 @@ export function AddPickModal({
   const [showComments, setShowComments] = useState(false);
   const [showFollowComments, setShowFollowComments] = useState(false);
 
-  const resetForm = useCallback(() => {
+  const resetForm = useCallback((preserveTipsterId?: string) => {
     // Reset pick fields
-    setTipsterId('');
+    setTipsterId(preserveTipsterId || '');
     setMatch('');
     setSport('');
     setPickType('');
@@ -174,12 +174,8 @@ export function AddPickModal({
       if (pick.bookmaker) ensureBookmakerExists(pick.bookmaker);
       if (existingFollow?.userBookmaker) ensureBookmakerExists(existingFollow.userBookmaker);
     } else {
-      // Reset form for create mode
-      resetForm();
-      // If initialTipsterId is provided, pre-select it
-      if (initialTipsterId) {
-        setTipsterId(initialTipsterId);
-      }
+      // Reset form for create mode, preserving initialTipsterId if provided
+      resetForm(initialTipsterId);
     }
   }, [isEditMode, pick, initialTipsterId, getFollowByPickId, ensureSportExists, ensureBookmakerExists, resetForm]);
 
