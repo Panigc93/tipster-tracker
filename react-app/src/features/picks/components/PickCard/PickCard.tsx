@@ -192,8 +192,4 @@ const PickCardComponent = ({
     </div>
   );
 };
-
-/**
- * Memoized PickCard to prevent unnecessary re-renders
- */
 export const PickCard = memo(PickCardComponent);

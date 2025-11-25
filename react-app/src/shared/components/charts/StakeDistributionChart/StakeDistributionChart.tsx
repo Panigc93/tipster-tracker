@@ -18,7 +18,7 @@ interface StakeDistributionChartProps {
 export function StakeDistributionChart({
   picks,
   follows,
-  title = 'Distribución de Stakes',
+  title = 'Stakes',
   height = 200,
 }: StakeDistributionChartProps) {
   // Validate that at least one data source is provided

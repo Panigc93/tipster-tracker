@@ -70,12 +70,6 @@ export function TipsterCard({ tipster }: Readonly<TipsterCardProps>) {
           <div className="text-lg font-bold text-slate-100">{tipster.stats.traceability.toFixed(0)}%</div>
         </div>
       </div>
-
-      {tipster.lastPickDate && (
-        <div className="text-xs text-slate-500 pt-3 border-t border-slate-700">
-          Último pick: {new Date(tipster.lastPickDate).toLocaleDateString('es-ES')}
-        </div>
-      )}
     </button>
   );
 }

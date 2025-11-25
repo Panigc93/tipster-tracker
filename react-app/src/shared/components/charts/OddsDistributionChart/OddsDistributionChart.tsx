@@ -18,7 +18,7 @@ interface OddsDistributionChartProps {
 export function OddsDistributionChart({
   picks,
   follows,
-  title = 'Distribución de Cuotas',
+  title = 'Cuotas',
   height = 200,
 }: OddsDistributionChartProps) {
   // Validate that at least one data source is provided

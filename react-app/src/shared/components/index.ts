@@ -1,7 +1,5 @@
 /**
  * @fileoverview Shared components exports
- * @module/**
- * @fileoverview Shared components exports
  * @module shared/components
  */
 
@@ -12,3 +10,4 @@ export type { StatCardProps } from './StatCard';
 export * from './charts';
 export * from './ConfirmDialog';
 export * from './ErrorBoundary';
+export * from './PicksTable';

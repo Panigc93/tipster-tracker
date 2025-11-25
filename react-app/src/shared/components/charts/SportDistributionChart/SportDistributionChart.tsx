@@ -16,7 +16,7 @@ interface SportDistributionChartProps {
 
 export function SportDistributionChart({
   picks,
-  title = 'Distribución por Deporte',
+  title = 'Deportes',
   height = 200,
 }: SportDistributionChartProps) {
   // Prepare chart data first (before any early returns to satisfy React Hooks rules)

@@ -16,7 +16,7 @@ interface PickTypeDistributionChartProps {
 
 export function PickTypeDistributionChart({
   picks,
-  title = 'Distribución por Tipo de Pick',
+  title = 'Tipos de Pick',
   height = 200,
 }: PickTypeDistributionChartProps) {
   // Prepare chart data first (before any early returns to satisfy React Hooks rules)

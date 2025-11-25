@@ -29,7 +29,7 @@ export function Header({ onAddTipster, onAddPick }: Readonly<HeaderProps>) {
 
   return (
     <header className="bg-slate-800 sticky top-0 z-50">
-      <div className="mx-auto px-8 py-3 flex items-center justify-between border-b border-slate-700">
+      <div className="mx-auto px-8 py-3 flex items-center justify-between border-b border-slate-700 max-w-7xl">
             <Link to="/" className="flex items-center">
               <img 
                 src={logoSvg} 
