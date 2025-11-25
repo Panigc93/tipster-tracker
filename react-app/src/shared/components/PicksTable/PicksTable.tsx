@@ -41,7 +41,7 @@ const getDefaultColumns = (mode: 'picks' | 'follows'): PicksTableColumns => {
     match: true,
     sport: true,
     pickType: false,
-    betType: false,
+    betType: true, // Show bet type for follows
     odds: true,
     stake: true,
     bookmaker: false,
