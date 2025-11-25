@@ -114,7 +114,7 @@ export function PicksTable({
   }
 
   return (
-    <div className="rounded-lg bg-slate-800 p-4">
+    <div>
       {title && (
         <h2 className="text-xl font-semibold text-slate-200 mb-4">
           {title} ({data.length})
