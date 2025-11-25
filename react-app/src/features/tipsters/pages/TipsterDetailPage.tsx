@@ -333,25 +333,30 @@ export function TipsterDetailPage() {
                 </Button>
               </div>
 
-              <GeneralStats 
-                stats={stats} 
-                loading={picksLoading} 
-                onAddPick={() => setIsAddPickModalOpen(true)}
-                hasPicks={picks.length > 0}
-              />
+              {/* Stats and Charts Container */}
+              <div className="bg-slate-800 rounded-lg border border-slate-700 p-4 space-y-6">
+                <GeneralStats 
+                  stats={stats} 
+                  loading={picksLoading} 
+                  onAddPick={() => setIsAddPickModalOpen(true)}
+                  hasPicks={picks.length > 0}
+                />
 
-              {picks.length > 0 && (
-                <>
+                {picks.length > 0 && (
                   <TipsterCharts picks={picks} />
-                  <div className="mt-8">
-                    <PicksHistory 
-                      picks={picks} 
-                      tipsterName={tipster.name}
-                      onEdit={handleEditPick}
-                      onDelete={handleDeletePick}
-                    />
-                  </div>
-                </>
+                )}
+              </div>
+
+              {/* Picks History Table - Outside gray container */}
+              {picks.length > 0 && (
+                <div className="mt-8">
+                  <PicksHistory 
+                    picks={picks} 
+                    tipsterName={tipster.name}
+                    onEdit={handleEditPick}
+                    onDelete={handleDeletePick}
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -387,20 +392,24 @@ export function TipsterDetailPage() {
 
               return (
                 <>
-                  <UserStats 
-                    stats={traceabilityStats} 
-                    loading={followsLoading}
-                    tipsterYield={stats.yield}
-                  />
-
-                  {followedPicks.length > 0 && (
-                    <TipsterCharts 
-                      picks={followedPicks} 
-                      follows={tipsterFollows}
-                      title="Distribuciones de tus Follows" 
+                  {/* User Stats and Charts Container */}
+                  <div className="bg-slate-800 rounded-lg border border-slate-700 p-4 space-y-6">
+                    <UserStats 
+                      stats={traceabilityStats} 
+                      loading={followsLoading}
+                      tipsterYield={stats.yield}
                     />
-                  )}
 
+                    {followedPicks.length > 0 && (
+                      <TipsterCharts 
+                        picks={followedPicks} 
+                        follows={tipsterFollows}
+                        title="Distribuciones de tus Follows" 
+                      />
+                    )}
+                  </div>
+
+                  {/* Follows History Table - Outside gray container */}
                   <div className="mt-8">
                     <FollowsHistory 
                       follows={tipsterFollows}
