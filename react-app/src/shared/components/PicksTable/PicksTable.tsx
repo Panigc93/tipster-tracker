@@ -114,7 +114,7 @@ export function PicksTable({
   }
 
   return (
-    <div>
+    <div className="rounded-lg bg-slate-800 p-4">
       {title && (
         <h2 className="text-xl font-semibold text-slate-200 mb-4">
           {title} ({data.length})
@@ -158,7 +158,7 @@ export function PicksTable({
       </div>
 
       {/* Desktop: Table */}
-      <div className="hidden md:block bg-slate-900/50 border border-slate-700 rounded-lg overflow-hidden">
+      <div className="hidden md:block border border-slate-700 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <PicksTableHeader
