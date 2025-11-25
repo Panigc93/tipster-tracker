@@ -59,6 +59,7 @@ function isMatch(tipsterResult: string, userResult: string): boolean {
  * - Tipster
  * - Match
  * - Deporte
+ * - Apuesta (Bet Type)
  * - Cuota (Tipster / Usuario)
  * - Stake (Tipster / Usuario)
  * - Resultado (Tipster / Usuario)
@@ -110,6 +111,11 @@ export function FollowTableRow({
           <span>{sportIcon}</span>
           <span>{pick.sport}</span>
         </span>
+      </td>
+
+      {/* Apuesta (Bet Type) */}
+      <td className="px-4 py-3 text-sm text-slate-300">
+        {pick.betType}
       </td>
 
       {/* Cuota (Tipster / Usuario) */}
