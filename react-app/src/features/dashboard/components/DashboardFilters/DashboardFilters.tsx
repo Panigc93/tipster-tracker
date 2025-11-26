@@ -134,7 +134,7 @@ export function DashboardFilters({
               type="text"
               value={filters.searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
-              placeholder="Buscar"
+              placeholder="Buscar tipsters"
               className="text-base pl-10 pr-4 py-1.5 bg-slate-900 border border-slate-700 rounded-md text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent w-64"
             />
             {filters.searchQuery && (

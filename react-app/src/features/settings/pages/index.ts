@@ -1,1 +1,0 @@
-export { SettingsDemo } from './SettingsDemo';
