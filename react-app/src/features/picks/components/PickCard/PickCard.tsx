@@ -5,7 +5,7 @@
 
 import { memo } from 'react';
 import { Edit2, Trash2, UserPlus, Check, Calendar, TrendingUp } from 'lucide-react';
-import { Badge } from '@shared/components/ui';
+import { Badge, Button } from '@shared/components/ui';
 import { getSportIcon } from '../../utils/sport-icons';
 import type { PickCardProps } from './PickCard.types';
 
@@ -157,14 +157,16 @@ const PickCardComponent = ({
       {showActions && (
         <div className="flex items-center gap-2 pt-2 border-t border-slate-700">
           {onFollow && !isFollowed && (
-            <button
+            <Button
               onClick={handleFollow}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+              variant="primary"
+              size="sm"
+              icon={<UserPlus className="h-4 w-4" />}
+              className="flex-1"
               aria-label="Seguir pick"
             >
-              <UserPlus className="h-4 w-4" />
               Seguir
-            </button>
+            </Button>
           )}
           {isFollowed && (
             <div className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-green-600/30 text-green-400 text-sm font-medium">
@@ -172,21 +174,22 @@ const PickCardComponent = ({
               Seguido
             </div>
           )}
-          <button
+          <Button
             onClick={handleEdit}
-            className="flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium transition-colors"
+            variant="secondary"
+            size="sm"
+            icon={<Edit2 className="h-4 w-4" />}
             aria-label="Editar pick"
           >
-            <Edit2 className="h-4 w-4" />
             Editar
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleDelete}
-            className="flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors"
+            variant="danger"
+            size="sm"
+            icon={<Trash2 className="h-4 w-4" />}
             aria-label="Eliminar pick"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+          />
         </div>
       )}
     </div>

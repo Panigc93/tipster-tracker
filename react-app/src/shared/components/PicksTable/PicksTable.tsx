@@ -47,7 +47,7 @@ const getDefaultColumns = (mode: 'picks' | 'follows'): PicksTableColumns => {
     bookmaker: false,
     result: true,
     profit: true,
-    matchComparison: true,
+    matchComparison: false, // Removed - redundant, users can see by comparing result badges
     actions: true,
   };
 };
@@ -94,13 +94,18 @@ export function PicksTable({
     return data;
   }, [mode, data, picks]);
 
-  // Sorting
+  // Sorting - Type the result based on mode
   const { 
-    sortedData, 
+    sortedData: rawSortedData, 
     requestSort, 
     getSortIndicator 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = useSortableTable(enrichedData as any, defaultSortKey, defaultSortDirection);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } = useSortableTable(enrichedData as unknown as any[], defaultSortKey, defaultSortDirection);
+
+  // Cast sortedData to the correct type based on mode
+  const sortedData = (mode === 'picks' 
+    ? rawSortedData as unknown as Pick[] 
+    : rawSortedData as unknown as (UserFollow & { sport?: string })[]) as (Pick | (UserFollow & { sport?: string }))[];
 
   // Empty state
   if (data.length === 0) {
@@ -125,7 +130,7 @@ export function PicksTable({
       <div className="md:hidden space-y-4">
         {sortedData.map((item) => {
           if (mode === 'picks') {
-            const pick = item as Pick;
+            const pick = item as unknown as Pick;
             return (
               <PickCard
                 key={pick.id}
@@ -139,7 +144,7 @@ export function PicksTable({
               />
             );
           } else {
-            const follow = item as UserFollow;
+            const follow = item as unknown as UserFollow;
             const originalPick = picks?.find(p => p.id === follow.pickId);
             if (!originalPick) return null;
 
@@ -158,7 +163,7 @@ export function PicksTable({
       </div>
 
       {/* Desktop: Table */}
-      <div className="hidden md:block border border-slate-700 rounded-lg overflow-hidden">
+      <div className="hidden md:block border border-slate-800 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <PicksTableHeader
@@ -167,13 +172,12 @@ export function PicksTable({
               requestSort={requestSort}
               getSortIndicator={getSortIndicator}
             />
-            <tbody className="divide-y divide-slate-700">
+            <tbody className="divide-y divide-slate-800">
               {sortedData.map((item) => (
                 <PicksTableRow
-                  key={mode === 'picks' ? (item as Pick).id : (item as UserFollow).id}
+                  key={mode === 'picks' ? (item as unknown as Pick).id : (item as unknown as UserFollow).id}
                   mode={mode}
                   item={item}
-                  columns={columns}
                   picks={picks}
                   getTipsterName={getTipsterName}
                   showActions={showActions}

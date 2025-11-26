@@ -188,6 +188,18 @@ export function ManageableDropdown({
           )}
 
           <div className="max-h-64 overflow-y-auto text-base">
+            {/* "Todos" option to clear selection */}
+            <div
+              className={`
+                px-4 py-1 cursor-pointer transition-colors
+                flex items-center justify-between group
+                ${!value ? 'bg-blue-600 text-white' : 'text-slate-200 hover:bg-slate-800'}
+              `}
+              onClick={() => handleSelect('')}
+            >
+              <span>{placeholder || 'Todos'}</span>
+            </div>
+
             {filteredItems.length > 0 ? (
               filteredItems.map((item) => (
                 <div

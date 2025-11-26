@@ -31,6 +31,7 @@ import {
   PicksHistory,
   FollowsHistory,
 } from '../components/TipsterDetail';
+import { Plus } from 'lucide-react';
 
 type TabType = 'stats' | 'my-stats';
 
@@ -287,7 +288,7 @@ export function TipsterDetailPage() {
 
       {/* Tabs */}
       <div className="mb-6">
-        <div className="border-b border-slate-700">
+        <div className="border-b border-slate-700 flex items-center justify-between">
           <nav className="-mb-px flex space-x-8" aria-label="Tabs">
             {[
               { id: 'stats', label: 'Estadísticas' },
@@ -310,6 +311,17 @@ export function TipsterDetailPage() {
               </button>
             ))}
           </nav>
+          
+          <div className="flex items-center gap-4 bg-slate-800 py-1 px-4 rounded-full">
+            <span className="text-sm text-slate-400">
+              Creado: {new Date(tipster.createdDate).toLocaleDateString()}
+            </span>
+            {tipster.lastPickDate && (
+              <span className="text-sm text-slate-400">
+                Última pick: {new Date(tipster.lastPickDate).toLocaleDateString()}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -325,8 +337,8 @@ export function TipsterDetailPage() {
                 </h2>
                 <Button
                   variant="primary"
-                  size="sm"
-                  icon={<svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>}
+                  size="xs"
+                  icon={<Plus className="h-4 w-4" />}
                   onClick={() => setIsAddPickModalOpen(true)}
                 >
                   Añadir Pick
@@ -377,10 +389,10 @@ export function TipsterDetailPage() {
                 return (
                   <div className="text-center py-12 bg-slate-900/50 rounded-lg border border-slate-700">
                     <p className="text-slate-400">
-                      Aún no has seguido ninguna pick de este tipster
+                      Aún no has seguido ningún pick de este tipster
                     </p>
                     <p className="text-sm text-slate-500 mt-2">
-                      Ve a la pestaña "Estadísticas" y haz clic en "Seguir" en las picks que te interesen
+                      Ve a la pestaña "Estadísticas" y haz clic en "Seguir" en los picks que te interesen
                     </p>
                   </div>
                 );
@@ -391,8 +403,50 @@ export function TipsterDetailPage() {
                 .filter((pick): pick is Pick => pick !== undefined);
 
               return (
-                <>
-                  {/* User Stats and Charts Container */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold text-slate-200">
+                      Tus Estadísticas de Seguimiento
+                    </h2>
+                    <div
+                      className={`w-fit rounded-full py-1 px-2 border ${
+                        traceabilityStats.yieldDiff >= 2
+                          ? 'bg-green-500/10 border-green-500/30'
+                          : traceabilityStats.yieldDiff <= -2
+                            ? 'bg-red-500/10 border-red-500/30'
+                            : 'bg-blue-500/10 border-blue-500/30'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm">
+                          {traceabilityStats.yieldDiff >= 2
+                            ? '🟢'
+                            : traceabilityStats.yieldDiff <= -2
+                              ? '🔴'
+                              : '⚪'}
+                        </div>
+                        <div>
+                          <p
+                            className={`font-medium text-sm ${
+                              traceabilityStats.yieldDiff >= 2
+                                ? 'text-green-400'
+                                : traceabilityStats.yieldDiff <= -2
+                                  ? 'text-red-400'
+                                  : 'text-blue-400'
+                            }`}
+                          >
+                            {traceabilityStats.yieldDiff >= 2
+                              ? `Superando al tipster en +${traceabilityStats.yieldDiff.toFixed(2)}% yield`
+                              : traceabilityStats.yieldDiff <= -2
+                                ? `Por debajo del tipster en ${traceabilityStats.yieldDiff.toFixed(2)}% yield`
+                                : `Rendimiento similar al tipster (${stats.yield.toFixed(2)}%)`}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stats and Charts Container */}
                   <div className="bg-slate-800 rounded-lg border border-slate-700 p-4 space-y-6">
                     <UserStats 
                       stats={traceabilityStats} 
@@ -419,7 +473,7 @@ export function TipsterDetailPage() {
                       onDelete={handleDeleteFollow}
                     />
                   </div>
-                </>
+                </div>
               );
             })()}
           </div>

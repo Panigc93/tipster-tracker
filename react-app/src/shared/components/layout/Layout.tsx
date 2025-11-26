@@ -42,12 +42,12 @@ export function Layout({ children }: Readonly<LayoutProps>) {
   const navItems = [
     {
       path: '/',
-      label: 'Dashboard',
+      label: 'Mis Tipsters',
       icon: BarChart3,
     },
     {
       path: '/picks',
-      label: 'Todas las Picks',
+      label: 'Tipsters Picks',
       icon: FileText,
     },
     {

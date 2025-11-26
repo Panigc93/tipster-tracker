@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
-import { Trash2, Filter, X, TrendingUp, Target, Percent, DollarSign } from 'lucide-react';
+import { Filter, X } from 'lucide-react';
 import {
   OddsDistributionChart,
   StakeDistributionChart,
   PicksTable,
+  StatCard,
+  ConfirmDialog,
 } from '@/shared/components';
 import { useFollows } from '../../hooks/useFollows';
 import { useTipsters } from '@/features/tipsters/hooks/useTipsters';
@@ -40,18 +42,12 @@ export const MyPicksPage = () => {
 
   // Calculate stats
   const stats = useMemo<FollowStats>(() => {
-    console.log('🔍 Calculating stats for follows:', follows);
-    console.log('📊 Total follows:', follows.length);
-    
     const resolvedFollows = follows.filter((f) => f.isResolved);
-    console.log('✅ Resolved follows:', resolvedFollows.length, resolvedFollows);
     
     const wonFollows = resolvedFollows.filter((f) => f.userResult === 'Ganada');
     const lostFollows = resolvedFollows.filter((f) => f.userResult === 'Perdida');
     const voidFollows = resolvedFollows.filter((f) => f.userResult === 'Void');
     
-    console.log('📈 Won:', wonFollows.length, 'Lost:', lostFollows.length, 'Void:', voidFollows.length);
-
     const totalStaked = resolvedFollows.reduce((sum, f) => {
       if (f.userResult === 'Void') return sum;
       return sum + f.userStake;
@@ -137,7 +133,6 @@ export const MyPicksPage = () => {
 
       // Search filter (match and tipster name)
       if (debouncedSearchQuery) {
-        console.log('🔍 Applying search filter:', debouncedSearchQuery);
         const originalPick = picks.find((p) => p.id === follow.pickId);
         const tipster = tipsters.find((t) => t.id === follow.tipsterId);
         const query = debouncedSearchQuery.toLowerCase();
@@ -152,8 +147,6 @@ export const MyPicksPage = () => {
       return true;
     });
   }, [follows, picks, tipsters, filters, debouncedSearchQuery]);
-
-
 
   // Handlers
   const handleEdit = (follow: UserFollow) => {
@@ -226,66 +219,43 @@ export const MyPicksPage = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg bg-slate-800 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-400">Total Follows</p>
-              <p className="mt-2 text-3xl font-semibold text-white">{stats.totalFollows}</p>
-              <p className="mt-1 text-xs text-gray-500">
-                {stats.pendingFollows} pendientes
-              </p>
-            </div>
-            <TrendingUp className="h-8 w-8 text-blue-500" />
-          </div>
-        </div>
-
-        <div className="rounded-lg bg-slate-800 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-400">Winrate</p>
-              <p className="mt-2 text-3xl font-semibold text-white">{stats.winrate.toFixed(1)}%</p>
-              <p className="mt-1 text-xs text-gray-500">
-                {stats.wonFollows}G · {stats.lostFollows}P · {stats.voidFollows}V
-              </p>
-            </div>
-            <Target className="h-8 w-8 text-green-500" />
-          </div>
-        </div>
-
-        <div className="rounded-lg bg-slate-800 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-400">Yield</p>
-              <p
-                className={`mt-2 text-3xl font-semibold ${
-                  stats.yield >= 0 ? 'text-green-500' : 'text-red-500'
-                }`}
-              >
-                {stats.yield >= 0 ? '+' : ''}
-                {stats.yield.toFixed(2)}%
-              </p>
-              <p className="mt-1 text-xs text-gray-500">
-                Profit: {stats.profit >= 0 ? '+' : ''}
-                {stats.profit.toFixed(2)}u
-              </p>
-            </div>
-            <Percent className="h-8 w-8 text-yellow-500" />
-          </div>
-        </div>
-
-        <div className="rounded-lg bg-slate-800 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-400">Match Rate</p>
-              <p className="mt-2 text-3xl font-semibold text-white">{stats.matchRate.toFixed(1)}%</p>
-              <p className="mt-1 text-xs text-gray-500">
-                {stats.matchCount} match · {stats.divergeCount} diverge
-              </p>
-            </div>
-            <DollarSign className="h-8 w-8 text-purple-500" />
-          </div>
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <StatCard 
+          label="Total Follows" 
+          value={stats.totalFollows}
+          size="md"
+        />
+        <StatCard 
+          label="Pendientes" 
+          value={stats.pendingFollows}
+          valueClassName="text-yellow-400"
+          size="md"
+        />
+        <StatCard 
+          label="Winrate" 
+          value={`${stats.winrate.toFixed(1)}%`}
+          title={`${stats.wonFollows}G · ${stats.lostFollows}P · ${stats.voidFollows}V`}
+          size="md"
+        />
+        <StatCard 
+          label="Yield" 
+          value={`${stats.yield >= 0 ? '+' : ''}${stats.yield.toFixed(2)}%`}
+          valueClassName={stats.yield >= 0 ? 'text-green-400' : 'text-red-400'}
+          size="md"
+        />
+        <StatCard 
+          label="Profit" 
+          value={`${stats.profit >= 0 ? '+' : ''}${stats.profit.toFixed(2)}u`}
+          valueClassName={stats.profit >= 0 ? 'text-green-400' : 'text-red-400'}
+          size="md"
+        />
+        <StatCard 
+          label="Match Rate" 
+          value={`${stats.matchRate.toFixed(1)}%`}
+          title={`${stats.matchCount} match · ${stats.divergeCount} diverge`}
+          valueClassName="text-purple-400"
+          size="md"
+        />
       </div>
 
       {/* Charts */}
@@ -321,64 +291,88 @@ export const MyPicksPage = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Tipster filter */}
           <div>
-            <label htmlFor="filter-tipster" className="mb-1 block text-sm font-medium text-gray-300">Tipster</label>
-            <select
-              id="filter-tipster"
-              value={filters.tipsterId}
-              onChange={(e) => handleFilterChange('tipsterId', e.target.value)}
-              className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="all">Todos los tipsters</option>
-              {tipsters.map((tipster) => (
-                <option key={tipster.id} value={tipster.id}>
-                  {tipster.name}
-                </option>
-              ))}
-            </select>
+            <label htmlFor="filter-tipster" className="mb-2 block text-sm font-medium text-slate-300">Tipster</label>
+            <div className="relative">
+              <select
+                id="filter-tipster"
+                value={filters.tipsterId}
+                onChange={(e) => handleFilterChange('tipsterId', e.target.value)}
+                className="w-full h-[35px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md text-slate-200 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.75rem center',
+                  backgroundSize: '16px 16px',
+                }}
+              >
+                <option value="all">Todos los tipsters</option>
+                {tipsters.map((tipster) => (
+                  <option key={tipster.id} value={tipster.id}>
+                    {tipster.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Result filter */}
           <div>
-            <label htmlFor="filter-result" className="mb-1 block text-sm font-medium text-gray-300">Resultado</label>
-            <select
-              id="filter-result"
-              value={filters.result}
-              onChange={(e) => handleFilterChange('result', e.target.value)}
-              className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="all">Todos</option>
-              <option value="pending">Pendiente</option>
-              <option value="Ganada">Ganada</option>
-              <option value="Perdida">Perdida</option>
-              <option value="Void">Void</option>
-            </select>
+            <label htmlFor="filter-result" className="mb-2 block text-sm font-medium text-slate-300">Resultado</label>
+            <div className="relative">
+              <select
+                id="filter-result"
+                value={filters.result}
+                onChange={(e) => handleFilterChange('result', e.target.value)}
+                className="w-full h-[35px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md text-slate-200 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.75rem center',
+                  backgroundSize: '16px 16px',
+                }}
+              >
+                <option value="all">Todos</option>
+                <option value="pending">Pendiente</option>
+                <option value="Ganada">Ganada</option>
+                <option value="Perdida">Perdida</option>
+                <option value="Void">Void</option>
+              </select>
+            </div>
           </div>
 
           {/* Match/Diverge filter */}
           <div>
-            <label htmlFor="filter-match" className="mb-1 block text-sm font-medium text-gray-300">Match/Diverge</label>
-            <select
-              id="filter-match"
-              value={filters.matchStatus}
-              onChange={(e) => handleFilterChange('matchStatus', e.target.value)}
-              className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="all">Todos</option>
-              <option value="match">Match</option>
-              <option value="diverge">Diverge</option>
-            </select>
+            <label htmlFor="filter-match" className="mb-2 block text-sm font-medium text-slate-300">Match/Diverge</label>
+            <div className="relative">
+              <select
+                id="filter-match"
+                value={filters.matchStatus}
+                onChange={(e) => handleFilterChange('matchStatus', e.target.value)}
+                className="w-full h-[35px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md text-slate-200 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.75rem center',
+                  backgroundSize: '16px 16px',
+                }}
+              >
+                <option value="all">Todos</option>
+                <option value="match">Match</option>
+                <option value="diverge">Diverge</option>
+              </select>
+            </div>
           </div>
 
           {/* Search filter */}
           <div>
-            <label htmlFor="filter-search" className="mb-1 block text-sm font-medium text-gray-300">Búsqueda</label>
+            <label htmlFor="filter-search" className="mb-2 block text-sm font-medium text-slate-300">Búsqueda</label>
             <input
               id="filter-search"
               type="text"
               value={filters.searchQuery}
               onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
               placeholder="Partido o tipster..."
-              className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full h-[35px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -447,43 +441,20 @@ export const MyPicksPage = () => {
         />
       )}
 
-      {/* Delete Confirmation Modal */}
-      {isDeleteModalOpen && selectedFollow && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-lg bg-slate-800 p-6">
-            <div className="mb-4 flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20">
-                <Trash2 className="h-5 w-5 text-red-500" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-white">Eliminar Follow</h3>
-                <p className="mt-1 text-sm text-gray-400">
-                  ¿Estás seguro de que quieres eliminar este seguimiento? Esta acción no se puede
-                  deshacer.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setIsDeleteModalOpen(false);
-                  setSelectedFollow(null);
-                }}
-                className="rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-gray-300 hover:bg-slate-700"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedFollow(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Eliminar Follow"
+        message="¿Estás seguro de que quieres eliminar este seguimiento? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        isDangerous
+      />
     </div>
   );
 };

@@ -4501,7 +4501,7 @@ const App: FC = () => {
             <EmptyState
               icon={<Package size={48} />}
               title="No hay picks"
-              description="Aún no has creado ninguna pick. Comienza añadiendo tu primera pick."
+              description="Aún no has creado ninguna pick. Comienza añadiendo tu primer pick."
               action={<Button>Añadir Pick</Button>}
             />
           </section>

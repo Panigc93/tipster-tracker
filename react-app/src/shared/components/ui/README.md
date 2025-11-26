@@ -254,7 +254,7 @@ import { Alert } from '@shared/components/ui';
 
 // Info con título
 <Alert variant="info" title="Información">
-  Recuerda actualizar las picks regularmente.
+  Recuerda actualizar los picks regularmente.
 </Alert>
 ```
 

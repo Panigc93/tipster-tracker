@@ -5,7 +5,7 @@
 
 import { memo } from 'react';
 import { Edit2, Trash2, Calendar, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
-import { Badge } from '@shared/components/ui';
+import { Badge, Button } from '@shared/components/ui';
 import { formatDate } from '@shared/utils/date.utils';
 import { getSportIcon } from '@features/picks/utils/sport-icons';
 import type { FollowCardProps } from './FollowCard.types';
@@ -200,23 +200,24 @@ const FollowCardComponent = ({
       {showActions && (onEdit || onDelete) && (
         <div className="flex items-center gap-2 pt-2 border-t border-slate-700">
           {onEdit && (
-            <button
+            <Button
               onClick={() => onEdit(follow)}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium transition-colors"
+              variant="secondary"
+              size="sm"
+              icon={<Edit2 className="h-4 w-4" />}
               aria-label="Editar follow"
             >
-              <Edit2 className="h-4 w-4" />
               Editar
-            </button>
+            </Button>
           )}
           {onDelete && (
-            <button
+            <Button
               onClick={() => onDelete(follow)}
-              className="flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors"
+              variant="danger"
+              size="sm"
+              icon={<Trash2 className="h-4 w-4" />}
               aria-label="Eliminar follow"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            />
           )}
         </div>
       )}

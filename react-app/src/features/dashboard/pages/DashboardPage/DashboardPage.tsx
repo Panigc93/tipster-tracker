@@ -111,7 +111,15 @@ export function DashboardPage() {
 
   return (
     <div className="bg-slate-900">
-      <div className="max-w-8xl mx-auto flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Mis Tipsters</h1>
+          <p className="mt-1 text-sm text-gray-400">
+            Seguimiento de tus tipsters
+          </p>
+        </div>
+      </div>
+      <div className="max-w-8xl mx-auto flex flex-col gap-4 mt-6">
         <PersonalStatsPanel />
         <DashboardFilters
           filters={filters}

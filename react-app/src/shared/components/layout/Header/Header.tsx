@@ -18,8 +18,8 @@ export function Header({ onAddTipster, onAddPick }: Readonly<HeaderProps>) {
   const { logout, user } = useAuth();
 
   const navItems = [
-    { path: '/', label: 'Dashboard' },
-    { path: '/picks', label: 'Todas las Picks' },
+    { path: '/', label: 'Mis Tipsters' },
+    { path: '/picks', label: 'Tipsters Picks' },
     { path: '/my-picks', label: 'Mis Picks' },
   ];
 

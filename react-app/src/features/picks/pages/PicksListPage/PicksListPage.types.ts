@@ -12,7 +12,6 @@ export interface PickFilters {
   sport: string;
   result: string;
   bookmaker: string;
-  searchQuery: string;
   
   // Advanced filters
   tipsterIds: string[];        // Multi-select tipsters
@@ -36,7 +35,6 @@ export const initialFilters: PickFilters = {
   sport: '',
   result: '',
   bookmaker: '',
-  searchQuery: '',
   
   // Advanced filters
   tipsterIds: [],

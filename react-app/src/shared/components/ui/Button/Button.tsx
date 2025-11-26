@@ -42,11 +42,14 @@ export function Button({
       'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus:ring-red-500',
     success:
       'bg-green-600 text-white hover:bg-green-700 active:bg-green-800 focus:ring-green-500',
+    transparent:
+      'bg-transparent text-slate-200 hover:bg-slate-700 active:bg-slate-600 focus:ring-slate-500',
   };
 
   // Size classes
   const sizeClasses = {
-    sm: 'px-4 py-2 text-sm',
+    xs: 'px-3 py-1 text-xs',
+    sm: 'px-4 py-1.5 text-sm',
     md: 'px-5 py-2.5 text-base',
     lg: 'px-7 py-3 text-lg',
   };
@@ -67,12 +70,12 @@ export function Button({
       {loading ? (
         <>
           <Loader2 className="h-4 w-4 animate-spin" />
-          <span>{children}</span>
+          {children && <span>{children}</span>}
         </>
       ) : (
         <>
           {icon && <span className="inline-flex">{icon}</span>}
-          <span>{children}</span>
+          {children && <span>{children}</span>}
         </>
       )}
     </button>

@@ -44,10 +44,10 @@ export function GeneralStats({ stats, loading, onAddPick, hasPicks }: GeneralSta
         <Button
           variant="primary"
           size="sm"
+          icon={<Plus className="h-4 w-4" />}
           onClick={onAddPick}
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Añadir Primera Pick
+          Añadir primer Pick
         </Button>
       </div>
     );

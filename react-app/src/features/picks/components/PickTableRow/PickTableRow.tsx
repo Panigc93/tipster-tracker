@@ -4,7 +4,7 @@
  */
 
 import { Edit2, Trash2, UserPlus, Check } from 'lucide-react';
-import { Badge } from '@shared/components/ui';
+import { Badge, Button } from '@shared/components/ui';
 import { getSportIcon } from '../../utils/sport-icons';
 import type { PickTableRowProps } from './PickTableRow.types';
 
@@ -38,6 +38,15 @@ const getResultVariant = (result: string): 'success' | 'error' | 'warning' | 'in
 };
 
 /**
+ * Get profit color class based on profit value
+ */
+const getProfitColor = (profit: number): string => {
+  if (profit > 0) return 'text-green-400';
+  if (profit < 0) return 'text-red-400';
+  return 'text-slate-400';
+};
+
+/**
  * Format date to DD/MM/YYYY
  */
 const formatDate = (dateString: string): string => {
@@ -47,6 +56,37 @@ const formatDate = (dateString: string): string => {
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
 };
+
+// Common CSS classes
+const TD_BASE = 'px-4 py-1 text-sm';
+const TD_NORMAL = `${TD_BASE} text-slate-300`;
+const TD_HIGHLIGHT = `${TD_BASE} text-slate-200 font-semibold`;
+
+/**
+ * Simple table cell component
+ */
+interface TableCellProps {
+  className?: string;
+  children: React.ReactNode;
+  title?: string;
+}
+
+const TableCell = ({ className = TD_NORMAL, children, title }: TableCellProps) => (
+  <td className={className} title={title}>
+    {children}
+  </td>
+);
+
+/**
+ * Truncated table cell component
+ */
+const TruncatedCell = ({ text, maxWidth }: { text: string; maxWidth: string }) => (
+  <TableCell className={`${TD_NORMAL} ${maxWidth}`}>
+    <div className="truncate" title={text}>
+      {text}
+    </div>
+  </TableCell>
+);
 
 /**
  * PickTableRow component
@@ -64,137 +104,112 @@ export function PickTableRow({
   const profit = calculateProfit(pick.result, pick.odds, pick.stake);
   const sportIcon = getSportIcon(pick.sport);
 
-  const handleEdit = () => {
-    onEdit?.(pick);
-  };
-
-  const handleDelete = () => {
-    onDelete?.(pick);
-  };
-
-  const handleFollow = () => {
-    onFollow?.(pick);
-  };
-
   return (
-    <tr className="bg-slate-800/30 border-b border-slate-700 hover:bg-slate-700/40 transition-colors">
+    <tr className="bg-slate-800/60 hover:bg-slate-700/60 transition-colors">
       {/* Fecha */}
-      <td className="px-4 py-3 text-sm text-slate-300">
+      <TableCell>
         {formatDate(pick.date)}
         {pick.time && (
-          <div className="text-xs text-slate-500 mt-0.5">{pick.time}</div>
+          <div className="text-xs text-slate-500">{pick.time}</div>
         )}
-      </td>
+      </TableCell>
 
       {/* Tipster */}
-      <td className="px-4 py-3 text-sm text-slate-200 font-medium">
+      <TableCell className={`${TD_BASE} text-slate-200 font-medium`}>
         {tipsterName}
-      </td>
+      </TableCell>
 
       {/* Match */}
-      <td className="px-4 py-3 text-sm text-slate-300 max-w-[200px]">
-        <div className="truncate" title={pick.match}>
-          {pick.match}
-        </div>
-      </td>
+      <TruncatedCell text={pick.match} maxWidth="max-w-[200px]" />
 
       {/* Sport */}
-      <td className="px-4 py-3 text-sm text-slate-300">
+      <TableCell>
         <span className="inline-flex items-center gap-1.5">
           <span className="text-base">{sportIcon}</span>
           <span>{pick.sport}</span>
         </span>
-      </td>
+      </TableCell>
 
       {/* Pick Type */}
-      <td className="px-4 py-3 text-sm text-slate-300">
+      <TableCell>
         <Badge variant="info" size="sm">
           {pick.pickType}
         </Badge>
-      </td>
+      </TableCell>
 
       {/* Bet Type */}
-      <td className="px-4 py-3 text-sm text-slate-300 max-w-[150px]">
-        <div className="truncate" title={pick.betType}>
-          {pick.betType}
-        </div>
-      </td>
+      <TruncatedCell text={pick.betType} maxWidth="max-w-[150px]" />
 
       {/* Odds */}
-      <td className="px-4 py-3 text-sm text-slate-200 font-mono font-semibold">
+      <TableCell className={TD_HIGHLIGHT}>
         {pick.odds.toFixed(2)}
-      </td>
+      </TableCell>
 
       {/* Stake */}
-      <td className="px-4 py-3 text-sm text-slate-200 font-mono font-semibold">
+      <TableCell className={TD_HIGHLIGHT}>
         {pick.stake}u
-      </td>
+      </TableCell>
 
       {/* Bookmaker */}
-      <td className="px-4 py-3 text-sm text-slate-300">
-        {pick.bookmaker}
-      </td>
+      <TableCell>{pick.bookmaker}</TableCell>
 
       {/* Result */}
-      <td className="px-4 py-3">
+      <TableCell className={TD_BASE}>
         <Badge variant={getResultVariant(pick.result)} size="sm">
           {pick.result}
         </Badge>
-      </td>
+      </TableCell>
 
       {/* Profit */}
-      <td className="px-4 py-3 text-sm font-mono font-semibold">
-        {(() => {
-          const profitColor =
-            profit > 0 ? 'text-green-400' : profit < 0 ? 'text-red-400' : 'text-slate-400';
-          return (
-            <span className={profitColor}>
-              {profit > 0 ? '+' : ''}
-              {profit.toFixed(2)}u
-            </span>
-          );
-        })()}
-      </td>
+      <TableCell className={`${TD_BASE} font-semibold`}>
+        <span className={getProfitColor(profit)}>
+          {profit > 0 && '+'}
+          {profit.toFixed(2)}u
+        </span>
+      </TableCell>
 
       {/* Actions */}
       {showActions && (
-        <td className="px-4 py-3">
-          <div className="flex items-center justify-end gap-2">
+        <td className="px-4 py-2">
+          <div className="flex items-center justify-end gap-1">
             {onFollow && !isFollowed && (
-              <button
-                onClick={handleFollow}
-                className="p-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+              <Button
+                onClick={() => onFollow(pick)}
+                variant="transparent"
                 aria-label="Seguir pick"
                 title="Seguir pick"
-              >
-                <UserPlus className="h-5 w-5" />
-              </button>
+                className="py-2"
+                icon={<UserPlus className="h-4 w-4 text-blue-400" />}
+                size="xs"
+              />
             )}
             {isFollowed && (
               <div
-                className="p-2 rounded-full bg-green-600/30 text-green-400"
+                className="p-2 rounded-full text-green-400"
                 aria-label="Pick ya seguido"
                 title="Pick seguido"
               >
                 <Check className="h-5 w-5" />
               </div>
             )}
-            <button
-              onClick={handleEdit}
-              className="p-2 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-200 transition-colors"
+            <Button
+              onClick={() => onEdit?.(pick)}
+              variant="transparent"
               aria-label="Editar pick"
               title="Editar pick"
-            >
-              <Edit2 className="h-5 w-5" />
-            </button>
-            <button
-              onClick={handleDelete}
-              className="p-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
+              className="py-2"
+              icon={<Edit2 className="h-4 w-4" />}
+              size="xs"
+            />
+            <Button
+              onClick={() => onDelete?.(pick)}
+              variant="transparent"
               aria-label="Eliminar pick"
               title="Eliminar pick"
-            >
-              <Trash2 className="h-5 w-5" />
-            </button>
+              className="py-2"
+              icon={<Trash2 className="h-4 w-4 text-red-500" />}
+              size="xs"
+            />
           </div>
         </td>
       )}

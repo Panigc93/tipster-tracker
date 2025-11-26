@@ -1,5 +1,5 @@
 import { Edit2, Trash2 } from 'lucide-react';
-import { Badge } from '@shared/components/ui';
+import { Badge, Button } from '@shared/components/ui';
 import { formatDate } from '@shared/utils/date.utils';
 import { getSportIcon } from '@features/picks/utils/sport-icons';
 import type { FollowTableRowProps } from './FollowTableRow.types';
@@ -44,13 +44,6 @@ function getResultVariant(result: string): BadgeVariant {
 }
 
 /**
- * Check if user result matches tipster result
- */
-function isMatch(tipsterResult: string, userResult: string): boolean {
-  return tipsterResult.toLowerCase() === userResult.toLowerCase();
-}
-
-/**
  * FollowTableRow Component
  * Displays a follow in a table row with comparison between tipster and user data
  *
@@ -81,32 +74,29 @@ export function FollowTableRow({
   const tipsterProfit = calculateProfit(pick.odds, pick.stake, pick.result);
   const userProfit = calculateProfit(follow.userOdds, follow.userStake, follow.userResult);
   
-  // Check if results match
-  const resultsMatch = isMatch(pick.result, follow.userResult);
-  
   // Profit colors
   const tipsterProfitClass = tipsterProfit > 0 ? 'text-green-400' : tipsterProfit < 0 ? 'text-red-400' : 'text-slate-400';
   const userProfitClass = userProfit > 0 ? 'text-green-400' : userProfit < 0 ? 'text-red-400' : 'text-slate-400';
 
   return (
-    <tr className="bg-slate-800/30 border-b border-slate-700 hover:bg-slate-700/40 transition-colors">
+    <tr className="bg-slate-800/60 hover:bg-slate-700/60 transition-colors">
       {/* Fecha */}
-      <td className="px-4 py-3 text-sm text-slate-300 whitespace-nowrap">
+      <td className="px-4 py-1 text-sm text-slate-300 whitespace-nowrap">
         {formatDate(follow.dateFollowed)}
       </td>
 
       {/* Tipster */}
-      <td className="px-4 py-3 text-sm text-slate-200 font-medium">
+      <td className="px-4 py-1 text-sm text-slate-200 font-medium">
         {tipsterName}
       </td>
 
       {/* Match */}
-      <td className="px-4 py-3 text-sm text-slate-200">
+      <td className="px-4 py-1 text-sm text-slate-200">
         {pick.match}
       </td>
 
       {/* Deporte */}
-      <td className="px-4 py-3 text-sm text-slate-300">
+      <td className="px-4 py-1 text-sm text-slate-300">
         <span className="flex items-center gap-1">
           <span>{sportIcon}</span>
           <span>{pick.sport}</span>
@@ -114,16 +104,15 @@ export function FollowTableRow({
       </td>
 
       {/* Apuesta (Bet Type) */}
-      <td className="px-4 py-3 text-sm text-slate-300">
+      <td className="px-4 py-1 text-sm text-slate-300">
         {pick.betType}
       </td>
 
       {/* Cuota (Tipster / Usuario) */}
-      <td className="px-4 py-3 text-sm">
-        <div className="flex flex-col gap-1">
-          <span className="text-slate-400 text-xs">Tip:</span>
+      <td className="px-4 py-1 text-sm">
+        <div className="flex items-center gap-1">
           <span className="text-slate-200">{pick.odds.toFixed(2)}</span>
-          <span className="text-slate-400 text-xs mt-1">Usuario:</span>
+          <span className="text-slate-500">/</span>
           <span className={follow.userOdds === pick.odds ? 'text-slate-200' : 'text-blue-400'}>
             {follow.userOdds.toFixed(2)}
           </span>
@@ -131,83 +120,69 @@ export function FollowTableRow({
       </td>
 
       {/* Stake (Tipster / Usuario) */}
-      <td className="px-4 py-3 text-sm">
-        <div className="flex flex-col gap-1">
-          <span className="text-slate-400 text-xs">Tip:</span>
-          <span className="text-slate-200">{pick.stake}</span>
-          <span className="text-slate-400 text-xs mt-1">Usuario:</span>
+      <td className="px-4 py-1 text-sm">
+        <div className="flex items-center gap-1">
+          <span className="text-slate-200">{pick.stake}u</span>
+          <span className="text-slate-500">/</span>
           <span className={follow.userStake === pick.stake ? 'text-slate-200' : 'text-blue-400'}>
-            {follow.userStake}
+            {follow.userStake}u
           </span>
         </div>
       </td>
 
       {/* Resultado (Tipster / Usuario) */}
-      <td className="px-4 py-3 text-sm">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-1">
-            <span className="text-slate-400 text-xs">Tip:</span>
-            <Badge variant={getResultVariant(pick.result)} size="sm">
-              {pick.result}
-            </Badge>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-slate-400 text-xs">User:</span>
-            <Badge variant={getResultVariant(follow.userResult)} size="sm">
-              {follow.userResult}
-            </Badge>
-          </div>
+      <td className="px-4 py-1 text-sm">
+        <div className="flex items-center gap-1">
+          <Badge variant={getResultVariant(pick.result)} size="sm">
+            {pick.result}
+          </Badge>
+          <span className="text-slate-500">/</span>
+          <Badge variant={getResultVariant(follow.userResult)} size="sm">
+            {follow.userResult}
+          </Badge>
         </div>
       </td>
 
       {/* Profit (Tipster / Usuario) */}
-      <td className="px-4 py-3 text-sm font-medium">
-        <div className="flex flex-col gap-1">
-          <span className="text-slate-400 text-xs">Tip:</span>
+      <td className="px-4 py-1 text-sm font-medium">
+        <div className="flex items-center gap-1">
           <span className={tipsterProfitClass}>
             {tipsterProfit > 0 && '+'}
-            {tipsterProfit.toFixed(2)}
+            {tipsterProfit.toFixed(2)}u
           </span>
-          <span className="text-slate-400 text-xs mt-1">Usuario:</span>
+          <span className="text-slate-500">/</span>
           <span className={userProfitClass}>
             {userProfit > 0 && '+'}
-            {userProfit.toFixed(2)}
+            {userProfit.toFixed(2)}u
           </span>
         </div>
       </td>
 
-      {/* Match/Diverge Indicator */}
-      <td className="px-4 py-3 text-sm text-center">
-        {resultsMatch ? (
-          <Badge variant="success" size="sm">Match</Badge>
-        ) : (
-          <Badge variant="warning" size="sm">Diverge</Badge>
-        )}
-      </td>
-
       {/* Acciones */}
       {showActions && (onEdit || onDelete) && (
-        <td className="px-4 py-3">
-          <div className="flex items-center justify-end gap-2">
+        <td className="px-4 py-2">
+          <div className="flex items-center justify-end gap-1">
             {onEdit && (
-              <button
+              <Button
                 onClick={() => onEdit(follow)}
-                className="p-2 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-200 transition-colors"
+                variant="transparent"
                 aria-label="Editar follow"
                 title="Editar follow"
-              >
-                <Edit2 className="h-5 w-5" />
-              </button>
+                className="py-2"
+                icon={<Edit2 className="h-4 w-4" />}
+                size="xs"
+              />
             )}
             {onDelete && (
-              <button
+              <Button
                 onClick={() => onDelete(follow)}
-                className="p-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
+                variant="transparent"
                 aria-label="Eliminar follow"
                 title="Eliminar follow"
-              >
-                <Trash2 className="h-5 w-5" />
-              </button>
+                className="py-2"
+                icon={<Trash2 className="h-4 w-4 text-red-500" />}
+                size="xs"
+              />
             )}
           </div>
         </td>

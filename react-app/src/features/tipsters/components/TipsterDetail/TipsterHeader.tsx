@@ -22,38 +22,27 @@ export function TipsterHeader({
   hasPicks,
 }: TipsterHeaderProps) {
   return (
-    <div className="mb-2 flex flex-col sm:flex-row justify-between items-start gap-4">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-200 mb-2">
+    <div className="mb-6 flex flex-col sm:flex-row justify-between items-start gap-4">
+      <div className="flex items-center gap-3">
+        <h1 className="text-3xl font-bold text-slate-200">
           {tipster.name}
         </h1>
-        <div className="flex items-center gap-3">
-          <Badge variant="info">{tipster.channel}</Badge>
-          <span className="text-sm text-slate-400">
-            Creado: {new Date(tipster.createdDate).toLocaleDateString()}
-          </span>
-          {tipster.lastPickDate && (
-            <span className="text-sm text-slate-400">
-              Última pick:{' '}
-              {new Date(tipster.lastPickDate).toLocaleDateString()}
-            </span>
-          )}
-        </div>
+        <Badge variant="info">{tipster.channel}</Badge>
       </div>
 
       <div className="flex gap-2">
         <Button
           variant="secondary"
-          size="sm"
-          icon={<Edit2 className="h-4 w-4" />}
+          size="xs"
+          icon={<Edit2 className="h-3 w-3" />}
           onClick={onEdit}
         >
           Editar
         </Button>
         <Button
           variant="outline"
-          size="sm"
-          icon={<RefreshCcw className="h-4 w-4" />}
+          size="xs"
+          icon={<RefreshCcw className="h-3 w-3" />}
           onClick={onReset}
           disabled={isResetting || !hasPicks}
           title={!hasPicks ? 'No hay picks para resetear' : 'Resetear tipster'}
@@ -61,9 +50,10 @@ export function TipsterHeader({
           {isResetting ? 'Reseteando...' : 'Resetear'}
         </Button>
         <Button
-          variant="danger"
-          size="sm"
-          icon={<Trash2 className="h-4 w-4" />}
+          variant="outline"
+          size="xs"
+          className="text-red-500 hover:text-red-600 border-red-500 hover:border-red-600"
+          icon={<Trash2 className="h-3 w-3" />}
           onClick={onDelete}
           disabled={isDeleting}
         >

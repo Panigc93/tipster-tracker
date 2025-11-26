@@ -3,14 +3,13 @@
  * @module shared/components/PicksTable
  */
 
-import type { ReactElement } from 'react';
 import type { PicksTableMode, PicksTableColumns } from './PicksTable.types';
 
 interface PicksTableHeaderProps {
   readonly mode: PicksTableMode;
   readonly columns: PicksTableColumns;
   readonly requestSort: (key: string) => void;
-  readonly getSortIndicator: (key: string) => ReactElement | null;
+  readonly getSortIndicator: (key: string) => string;
 }
 
 export function PicksTableHeader({
@@ -19,11 +18,12 @@ export function PicksTableHeader({
   requestSort,
   getSortIndicator,
 }: PicksTableHeaderProps) {
-  const sortableClass = "px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-blue-500/20 transition-colors select-none";
-  const normalClass = "px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider";
+  const baseClass = "px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider";
+  const sortableClass = `${baseClass} cursor-pointer hover:bg-blue-500/20 transition-colors select-none`;
+  const normalClass = baseClass;
 
   return (
-    <thead className="bg-slate-700/50 border-b border-slate-600">
+    <thead className="bg-blue-400/20 border-b border-slate-600">
       <tr>
         {/* Date */}
         {columns.date && (
@@ -56,7 +56,7 @@ export function PicksTableHeader({
         {/* Match */}
         {columns.match && (
           <th className={normalClass}>
-            {mode === 'picks' ? 'Partido' : 'Match'}
+            Partido
           </th>
         )}
 
@@ -95,7 +95,7 @@ export function PicksTableHeader({
             title="Click para ordenar por cuota. Click en otra columna para multi-sort"
           >
             <span className="flex items-center gap-1">
-              Cuota {getSortIndicator(mode === 'picks' ? 'odds' : 'userOdds')}
+              {mode === 'follows' ? 'Cuota (T/U)' : 'Cuota'} {getSortIndicator(mode === 'picks' ? 'odds' : 'userOdds')}
             </span>
           </th>
         )}
@@ -108,7 +108,7 @@ export function PicksTableHeader({
             title="Click para ordenar por stake. Click en otra columna para multi-sort"
           >
             <span className="flex items-center gap-1">
-              Stake {getSortIndicator(mode === 'picks' ? 'stake' : 'userStake')}
+              {mode === 'follows' ? 'Stake (T/U)' : 'Stake'} {getSortIndicator(mode === 'picks' ? 'stake' : 'userStake')}
             </span>
           </th>
         )}
@@ -123,14 +123,14 @@ export function PicksTableHeader({
         {/* Result */}
         {columns.result && (
           <th className={normalClass}>
-            Resultado
+            {mode === 'follows' ? 'Resultado (T/U)' : 'Resultado'}
           </th>
         )}
 
         {/* Profit */}
         {columns.profit && (
           <th className={normalClass}>
-            Profit
+            {mode === 'follows' ? 'Profit (T/U)' : 'Profit'}
           </th>
         )}
 

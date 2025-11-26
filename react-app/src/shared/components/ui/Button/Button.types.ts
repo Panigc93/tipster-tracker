@@ -2,10 +2,10 @@
  * Button component types
  */
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success' | 'transparent';
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   /**
    * Visual style variant
    * @default 'primary'
@@ -36,7 +36,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   icon?: React.ReactNode;
 
   /**
-   * Button content
+   * Button content (optional for icon-only buttons)
    */
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
