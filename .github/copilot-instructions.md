@@ -218,7 +218,7 @@ tipster-tracker/
   name: string,            // Nombre del tipster
   channel: string,         // Canal origen (Telegram, BlogaBet, etc.)
   createdDate: string,     // Fecha creación (YYYY-MM-DD)
-  lastPickDate: string     // Última pick registrada (YYYY-MM-DD) - calculado
+  lastPickDate: string     // Último pick registrado (YYYY-MM-DD) - calculado
 }
 ```
 

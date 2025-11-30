@@ -8,6 +8,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LogOut, BarChart3, FileText, Menu, X, Plus, UserPlus } from 'lucide-react';
 import { useAuth } from '@features/auth/hooks';
 import { AddPickModal } from '@features/picks/components';
+import { AddTipsterModal } from '@features/tipsters/components';
 import { useTipsters } from '@features/tipsters/hooks';
 import { Button } from '../ui';
 import { Header } from './Header';
@@ -23,11 +24,12 @@ export function Layout({ children }: Readonly<LayoutProps>) {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  const { tipsters } = useTipsters(); // Only for AddPickModal
+  const { tipsters, createTipster } = useTipsters();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isAddPickModalOpen, setIsAddPickModalOpen] = useState(false);
+  const [isAddTipsterModalOpen, setIsAddTipsterModalOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -35,8 +37,7 @@ export function Layout({ children }: Readonly<LayoutProps>) {
   };
 
   const handleAddTipster = () => {
-    // Dispatch custom event that DashboardPage will listen to
-    window.dispatchEvent(new CustomEvent('openAddTipsterModal'));
+    setIsAddTipsterModalOpen(true);
   };
 
   const navItems = [
@@ -227,6 +228,15 @@ export function Layout({ children }: Readonly<LayoutProps>) {
         onClose={() => setIsAddPickModalOpen(false)}
         onSuccess={() => setIsAddPickModalOpen(false)}
         tipsters={tipsters}
+      />
+
+      <AddTipsterModal
+        isOpen={isAddTipsterModalOpen}
+        onClose={() => setIsAddTipsterModalOpen(false)}
+        onCreate={async (data) => {
+          await createTipster(data);
+        }}
+        onSuccess={() => setIsAddTipsterModalOpen(false)}
       />
     </div>
   );

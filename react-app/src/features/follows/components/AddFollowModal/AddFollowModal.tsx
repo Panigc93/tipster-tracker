@@ -70,6 +70,8 @@ export function AddFollowModal({
 
   // Initialize form with follow data in edit mode or pick data in create mode
   useEffect(() => {
+    if (!isOpen) return;
+
     if (isEditMode && follow) {
       setFormData({
         userOdds: follow.userOdds.toString(),
@@ -93,14 +95,14 @@ export function AddFollowModal({
         userStake: pick.stake.toString(),
         userBookmaker: pick.bookmaker,
         userBetType: pick.betType,
-        userResult: 'Pendiente',
+        userResult: pick.result,
         userIsResolved: false,
         dateFollowed: new Date().toISOString().split('T')[0],
         timeFollowed: new Date().toTimeString().slice(0, 5),
         comments: '',
       });
     }
-  }, [isEditMode, follow, pick]);
+  }, [isOpen, isEditMode, follow, pick]);
 
   const handleInputChange = (field: keyof FollowFormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -204,56 +206,31 @@ export function AddFollowModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEditMode ? 'Editar Follow' : 'Seguir Pick'} size="lg">
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit}>
         {/* Pick Info (Read-only) - Only show in create mode */}
         {!isEditMode && pick && (
-          <div className="bg-slate-700/50 rounded-lg p-4 space-y-2">
-            <h3 className="text-sm font-semibold text-slate-300 mb-3">Información de la Pick Original</h3>
-            
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <span className="text-slate-400">Tipster:</span>
-                <span className="ml-2 text-slate-200">{tipsterName || 'Desconocido'}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Fecha:</span>
-                <span className="ml-2 text-slate-200">{formatDate(pick.date)}</span>
-              </div>
-              <div className="col-span-2">
-                <span className="text-slate-400">Partido:</span>
-                <span className="ml-2 text-slate-200">{pick.match}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Deporte:</span>
-                <span className="ml-2 text-slate-200">
-                  {getSportIcon(pick.sport)} {pick.sport}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400">Tipo:</span>
-                <span className="ml-2 text-slate-200">{pick.pickType}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Cuota:</span>
-                <span className="ml-2 text-slate-200 font-medium">{pick.odds.toFixed(2)}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Stake:</span>
-                <span className="ml-2 text-slate-200 font-medium">{pick.stake}</span>
-              </div>
-              <div className="col-span-2">
-                <span className="text-slate-400">Apuesta:</span>
-                <span className="ml-2 text-slate-200">{pick.betType}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Bookmaker:</span>
-                <span className="ml-2 text-slate-200">{pick.bookmaker}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Resultado:</span>
-                <Badge variant={pick.result === 'Ganada' ? 'success' : pick.result === 'Perdida' ? 'error' : 'info'} size="sm" className="ml-2">
+          <div className="bg-slate-700/50 rounded-lg p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-200">Pick Original de {tipsterName}</h3>
+              <div className="flex items-center gap-2">
+                <span className="ml-2 text-slate-200 text-sm">{formatDate(pick.date)}</span>
+                <Badge variant={pick.result === 'Ganada' ? 'success' : pick.result === 'Perdida' ? 'error' : 'info'} size="md" className="ml-2">
                   {pick.result}
                 </Badge>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="col-span-2 flex flex-col border-b border-slate-600 pb-3">
+                <span className="text-blue-500 text-lg font-semibold">{getSportIcon(pick.sport)} {pick.match}</span>
+                <span className="ml-5 text-slate-200">{pick.betType}</span>
+              </div>
+              <div style={{ marginTop: '-1rem' }} className="col-span-2 flex items-center gap-2 justify-between">
+                <span className=" text-slate-200 bg-slate-600 py-0 px-2 rounded-full">{pick.pickType}</span>
+                <div className="flex items-center gap-2 col-span-2 bg-slate-600 py-0 px-2 rounded-full w-fit" >
+                  <span className=" text-slate-200 font-medium">@{pick.odds.toFixed(2)}</span>
+                  <span className=" text-slate-200 font-medium">{pick.stake}/10</span>
+                </div>
+                <span className=" text-slate-200 bg-slate-600 py-0 px-2 rounded-full">{pick.bookmaker}</span>
               </div>
             </div>
           </div>
@@ -261,8 +238,8 @@ export function AddFollowModal({
 
         {/* Divider */}
         {!isEditMode && pick && (
-          <div className="border-t border-slate-600 my-4">
-            <p className="text-sm text-slate-400 text-center -mt-3 bg-slate-800 w-fit mx-auto px-3">
+          <div className="border-t border-slate-600 mt-4 mb-2">
+            <p className="text-sm text-slate-400 text-center -mt-2.5 bg-slate-800 w-fit mx-auto px-3">
               Ingresa tus datos
             </p>
           </div>
@@ -276,7 +253,7 @@ export function AddFollowModal({
         )}
 
         {/* User Data Form */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* User Odds */}
           <div>
             <Input
@@ -307,14 +284,14 @@ export function AddFollowModal({
           </div>
 
           {/* User Bookmaker */}
-          <div className="md:col-span-2">
+          <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Tu Casa de Apuestas *
             </label>
             <select
               value={formData.userBookmaker}
               onChange={(e) => handleInputChange('userBookmaker', e.target.value)}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-[35px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
               required
             >
               <option value="">Seleccionar...</option>
@@ -325,17 +302,36 @@ export function AddFollowModal({
               ))}
             </select>
           </div>
+          
 
           {/* User Bet Type */}
           <div className="md:col-span-2">
             <Input
-              label="Tipo de Apuesta"
+              label="Apuesta"
               type="text"
               value={formData.userBetType}
               onChange={(e) => handleInputChange('userBetType', e.target.value)}
               placeholder="ej: Local gana, Más de 2.5 goles"
               required
             />
+          </div>
+                    {/* User Result */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Tu Resultado *
+            </label>
+            <select
+              value={formData.userResult}
+              onChange={(e) => handleInputChange('userResult', e.target.value)}
+              className="w-full h-[35px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
+            >
+              {Object.values(PickResult).map((res) => (
+                <option key={res} value={res}>
+                  {res}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Date Followed */}
@@ -358,28 +354,6 @@ export function AddFollowModal({
               onChange={(e) => handleInputChange('timeFollowed', e.target.value)}
               required
             />
-          </div>
-
-          {/* User Result */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Tu Resultado *
-            </label>
-            <select
-              value={formData.userResult}
-              onChange={(e) => handleInputChange('userResult', e.target.value)}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              {Object.values(PickResult).map((res) => (
-                <option key={res} value={res}>
-                  {res}
-                </option>
-              ))}
-            </select>
-            <p className="mt-1.5 text-xs text-slate-500">
-              Si seleccionas un resultado diferente a "Pendiente", el follow se marcará automáticamente como resuelto
-            </p>
           </div>
 
           {/* Comments - Collapsible */}
@@ -417,7 +391,7 @@ export function AddFollowModal({
                   value={formData.comments}
                   onChange={(e) => handleInputChange('comments', e.target.value)}
                   placeholder="Notas adicionales..."
-                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[80px]"
                   disabled={loading}
                 />
               </div>
@@ -426,11 +400,11 @@ export function AddFollowModal({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
-          <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-700 mt-2">
+          <Button type="button" variant="secondary" size="sm" onClick={onClose} disabled={loading}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" disabled={loading}>
+          <Button type="submit" variant="primary" size="sm" disabled={loading}>
             {loading ? 'Guardando...' : isEditMode ? 'Actualizar Follow' : 'Guardar Follow'}
           </Button>
         </div>

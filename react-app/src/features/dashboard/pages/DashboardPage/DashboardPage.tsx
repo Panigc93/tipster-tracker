@@ -3,11 +3,10 @@
  * Main dashboard view with personal stats, filters, and tipster grid
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Download } from 'lucide-react';
 import { PersonalStatsPanel, DashboardFilters, TipsterCard } from '../../components';
-import { AddTipsterModal } from '@features/tipsters/components';
 import { useDashboardFilters } from '../../hooks';
 import { usePicks } from '@features/picks/hooks';
 import { useFollows } from '@features/follows/hooks';
@@ -16,19 +15,10 @@ import { SkeletonText, SkeletonCard } from '@shared/components/ui';
 export function DashboardPage() {
   const [isHovered, setIsHovered] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [isAddTipsterModalOpen, setIsAddTipsterModalOpen] = useState(false);
-  
-  // Listen for event from Header button
-  useEffect(() => {
-    const handleOpenModal = () => setIsAddTipsterModalOpen(true);
-    window.addEventListener('openAddTipsterModal', handleOpenModal);
-    return () => window.removeEventListener('openAddTipsterModal', handleOpenModal);
-  }, []);
   
   const {
     tipsters: filteredTipsters,
     allTipsters,
-    createTipster,
     filters,
     activeFiltersCount,
     isLoading,
@@ -212,13 +202,6 @@ export function DashboardPage() {
           </span>
         )}
       </button>
-
-      <AddTipsterModal
-        isOpen={isAddTipsterModalOpen}
-        onClose={() => setIsAddTipsterModalOpen(false)}
-        onCreate={async (data) => { await createTipster(data); }}
-        onSuccess={() => setIsAddTipsterModalOpen(false)}
-      />
     </div>
   );
 }

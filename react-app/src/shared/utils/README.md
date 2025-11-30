@@ -199,7 +199,7 @@ function TipsterCard({ tipsterId }: { tipsterId: string }) {
     <div className="tipster-card">
       <h3>{tipster.name}</h3>
       <p>Canal: {tipster.channel}</p>
-      <p>Última pick: {formatRelativeDate(tipster.lastPickDate || '')}</p>
+      <p>Último pick: {formatRelativeDate(tipster.lastPickDate || '')}</p>
       
       <div className="stats">
         <div>

@@ -628,6 +628,7 @@ export function PicksListPage() {
             setFollowingPick(undefined);
           }}
           pick={followingPick}
+          tipsterName={getTipsterName(followingPick.tipsterId)}
           onSuccess={() => {
             setIsFollowModalOpen(false);
             setFollowingPick(undefined);

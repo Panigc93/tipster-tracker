@@ -121,8 +121,8 @@ export function AddItemModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+          <div className=" mb-3">
+            <label className="block text-sm font-medium text-slate-300 mb-1">
               Nombre {categoryText.article} {categoryText.singular}
             </label>
             <input
@@ -134,9 +134,9 @@ export function AddItemModal({
               }}
               placeholder={`Ej: ${category === 'sport' ? 'Padel' : category === 'bookmaker' ? 'BET777' : 'WhatsApp'}`}
               className={`
-                w-full px-4 py-2.5 bg-slate-700 border rounded-lg text-white
-                placeholder-slate-400 focus:outline-none focus:ring-2
-                ${error ? 'border-red-500 focus:ring-red-500' : 'border-slate-600 focus:ring-blue-500'}
+                w-full h-[35px] px-3 py-2 bg-slate-900 border rounded-md text-slate-200
+                placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500
+                ${error ? 'border-red-500 focus:border-red-500' : 'border-slate-700'}
               `}
               autoFocus
               disabled={isSubmitting}

@@ -1,20 +1,22 @@
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
-import { Filter, X } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import {
   OddsDistributionChart,
   StakeDistributionChart,
+  SportDistributionChart,
+  PickTypeDistributionChart,
   PicksTable,
-  StatCard,
   ConfirmDialog,
 } from '@/shared/components';
+import { PersonalStatsPanel } from '@/features/dashboard/components';
 import { useFollows } from '../../hooks/useFollows';
 import { useTipsters } from '@/features/tipsters/hooks/useTipsters';
 import { usePicks } from '@/features/picks/hooks/usePicks';
 import { useDebounce } from '@shared/hooks';
 import { AddFollowModal } from '../../components';
-import { SkeletonTable, CollapsibleSection } from '@shared/components/ui';
-import type { MyPicksFilters, FollowStats } from './MyPicksPage.types';
+import { SkeletonTable } from '@shared/components/ui';
+import type { MyPicksFilters } from './MyPicksPage.types';
 import type { UserFollow, Pick } from '@/shared/types';
 
 export const MyPicksPage = () => {
@@ -29,6 +31,9 @@ export const MyPicksPage = () => {
   const [selectedFollow, setSelectedFollow] = useState<UserFollow | null>(null);
   const [selectedPick, setSelectedPick] = useState<Pick | null>(null);
 
+  // Filters expanded state
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
+
   // Filter states
   const [filters, setFilters] = useState<MyPicksFilters>({
     tipsterId: 'all',
@@ -39,72 +44,6 @@ export const MyPicksPage = () => {
   
   // Debounce search query to optimize performance
   const debouncedSearchQuery = useDebounce(filters.searchQuery, 300);
-
-  // Calculate stats
-  const stats = useMemo<FollowStats>(() => {
-    const resolvedFollows = follows.filter((f) => f.isResolved);
-    
-    const wonFollows = resolvedFollows.filter((f) => f.userResult === 'Ganada');
-    const lostFollows = resolvedFollows.filter((f) => f.userResult === 'Perdida');
-    const voidFollows = resolvedFollows.filter((f) => f.userResult === 'Void');
-    
-    const totalStaked = resolvedFollows.reduce((sum, f) => {
-      if (f.userResult === 'Void') return sum;
-      return sum + f.userStake;
-    }, 0);
-
-    const profit = resolvedFollows.reduce((sum, f) => sum + (f.profitFromFollow || 0), 0);
-
-    const yieldValue = totalStaked > 0 ? (profit / totalStaked) * 100 : 0;
-    const winrate = resolvedFollows.length > 0 ? (wonFollows.length / resolvedFollows.length) * 100 : 0;
-
-    const avgOdds =
-      resolvedFollows.length > 0
-        ? resolvedFollows.reduce((sum, f) => sum + f.userOdds, 0) / resolvedFollows.length
-        : 0;
-
-    const avgStake =
-      resolvedFollows.length > 0
-        ? resolvedFollows.reduce((sum, f) => sum + f.userStake, 0) / resolvedFollows.length
-        : 0;
-
-    // Calculate match/diverge
-    let matchCount = 0;
-    let divergeCount = 0;
-
-    for (const follow of follows) {
-      if (!follow.isResolved) continue;
-
-      const originalPick = picks.find((p) => p.id === follow.pickId);
-      if (!originalPick?.isResolved) continue;
-
-      if (follow.userResult === originalPick.result) {
-        matchCount++;
-      } else {
-        divergeCount++;
-      }
-    }
-
-    const matchRate = resolvedFollows.length > 0 ? (matchCount / resolvedFollows.length) * 100 : 0;
-
-    return {
-      totalFollows: follows.length,
-      resolvedFollows: resolvedFollows.length,
-      pendingFollows: follows.length - resolvedFollows.length,
-      wonFollows: wonFollows.length,
-      lostFollows: lostFollows.length,
-      voidFollows: voidFollows.length,
-      winrate,
-      yield: yieldValue,
-      profit,
-      totalStaked,
-      avgOdds,
-      avgStake,
-      matchCount,
-      divergeCount,
-      matchRate,
-    };
-  }, [follows, picks]);
 
   // Filter follows
   const filteredFollows = useMemo(() => {
@@ -218,165 +157,160 @@ export const MyPicksPage = () => {
         </div>
       </div>
 
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard 
-          label="Total Follows" 
-          value={stats.totalFollows}
-          size="md"
-        />
-        <StatCard 
-          label="Pendientes" 
-          value={stats.pendingFollows}
-          valueClassName="text-yellow-400"
-          size="md"
-        />
-        <StatCard 
-          label="Winrate" 
-          value={`${stats.winrate.toFixed(1)}%`}
-          title={`${stats.wonFollows}G · ${stats.lostFollows}P · ${stats.voidFollows}V`}
-          size="md"
-        />
-        <StatCard 
-          label="Yield" 
-          value={`${stats.yield >= 0 ? '+' : ''}${stats.yield.toFixed(2)}%`}
-          valueClassName={stats.yield >= 0 ? 'text-green-400' : 'text-red-400'}
-          size="md"
-        />
-        <StatCard 
-          label="Profit" 
-          value={`${stats.profit >= 0 ? '+' : ''}${stats.profit.toFixed(2)}u`}
-          valueClassName={stats.profit >= 0 ? 'text-green-400' : 'text-red-400'}
-          size="md"
-        />
-        <StatCard 
-          label="Match Rate" 
-          value={`${stats.matchRate.toFixed(1)}%`}
-          title={`${stats.matchCount} match · ${stats.divergeCount} diverge`}
-          valueClassName="text-purple-400"
-          size="md"
-        />
-      </div>
+      <PersonalStatsPanel />
+
 
       {/* Charts */}
       {follows.length > 0 && (
-        <div>
-          <h2 className="text-xl font-semibold text-slate-200 mb-4">
-            Distribuciones Globales de tus Follows
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <OddsDistributionChart follows={follows} height={180} title="Tus Cuotas" />
-            <StakeDistributionChart follows={follows} height={180} title="Tus Stakes" />
+        <div className="bg-slate-800 rounded p-3 border border-slate-700 shadow-md">
+          <h3 className="text-sm font-semibold text-slate-100 mb-2">
+            DISTRIBUCIONES GLOBALES DE TUS FOLLOWS
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <OddsDistributionChart follows={follows} height={180} title={follows ? "Tus Cuotas" : undefined} />
+            <StakeDistributionChart follows={follows} height={180} title={follows ? "Tus Stakes" : undefined} />
+            {picks && (
+              <>
+                <SportDistributionChart picks={picks} height={140} title={follows ? "Deportes Seguidos" : undefined} />
+                <PickTypeDistributionChart picks={picks} height={140} title={follows ? "Tipos de Pick Seguidos" : undefined} />
+              </>
+            )}
           </div>
         </div>
       )}
 
+
       {/* Filters */}
-      <CollapsibleSection
-        title="Filtros"
-        icon={<Filter className="h-5 w-5" />}
-        badge={hasActiveFilters ? activeFilterCount : undefined}
-        actions={
-          hasActiveFilters ? (
+      <div className="bg-slate-800 rounded-md px-3 py-2 border border-slate-700 shadow-md">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-2 mt-1">
             <button
-              onClick={clearFilters}
-              className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300"
+              onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
+              className="text-slate-100 hover:text-blue-400 transition-colors"
+              aria-label={isFiltersExpanded ? 'Ocultar filtros' : 'Mostrar filtros'}
             >
-              <X className="h-4 w-4" />
-              Limpiar filtros
+              {isFiltersExpanded ? (
+                <ChevronUp className="h-5 w-5" />
+              ) : (
+                <ChevronDown className="h-5 w-5" />
+              )}
             </button>
-          ) : undefined
-        }
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Tipster filter */}
-          <div>
-            <label htmlFor="filter-tipster" className="mb-2 block text-sm font-medium text-slate-300">Tipster</label>
-            <div className="relative">
-              <select
-                id="filter-tipster"
-                value={filters.tipsterId}
-                onChange={(e) => handleFilterChange('tipsterId', e.target.value)}
-                className="w-full h-[35px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md text-slate-200 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.75rem center',
-                  backgroundSize: '16px 16px',
-                }}
-              >
-                <option value="all">Todos los tipsters</option>
-                {tipsters.map((tipster) => (
-                  <option key={tipster.id} value={tipster.id}>
-                    {tipster.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <button
+              onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
+              className="text-sm font-semibold text-slate-100 hover:text-blue-400 transition-colors cursor-pointer"
+            >
+              {isFiltersExpanded ? (<span>OCULTAR FILTROS</span>) : (<span>MOSTRAR FILTROS</span>)}
+            </button>
+            {hasActiveFilters && (
+              <span className="w-6 h-6 flex items-center justify-center text-xs font-medium text-blue-500 rounded-full border border-blue-500">
+                {activeFilterCount}
+              </span>
+            )}
           </div>
-
-          {/* Result filter */}
-          <div>
-            <label htmlFor="filter-result" className="mb-2 block text-sm font-medium text-slate-300">Resultado</label>
-            <div className="relative">
-              <select
-                id="filter-result"
-                value={filters.result}
-                onChange={(e) => handleFilterChange('result', e.target.value)}
-                className="w-full h-[35px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md text-slate-200 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.75rem center',
-                  backgroundSize: '16px 16px',
-                }}
-              >
-                <option value="all">Todos</option>
-                <option value="pending">Pendiente</option>
-                <option value="Ganada">Ganada</option>
-                <option value="Perdida">Perdida</option>
-                <option value="Void">Void</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Match/Diverge filter */}
-          <div>
-            <label htmlFor="filter-match" className="mb-2 block text-sm font-medium text-slate-300">Match/Diverge</label>
-            <div className="relative">
-              <select
-                id="filter-match"
-                value={filters.matchStatus}
-                onChange={(e) => handleFilterChange('matchStatus', e.target.value)}
-                className="w-full h-[35px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md text-slate-200 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.75rem center',
-                  backgroundSize: '16px 16px',
-                }}
-              >
-                <option value="all">Todos</option>
-                <option value="match">Match</option>
-                <option value="diverge">Diverge</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Search filter */}
-          <div>
-            <label htmlFor="filter-search" className="mb-2 block text-sm font-medium text-slate-300">Búsqueda</label>
-            <input
-              id="filter-search"
-              type="text"
-              value={filters.searchQuery}
-              onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
-              placeholder="Partido o tipster..."
-              className="w-full h-[35px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
+          <button
+            onClick={clearFilters}
+            disabled={!hasActiveFilters}
+            className={`px-4 py-2 text-sm font-medium text-slate-200 border ${
+              hasActiveFilters ? 'border-blue-500 hover:bg-blue-500' : 'border-slate-700 opacity-50 cursor-not-allowed'
+            } rounded-md transition-colors`}
+          >
+            Limpiar Filtros
+          </button>
         </div>
-      </CollapsibleSection>
+
+        {isFiltersExpanded && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mt-2">
+            {/* Tipster filter */}
+            <div>
+              <label htmlFor="filter-tipster" className="block text-sm font-medium text-slate-300 mb-2">Tipster</label>
+              <div className="relative">
+                <select
+                  id="filter-tipster"
+                  value={filters.tipsterId}
+                  onChange={(e) => handleFilterChange('tipsterId', e.target.value)}
+                  className="w-full h-[35px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md text-slate-200 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundSize: '16px 16px',
+                  }}
+                >
+                  <option value="all">Todos los tipsters</option>
+                  {tipsters.map((tipster) => (
+                    <option key={tipster.id} value={tipster.id}>
+                      {tipster.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Result filter */}
+            <div>
+              <label htmlFor="filter-result" className="block text-sm font-medium text-slate-300 mb-2">Resultado</label>
+              <div className="relative">
+                <select
+                  id="filter-result"
+                  value={filters.result}
+                  onChange={(e) => handleFilterChange('result', e.target.value)}
+                  className="w-full h-[35px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md text-slate-200 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundSize: '16px 16px',
+                  }}
+                >
+                  <option value="all">Todos</option>
+                  <option value="pending">Pendiente</option>
+                  <option value="Ganada">Ganada</option>
+                  <option value="Perdida">Perdida</option>
+                  <option value="Void">Void</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Match/Diverge filter */}
+            <div>
+              <label htmlFor="filter-match" className="block text-sm font-medium text-slate-300 mb-2">Match/Diverge</label>
+              <div className="relative">
+                <select
+                  id="filter-match"
+                  value={filters.matchStatus}
+                  onChange={(e) => handleFilterChange('matchStatus', e.target.value)}
+                  className="w-full h-[35px] px-3 py-2 pr-10 bg-slate-900 border border-slate-700 rounded-md text-slate-200 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundSize: '16px 16px',
+                  }}
+                >
+                  <option value="all">Todos</option>
+                  <option value="match">Match</option>
+                  <option value="diverge">Diverge</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Search filter */}
+            <div>
+              <label htmlFor="filter-search" className="block text-sm font-medium text-slate-300 mb-2">Búsqueda</label>
+              <input
+                id="filter-search"
+                type="text"
+                value={filters.searchQuery}
+                onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
+                placeholder="Partido o tipster..."
+                className="w-full h-[35px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Table */}
       <div>
@@ -436,6 +370,7 @@ export const MyPicksPage = () => {
             setSelectedPick(null);
           }}
           pick={selectedPick}
+          tipsterName={tipsters.find(t => t.id === selectedPick.tipsterId)?.name}
           follow={selectedFollow}
           onUpdate={updateFollow}
         />

@@ -45,14 +45,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     // Determine actual input type (handle password visibility)
     const inputType = type === 'password' && showPassword ? 'text' : type;
 
-    // Base classes
+    // Base classes - matching filter input styles
     const baseClasses =
-      'w-full px-5 py-2.5 bg-slate-800 border rounded-lg text-slate-200 placeholder-slate-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed';
+      'w-full h-[35px] px-3 py-2 bg-slate-900 border rounded-md text-slate-200 placeholder-slate-500 transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed';
 
     // Border classes based on state
     const borderClasses = error
-      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-      : 'border-slate-600 focus:border-blue-500 focus:ring-blue-500';
+      ? 'border-red-500 focus:border-red-500'
+      : 'border-slate-700';
 
     // Icon padding
     const iconPaddingClasses = icon ? 'pl-11' : '';

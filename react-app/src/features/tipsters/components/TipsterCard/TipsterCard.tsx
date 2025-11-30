@@ -75,7 +75,7 @@ export function TipsterCard({
       {/* Dates */}
       <div className="flex items-center gap-2 text-xs text-slate-400 mb-4">
         <Calendar className="h-3 w-3" />
-        <span>Última pick: {formatDate(tipster.lastPickDate)}</span>
+        <span>Último pick: {formatDate(tipster.lastPickDate)}</span>
       </div>
 
       {/* Stats (if provided) */}

@@ -318,7 +318,7 @@ export function TipsterDetailPage() {
             </span>
             {tipster.lastPickDate && (
               <span className="text-sm text-slate-400">
-                Última pick: {new Date(tipster.lastPickDate).toLocaleDateString()}
+                Último pick: {new Date(tipster.lastPickDate).toLocaleDateString()}
               </span>
             )}
           </div>
@@ -523,6 +523,7 @@ export function TipsterDetailPage() {
             setSelectedFollow(null);
           }}
           pick={picks.find(p => p.id === selectedFollow.pickId)}
+          tipsterName={tipster.name}
           follow={selectedFollow || undefined}
           onSuccess={handleEditFollowSuccess}
         />

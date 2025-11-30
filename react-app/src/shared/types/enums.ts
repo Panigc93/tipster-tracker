@@ -126,7 +126,7 @@ export const SortBy = {
 export type SortBy = (typeof SortBy)[keyof typeof SortBy];
 
 /**
- * Rangos de días para filtrar última pick
+ * Rangos de días para filtrar último pick
  */
 export const LastPickDays = {
   ALL: 'all',

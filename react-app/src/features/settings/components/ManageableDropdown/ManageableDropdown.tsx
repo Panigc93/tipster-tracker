@@ -180,7 +180,7 @@ export function ManageableDropdown({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={`Buscar ${getCategoryText()}...`}
-                  className="w-full pl-6 pr-2 py-0 bg-slate-800 border border-slate-600 rounded text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-6 pr-2 py-0 bg-slate-900 border border-slate-700 rounded text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   autoFocus
                 />
               </div>

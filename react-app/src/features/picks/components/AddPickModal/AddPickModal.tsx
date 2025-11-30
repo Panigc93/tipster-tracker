@@ -109,7 +109,7 @@ export function AddPickModal({
     setOdds('');
     setStake('');
     setDate(new Date().toISOString().split('T')[0]); // Today's date
-    setTime('');
+    setTime(new Date().toTimeString().slice(0, 5)); // Current time
     setResult('Pendiente');
     setComments('');
     
@@ -132,6 +132,8 @@ export function AddPickModal({
 
   // Initialize form with pick data in edit mode or initialTipsterId in create mode
   useEffect(() => {
+    if (!isOpen) return;
+
     if (isEditMode && pick) {
       // Load pick data
       setTipsterId(pick.tipsterId);
@@ -177,7 +179,7 @@ export function AddPickModal({
       // Reset form for create mode, preserving initialTipsterId if provided
       resetForm(initialTipsterId);
     }
-  }, [isEditMode, pick, initialTipsterId, getFollowByPickId, ensureSportExists, ensureBookmakerExists, resetForm]);
+  }, [isOpen, isEditMode, pick, initialTipsterId, getFollowByPickId, ensureSportExists, ensureBookmakerExists, resetForm]);
 
   const validateForm = (): boolean => {
     if (!tipsterId) {
@@ -447,7 +449,7 @@ export function AddPickModal({
       title={isEditMode ? 'Editar Pick' : 'Añadir Pick'}
       size="lg"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* Error message */}
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-sm text-red-400">
@@ -455,31 +457,9 @@ export function AddPickModal({
           </div>
         )}
 
-        {/* Tipster */}
-        <div>
-          <label htmlFor="tipster" className="block text-sm font-medium text-slate-300 mb-2">
-            Tipster <span className="text-red-400">*</span>
-          </label>
-          <select
-            id="tipster"
-            value={tipsterId}
-            onChange={(e) => setTipsterId(e.target.value)}
-            className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-            disabled={loading}
-          >
-            <option value="">Selecciona un tipster</option>
-            {tipsters.map((tipster) => (
-              <option key={tipster.id} value={tipster.id}>
-                {tipster.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
         {/* Match */}
         <div>
-          <label htmlFor="match" className="block text-sm font-medium text-slate-300 mb-2">
+          <label htmlFor="match" className="block text-sm font-medium text-slate-300 mb-1">
             Partido/Evento <span className="text-red-400">*</span>
           </label>
           <Input
@@ -493,8 +473,45 @@ export function AddPickModal({
           />
         </div>
 
+        {/* Bet Type */}
+        <div>
+          <label htmlFor="betType" className="block text-sm font-medium text-slate-300 mb-1">
+            Apuesta <span className="text-red-400">*</span>
+          </label>
+          <Input
+            id="betType"
+            type="text"
+            value={betType}
+            onChange={(e) => setBetType(e.target.value)}
+            placeholder="Ej: Over 2.5, 1X2 Local, Ambos marcan"
+            required
+            disabled={loading}
+          />
+        </div>
+
         {/* Sport and Pick Type - Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          {/* Tipster */}
+          <div>
+            <label htmlFor="tipster" className="block text-sm font-medium text-slate-300 mb-2">
+              Tipster <span className="text-red-400">*</span>
+            </label>
+            <select
+            id="tipster"
+            value={tipsterId}
+            onChange={(e) => setTipsterId(e.target.value)}
+            className="w-full h-[35px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required
+            disabled={loading}
+          >
+            <option value="">Selecciona un tipster</option>
+            {tipsters.map((tipster) => (
+              <option key={tipster.id} value={tipster.id}>
+                {tipster.name}
+              </option>
+            ))}
+            </select>
+          </div>
           <div>
             <ManageableDropdown
               label="Deporte"
@@ -517,7 +534,7 @@ export function AddPickModal({
               id="pickType"
               value={pickType}
               onChange={(e) => setPickType(e.target.value)}
-              className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-[35px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
               required
               disabled={loading}
             >
@@ -529,40 +546,30 @@ export function AddPickModal({
               ))}
             </select>
           </div>
-        </div>
-
-        {/* Bet Type */}
-        <div>
-          <label htmlFor="betType" className="block text-sm font-medium text-slate-300 mb-2">
-            Tipo de Apuesta <span className="text-red-400">*</span>
-          </label>
-          <Input
-            id="betType"
-            type="text"
-            value={betType}
-            onChange={(e) => setBetType(e.target.value)}
-            placeholder="Ej: Over 2.5, 1X2 Local, Ambos marcan"
-            required
-            disabled={loading}
-          />
+          {/* Result */}
+          <div>
+            <label htmlFor="result" className="block text-sm font-medium text-slate-300 mb-2">
+              Resultado <span className="text-red-400">*</span>
+            </label>
+            <select
+              id="result"
+              value={result}
+              onChange={(e) => setResult(e.target.value)}
+              className="w-full h-[35px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
+              disabled={loading}
+            >
+              {Object.values(PickResult).map((resultValue) => (
+                <option key={resultValue} value={resultValue}>
+                  {resultValue}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Bookmaker, Odds and Stake - Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <ManageableDropdown
-              label="Bookmaker"
-              value={bookmaker}
-              items={settings?.bookmakers || []}
-              category="bookmaker"
-              onChange={setBookmaker}
-              onAdd={() => handleOpenAdd('bookmaker')}
-              onEdit={(item) => handleOpenEdit('bookmaker', item)}
-              disabled={loading}
-              placeholder="Selecciona"
-            />
-          </div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label htmlFor="odds" className="block text-sm font-medium text-slate-300 mb-2">
               Cuota <span className="text-red-400">*</span>
@@ -596,12 +603,25 @@ export function AddPickModal({
               disabled={loading}
             />
           </div>
+          <div>
+            <ManageableDropdown
+              label="Bookie"
+              value={bookmaker}
+              items={settings?.bookmakers || []}
+              category="bookmaker"
+              onChange={setBookmaker}
+              onAdd={() => handleOpenAdd('bookmaker')}
+              onEdit={(item) => handleOpenEdit('bookmaker', item)}
+              disabled={loading}
+              placeholder="Selecciona"
+            />
+          </div>
         </div>
 
         {/* Date and Time - Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label htmlFor="date" className="block text-sm font-medium text-slate-300 mb-2">
+            <label htmlFor="date" className="block text-sm font-medium text-slate-300 mb-1">
               Fecha <span className="text-red-400">*</span>
             </label>
             <Input
@@ -615,7 +635,7 @@ export function AddPickModal({
           </div>
 
           <div>
-            <label htmlFor="time" className="block text-sm font-medium text-slate-300 mb-2">
+            <label htmlFor="time" className="block text-sm font-medium text-slate-300 mb-1">
               Hora <span className="text-red-400">*</span>
             </label>
             <Input
@@ -627,30 +647,6 @@ export function AddPickModal({
               disabled={loading}
             />
           </div>
-        </div>
-
-        {/* Result */}
-        <div>
-          <label htmlFor="result" className="block text-sm font-medium text-slate-300 mb-2">
-            Resultado <span className="text-red-400">*</span>
-          </label>
-          <select
-            id="result"
-            value={result}
-            onChange={(e) => setResult(e.target.value)}
-            className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-            disabled={loading}
-          >
-            {Object.values(PickResult).map((resultValue) => (
-              <option key={resultValue} value={resultValue}>
-                {resultValue}
-              </option>
-            ))}
-          </select>
-          <p className="mt-1.5 text-xs text-slate-500">
-            Si el resultado no es "Pendiente", la pick se marcará como resuelta automáticamente
-          </p>
         </div>
 
         {/* Comments - Collapsible */}
@@ -689,7 +685,7 @@ export function AddPickModal({
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
                 rows={3}
-                className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
                 placeholder="Añade notas o comentarios sobre esta pick..."
                 disabled={loading}
               />
@@ -698,8 +694,8 @@ export function AddPickModal({
         </div>
 
         {/* Follow Section */}
-        <div className="border-t border-slate-700 pt-6">
-          <div className="flex items-center gap-2 mb-4">
+        <div className="border-t border-slate-700 pt-2">
+          <div className="flex items-center gap-2 mb-3">
             <input
               type="checkbox"
               id="shouldFollow"
@@ -714,13 +710,30 @@ export function AddPickModal({
           </div>
 
           {shouldFollow && (
-            <div className="space-y-4 pl-6 border-l-2 border-blue-500/30 bg-blue-500/5 rounded-r-lg p-4">
-              <p className="text-sm text-slate-400 mb-4">
+            <div className="space-y-3 pl-6 border-l-2 border-blue-500/30 bg-blue-500/5 rounded-r-lg p-4">
+              <p className="text-sm text-slate-400 mb-3">
                 Ingresa los datos de tu apuesta personal
               </p>
 
+
+              {/* User Bet Type */}
+              <div>
+                <label htmlFor="userBetType" className="block text-sm font-medium text-slate-300 mb-1">
+                  Tu apuesta <span className="text-red-400">*</span>
+                </label>
+                <Input
+                  id="userBetType"
+                  type="text"
+                  value={userBetType}
+                  onChange={(e) => setUserBetType(e.target.value)}
+                  placeholder="Ej: Over 2.5, 1X2 Local"
+                  required={shouldFollow}
+                  disabled={loading}
+                />
+              </div>
+
               {/* User Odds and Stake */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 <div>
                   <label htmlFor="userOdds" className="block text-sm font-medium text-slate-300 mb-2">
                     Tu Cuota <span className="text-red-400">*</span>
@@ -755,43 +768,44 @@ export function AddPickModal({
                     disabled={loading}
                   />
                 </div>
-              </div>
-
-              {/* User Bookmaker */}
-              <div>
-                <ManageableDropdown
-                  label="Tu Bookmaker"
-                  value={userBookmaker}
-                  items={settings?.bookmakers || []}
-                  category="bookmaker"
-                  onChange={setUserBookmaker}
-                  onAdd={() => handleOpenAdd('bookmaker')}
-                  onEdit={(item) => handleOpenEdit('bookmaker', item)}
-                  disabled={loading}
-                  placeholder="Selecciona"
-                />
-              </div>
-
-              {/* User Bet Type */}
-              <div>
-                <label htmlFor="userBetType" className="block text-sm font-medium text-slate-300 mb-2">
-                  Tu Tipo de Apuesta <span className="text-red-400">*</span>
-                </label>
-                <Input
-                  id="userBetType"
-                  type="text"
-                  value={userBetType}
-                  onChange={(e) => setUserBetType(e.target.value)}
-                  placeholder="Ej: Over 2.5, 1X2 Local"
-                  required={shouldFollow}
-                  disabled={loading}
-                />
+                <div>
+                  <label htmlFor="userResult" className="block text-sm font-medium text-slate-300 mb-2">
+                    Tu Resultado
+                  </label>
+                  <select
+                    id="userResult"
+                    value={userResult}
+                    onChange={(e) => setUserResult(e.target.value)}
+                    className="w-full h-[35px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    disabled={loading}
+                  >
+                    {Object.values(PickResult).map((resultValue) => (
+                      <option key={resultValue} value={resultValue}>
+                        {resultValue}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {/* User Bookmaker */}
+                <div>
+                  <ManageableDropdown
+                    label="Tu Bookmaker"
+                    value={userBookmaker}
+                    items={settings?.bookmakers || []}
+                    category="bookmaker"
+                    onChange={setUserBookmaker}
+                    onAdd={() => handleOpenAdd('bookmaker')}
+                    onEdit={(item) => handleOpenEdit('bookmaker', item)}
+                    disabled={loading}
+                    placeholder="Selecciona"
+                  />
+                </div>
               </div>
 
               {/* Date and Time Followed */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="dateFollowed" className="block text-sm font-medium text-slate-300 mb-2">
+                  <label htmlFor="dateFollowed" className="block text-sm font-medium text-slate-300 mb-1">
                     Fecha de tu apuesta <span className="text-red-400">*</span>
                   </label>
                   <Input
@@ -805,7 +819,7 @@ export function AddPickModal({
                 </div>
 
                 <div>
-                  <label htmlFor="timeFollowed" className="block text-sm font-medium text-slate-300 mb-2">
+                  <label htmlFor="timeFollowed" className="block text-sm font-medium text-slate-300 mb-1">
                     Hora <span className="text-red-400">*</span>
                   </label>
                   <Input
@@ -819,30 +833,7 @@ export function AddPickModal({
                 </div>
               </div>
 
-              {/* User Result */}
-              <div>
-                <label htmlFor="userResult" className="block text-sm font-medium text-slate-300 mb-2">
-                  Tu Resultado
-                </label>
-                <select
-                  id="userResult"
-                  value={userResult}
-                  onChange={(e) => setUserResult(e.target.value)}
-                  className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={loading}
-                >
-                  {Object.values(PickResult).map((resultValue) => (
-                    <option key={resultValue} value={resultValue}>
-                      {resultValue}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1.5 text-xs text-slate-500">
-                  Si seleccionas un resultado diferente a "Pendiente", tu follow se marcará automáticamente como resuelto
-                </p>
-              </div>
-
-              {/* User Comments - Collapsible */}
+              {/* User  Comments - Collapsible */}
               <div>
                 {!showFollowComments ? (
                   <Button
@@ -878,7 +869,7 @@ export function AddPickModal({
                       value={userComments}
                       onChange={(e) => setUserComments(e.target.value)}
                       rows={2}
-                      className="w-full px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
                       placeholder="Añade notas sobre tu apuesta..."
                       disabled={loading}
                     />
@@ -894,12 +885,13 @@ export function AddPickModal({
           <Button
             type="button"
             variant="secondary"
+            size="sm" 
             onClick={handleClose}
             disabled={loading}
           >
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" loading={loading}>
+          <Button type="submit" variant="primary" loading={loading} size="sm">
             {(() => {
               if (loading) return 'Guardando...';
               return isEditMode ? 'Actualizar Pick' : 'Añadir Pick';

@@ -12345,7 +12345,7 @@ export const DashboardFilters: FC<DashboardFiltersProps> = ({
         {/* Última Pick */}
         <div className="flex flex-col gap-2">
           <Select
-            label="Última Pick"
+            label="Último Pick"
             options={lastPickOptions}
             value={filters.lastPickDays}
             onChange={(e) =>

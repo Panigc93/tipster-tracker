@@ -155,10 +155,10 @@ export function AddTipsterModal({
       title={isEditMode ? 'Editar Tipster' : 'Añadir Tipster'}
       size="md"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* Name Input */}
         <div>
-          <label htmlFor="tipster-name" className="block text-sm font-medium text-slate-200 mb-2">
+          <label htmlFor="tipster-name" className="block text-sm font-medium text-slate-200 mb-1">
             Nombre <span className="text-red-400">*</span>
           </label>
           <Input
